@@ -1,0 +1,11 @@
+{
+  "@@locale": "ko",
+  "appTitle": "베이비노트",
+  "@appTitle": {
+    "description": "App display name shown on launchers and titles"
+  },
+  "homeWelcome": "환영합니다",
+  "@homeWelcome": {
+    "description": "Welcome message on the home screen placeholder"
+  }
+}

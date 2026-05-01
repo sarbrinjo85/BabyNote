@@ -1,0 +1,78 @@
+name: babynote
+description: "Global baby-care recording app (KR/JP/EN). Flutter + Supabase."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.5
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # Backend / data
+  supabase_flutter: ^2.8.0
+
+  # State management
+  flutter_riverpod: ^2.6.1
+  riverpod_annotation: ^2.6.1
+
+  # Navigation
+  go_router: ^14.6.2
+
+  # Utilities
+  intl: ^0.20.2
+  shared_preferences: ^2.3.4
+  logger: ^2.5.0
+
+  # Observability
+  sentry_flutter: ^8.13.0
+
+  # NOTE — packages added in later phases (kept here for reference; uncomment when needed):
+  # # Local DB (Phase 2 — records storage offline)
+  # drift: ^2.22.0
+  # sqflite: ^2.4.1
+  # path_provider: ^2.1.5
+  # path: ^1.9.1
+  # # Charts (Phase 2 — stats screen)
+  # fl_chart: ^0.69.2
+  # # Offline-first sync (Phase 3 — Supabase ↔ local SQLite mirroring)
+  # brick_offline_first_with_supabase: ^1.4.0
+  # # Push + local notifications (Phase 3 — depletion / vaccine alerts)
+  # firebase_messaging: ^15.1.6
+  # flutter_local_notifications: ^18.0.1
+  # # Payments (Phase 4 — multi-child paywall)
+  # purchases_flutter: ^8.4.2
+  # # Social login — KR (Phase 5)
+  # kakao_flutter_sdk_user: ^1.9.7
+  # flutter_naver_login: ^1.8.0
+  # # Social login — JP (Phase 5)
+  # flutter_line_sdk: ^2.5.0
+  # # Social login — global (Phase 5)
+  # sign_in_with_apple: ^6.1.4
+  # google_sign_in: ^6.2.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^6.0.0
+
+  # Codegen
+  build_runner: ^2.4.13
+  riverpod_generator: ^2.6.3
+  custom_lint: ^0.7.0
+  riverpod_lint: ^2.6.3
+
+  # NOTE — added with their runtime counterparts later:
+  # drift_dev: ^2.22.0          # with drift
+  # brick_offline_first_with_supabase_build: ^1.4.0  # with brick
+
+flutter:
+  uses-material-design: true
+  generate: true  # enables flutter_localizations ARB → Dart codegen

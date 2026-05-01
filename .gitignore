@@ -1,0 +1,72 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ / Android Studio
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# VS Code (uncomment to share launch.json across team)
+#.vscode/
+
+# Flutter / Dart / Pub
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+/coverage/
+
+# Symbolication / obfuscation
+app.*.symbols
+app.*.map.json
+
+# Android build outputs
+/android/app/debug
+/android/app/profile
+/android/app/release
+/android/.gradle
+/android/captures
+/android/local.properties
+/android/key.properties
+/android/**/*.keystore
+/android/**/*.jks
+
+# iOS / macOS
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/Runner/GeneratedPluginRegistrant.*
+**/ios/build/
+**/macos/Pods/
+**/macos/.symlinks/
+
+# Secrets / env
+.env
+.env.*
+!.env.example
+google-services.json
+GoogleService-Info.plist
+
+# Codegen output (kept gitignored — regenerate locally)
+*.g.dart
+*.freezed.dart
+*.gr.dart
+# But we DO commit AppLocalizations to make analyze + tests work without codegen step:
+!lib/l10n/app_localizations*.dart
