@@ -24,6 +24,17 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+
+            <!-- Supabase OAuth deep-link callback.
+                 Google/Apple/etc. 로그인 끝나면 Supabase가 이 scheme의 URL로 redirect.
+                 supabase_flutter SDK가 자동으로 URL의 access_token을 추출 → 세션 저장.
+                 redirectTo 인자(auth_repository.signInWithGoogle)와 일치해야 함. -->
+            <intent-filter android:autoVerify="false">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="com.kjfamily.babynote" android:host="auth-callback" />
+            </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->

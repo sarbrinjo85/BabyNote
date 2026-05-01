@@ -30,31 +30,64 @@ class AuthRepository {
   /// 각 이벤트마다 `AuthState { event, session }` 형태로 도착.
   Stream<AuthState> authStateChanges() => _client.auth.onAuthStateChange;
 
-  /// 익명 사용자로 로그인.
-  ///
-  /// ── 익명 로그인이란 ─────────────────────────────────────────────
-  /// 회원가입 없이 즉시 사용 가능한 임시 사용자를 만들어줌. `auth.uid()`가
-  /// 정상적으로 채워지므로 RLS 정책이 그대로 동작 (= "본인 데이터"라는 개념 유지).
-  /// 나중에 사용자가 이메일/소셜로 정식 가입하면 `linkIdentity`로 익명 계정을
-  /// 정식 계정에 흡수시킬 수 있음 → 데이터 손실 없이 회원전환.
-  ///
-  /// ── 멱등성 ──────────────────────────────────────────────────────
-  /// 이미 세션이 있으면 그대로 반환 (다시 익명 사용자 만들지 않음).
-  /// 부트스트랩 단계에서 안전하게 여러 번 호출 가능.
+  /// 익명 사용자로 로그인 (현재는 사용 안 함 — onboarding이 SNS/Email 강제).
+  /// 추후 "둘러보기" 모드를 지원할 일 있으면 이 메서드로 즉시 부활 가능.
   Future<User> ensureAnonymousSession() async {
     final existing = currentUser;
     if (existing != null) return existing;
-
     final response = await _client.auth.signInAnonymously();
     final user = response.user;
-    if (user == null) {
-      // signInAnonymously 성공 시 user는 거의 항상 채워지지만, 방어적으로 처리.
-      throw StateError('익명 로그인 응답에 user가 없습니다.');
-    }
+    if (user == null) throw StateError('익명 로그인 응답에 user가 없습니다.');
     return user;
   }
 
-  /// 로그아웃. 익명 사용자도 로그아웃 가능 (그러면 데이터 접근 불가).
+  /// 이메일 + 비밀번호로 신규 가입.
+  ///
+  /// Supabase는 가입 직후 자동 로그인 처리 (=세션 발급). "Confirm email" 옵션이
+  /// ON이면 사용자가 메일 확인 전엔 세션은 있어도 일부 기능이 제한됨. 개발 단계
+  /// 에선 OFF로 두는 게 편함 (Supabase Dashboard → Auth → Providers → Email).
+  Future<User> signUpWithEmail({
+    required String email,
+    required String password,
+  }) async {
+    final response = await _client.auth.signUp(email: email, password: password);
+    final user = response.user;
+    if (user == null) throw StateError('가입 응답에 user가 없습니다.');
+    return user;
+  }
+
+  /// 이메일 + 비밀번호로 로그인.
+  Future<User> signInWithEmail({
+    required String email,
+    required String password,
+  }) async {
+    final response = await _client.auth
+        .signInWithPassword(email: email, password: password);
+    final user = response.user;
+    if (user == null) throw StateError('로그인 응답에 user가 없습니다.');
+    return user;
+  }
+
+  /// Google OAuth 로그인.
+  ///
+  /// ── 동작 ─────────────────────────────────────────────────────────
+  /// 외부 브라우저(또는 in-app browser)를 띄워서 Google 로그인 페이지로 보냄.
+  /// 사용자가 인증 끝내면 Google → Supabase callback URL로 redirect → Supabase가
+  /// 토큰 발급 후 우리 앱의 deep link(`com.kjfamily.babynote://auth-callback`)로
+  /// 다시 redirect → 앱이 받아서 supabase_flutter SDK가 세션을 로컬에 저장.
+  ///
+  /// 이 메서드 자체는 "외부 페이지 띄우기"만 트리거하고 즉시 반환 (return true).
+  /// 실제 로그인 완료 신호는 onAuthStateChange 스트림에서 signedIn 이벤트로 도착.
+  /// 그래서 호출 측은 이 메서드 결과보다는 currentUserProvider가 갱신되는 걸 봐야 함.
+  Future<bool> signInWithGoogle() {
+    return _client.auth.signInWithOAuth(
+      OAuthProvider.google,
+      // Android/iOS deep link. AndroidManifest의 intent filter와 일치해야 함.
+      redirectTo: 'com.kjfamily.babynote://auth-callback',
+    );
+  }
+
+  /// 로그아웃. 토큰을 폐기하고 onAuthStateChange가 signedOut 이벤트 발행.
   Future<void> signOut() => _client.auth.signOut();
 }
 
