@@ -18,6 +18,9 @@ migrate_working_dir/
 *.iws
 .idea/
 
+# Claude Code workspace (worktrees, settings, etc.)
+.claude/
+
 # VS Code (uncomment to share launch.json across team)
 #.vscode/
 
