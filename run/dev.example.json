@@ -1,0 +1,7 @@
+{
+  "_comment": "이 파일은 템플릿입니다. cp run/dev.example.json run/dev.json 후 실제 값을 채워주세요.",
+  "SUPABASE_URL": "https://YOUR-PROJECT.supabase.co",
+  "SUPABASE_ANON_KEY": "sb_publishable_...",
+  "SENTRY_DSN": "",
+  "FLAVOR": "dev"
+}

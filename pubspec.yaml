@@ -31,7 +31,9 @@ dependencies:
   logger: ^2.5.0
 
   # Observability
-  sentry_flutter: ^8.13.0
+  # NOTE — 9.x로 올린 이유: 8.x가 Kotlin language version 1.6을 명시하는데
+  # 최신 Kotlin compiler(2.x)는 1.6 미만을 거부함. 9.x는 LV 1.8+ 사용해서 정상 빌드됨.
+  sentry_flutter: ^9.0.0
 
   # NOTE — packages added in later phases (kept here for reference; uncomment when needed):
   # # Local DB (Phase 2 — records storage offline)

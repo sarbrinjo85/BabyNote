@@ -64,6 +64,11 @@ app.*.map.json
 google-services.json
 GoogleService-Info.plist
 
+# Build-time env files passed via --dart-define-from-file (URLs, API keys)
+# README.md / *.example.json은 추적, 실제 키는 절대 commit 안 함
+/run/*.json
+!/run/*.example.json
+
 # Codegen output (kept gitignored — regenerate locally)
 *.g.dart
 *.freezed.dart
