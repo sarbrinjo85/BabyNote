@@ -5,6 +5,7 @@ import '../../features/auth/presentation/auth_gate.dart';
 import '../../features/child/presentation/child_register_page.dart';
 import '../../features/diaper/presentation/diaper_register_page.dart';
 import '../../features/feeding/presentation/feeding_register_page.dart';
+import '../../features/growth/presentation/growth_register_page.dart';
 import '../../features/home/presentation/home_page.dart';
 import '../../features/sleep/presentation/sleep_register_page.dart';
 
@@ -52,6 +53,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'diaperNew',
         builder: (context, state) =>
             const AuthGate(child: DiaperRegisterPage()),
+      ),
+      GoRoute(
+        // /growth/new — 성장 기록 (체중/키/머리둘레)
+        path: '/growth/new',
+        name: 'growthNew',
+        builder: (context, state) =>
+            const AuthGate(child: GrowthRegisterPage()),
       ),
     ],
   );

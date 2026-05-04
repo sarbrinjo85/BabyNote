@@ -124,7 +124,7 @@ class HomePage extends ConsumerWidget {
           BigActionButton(
             label: '성장',
             icon: const Text('📏', style: TextStyle(fontSize: 28)),
-            onPressed: () => _comingSoon(context, '성장'),
+            onPressed: () => context.push('/growth/new'),
           ),
           const SizedBox(height: Spacing.xl),
         ],
@@ -132,11 +132,7 @@ class HomePage extends ConsumerWidget {
     );
   }
 
-  void _comingSoon(BuildContext context, String label) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$label 기록 화면은 Phase 2에서 만들 예정이에요.')),
-    );
-  }
+  // 4개 기록 모두 화면 연결 완료. _comingSoon은 더 이상 사용 안 함 → 제거.
 
   String _genderLabel(String? g) {
     switch (g) {
