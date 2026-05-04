@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/auth_gate.dart';
 import '../../features/child/presentation/child_register_page.dart';
+import '../../features/feeding/presentation/feeding_register_page.dart';
 import '../../features/home/presentation/home_page.dart';
 
 /// 앱 전체 라우팅 정의.
@@ -28,6 +29,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'childNew',
         builder: (context, state) =>
             const AuthGate(child: ChildRegisterPage()),
+      ),
+      GoRoute(
+        // /feeding/new — 수유 기록 등록 (3 탭: 모유/분유/이유식)
+        path: '/feeding/new',
+        name: 'feedingNew',
+        builder: (context, state) =>
+            const AuthGate(child: FeedingRegisterPage()),
       ),
     ],
   );

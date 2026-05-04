@@ -106,7 +106,7 @@ class HomePage extends ConsumerWidget {
           BigActionButton(
             label: '수유',
             icon: const Text('🍼', style: TextStyle(fontSize: 28)),
-            onPressed: () => _comingSoon(context, '수유'),
+            onPressed: () => context.push('/feeding/new'),
           ),
           const SizedBox(height: Spacing.xs),
           BigActionButton(

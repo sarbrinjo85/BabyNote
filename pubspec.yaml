@@ -35,6 +35,11 @@ dependencies:
   # 최신 Kotlin compiler(2.x)는 1.6 미만을 거부함. 9.x는 LV 1.8+ 사용해서 정상 빌드됨.
   sentry_flutter: ^9.0.0
 
+  # 이미지 선택 (이유식 사진 첨부 등)
+  # 갤러리/카메라 선택 + 자동 압축. iOS Info.plist에 NSCameraUsageDescription /
+  # NSPhotoLibraryUsageDescription 추가 필요 (iOS 빌드 시점에).
+  image_picker: ^1.1.2
+
   # NOTE — packages added in later phases (kept here for reference; uncomment when needed):
   # # Local DB (Phase 2 — records storage offline)
   # drift: ^2.22.0
