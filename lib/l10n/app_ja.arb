@@ -208,6 +208,10 @@
   "vaccineRecordButton": "接種完了を記録",
   "vaccineScheduleLoadFailure": "スケジュール読み込みに失敗: {error}",
   "vaccineRecordsLoadFailure": "接種記録の読み込みに失敗: {error}",
+  "upcomingVaccineTitle": "次回の予防接種",
+  "upcomingVaccineToday": "本日推奨",
+  "upcomingVaccineDays": "{n}日後推奨",
+  "upcomingVaccineOverdue": "{n}日経過",
 
   "formulaInventoryTitle": "ミルク在庫",
   "formulaRegisterTitle": "ミルク登録",

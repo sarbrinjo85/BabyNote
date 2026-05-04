@@ -632,6 +632,22 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String get upcomingVaccineTitle => '다가오는 접종';
+
+  @override
+  String get upcomingVaccineToday => '오늘 권장';
+
+  @override
+  String upcomingVaccineDays(int n) {
+    return '$n일 후 권장';
+  }
+
+  @override
+  String upcomingVaccineOverdue(int n) {
+    return '$n일 지남';
+  }
+
+  @override
   String get formulaInventoryTitle => '분유 재고';
 
   @override

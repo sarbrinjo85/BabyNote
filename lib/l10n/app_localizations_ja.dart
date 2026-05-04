@@ -632,6 +632,22 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String get upcomingVaccineTitle => '次回の予防接種';
+
+  @override
+  String get upcomingVaccineToday => '本日推奨';
+
+  @override
+  String upcomingVaccineDays(int n) {
+    return '$n日後推奨';
+  }
+
+  @override
+  String upcomingVaccineOverdue(int n) {
+    return '$n日経過';
+  }
+
+  @override
   String get formulaInventoryTitle => 'ミルク在庫';
 
   @override

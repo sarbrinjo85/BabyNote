@@ -1270,6 +1270,30 @@ abstract class AppLocalizations {
   /// **'접종 기록 로딩 실패: {error}'**
   String vaccineRecordsLoadFailure(Object error);
 
+  /// No description provided for @upcomingVaccineTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'다가오는 접종'**
+  String get upcomingVaccineTitle;
+
+  /// No description provided for @upcomingVaccineToday.
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘 권장'**
+  String get upcomingVaccineToday;
+
+  /// No description provided for @upcomingVaccineDays.
+  ///
+  /// In ko, this message translates to:
+  /// **'{n}일 후 권장'**
+  String upcomingVaccineDays(int n);
+
+  /// No description provided for @upcomingVaccineOverdue.
+  ///
+  /// In ko, this message translates to:
+  /// **'{n}일 지남'**
+  String upcomingVaccineOverdue(int n);
+
   /// No description provided for @formulaInventoryTitle.
   ///
   /// In ko, this message translates to:

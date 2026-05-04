@@ -637,6 +637,22 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get upcomingVaccineTitle => 'Upcoming vaccination';
+
+  @override
+  String get upcomingVaccineToday => 'recommended today';
+
+  @override
+  String upcomingVaccineDays(int n) {
+    return 'in $n days';
+  }
+
+  @override
+  String upcomingVaccineOverdue(int n) {
+    return '${n}d overdue';
+  }
+
+  @override
   String get formulaInventoryTitle => 'Formula inventory';
 
   @override

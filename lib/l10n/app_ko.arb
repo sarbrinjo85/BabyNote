@@ -227,6 +227,12 @@
   "@vaccineScheduleLoadFailure": { "placeholders": { "error": { "type": "Object" } } },
   "vaccineRecordsLoadFailure": "접종 기록 로딩 실패: {error}",
   "@vaccineRecordsLoadFailure": { "placeholders": { "error": { "type": "Object" } } },
+  "upcomingVaccineTitle": "다가오는 접종",
+  "upcomingVaccineToday": "오늘 권장",
+  "upcomingVaccineDays": "{n}일 후 권장",
+  "@upcomingVaccineDays": { "placeholders": { "n": { "type": "int" } } },
+  "upcomingVaccineOverdue": "{n}일 지남",
+  "@upcomingVaccineOverdue": { "placeholders": { "n": { "type": "int" } } },
 
   "formulaInventoryTitle": "분유 재고",
   "formulaRegisterTitle": "분유 등록",

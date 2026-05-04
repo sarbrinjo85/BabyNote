@@ -208,6 +208,10 @@
   "vaccineRecordButton": "Record dose",
   "vaccineScheduleLoadFailure": "Failed to load schedule: {error}",
   "vaccineRecordsLoadFailure": "Failed to load records: {error}",
+  "upcomingVaccineTitle": "Upcoming vaccination",
+  "upcomingVaccineToday": "recommended today",
+  "upcomingVaccineDays": "in {n} days",
+  "upcomingVaccineOverdue": "{n}d overdue",
 
   "formulaInventoryTitle": "Formula inventory",
   "formulaRegisterTitle": "Register formula",
