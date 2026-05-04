@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/auth_gate.dart';
 import '../../features/child/presentation/child_register_page.dart';
+import '../../features/diaper/presentation/diaper_register_page.dart';
 import '../../features/feeding/presentation/feeding_register_page.dart';
 import '../../features/home/presentation/home_page.dart';
 import '../../features/sleep/presentation/sleep_register_page.dart';
@@ -44,6 +45,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'sleepNew',
         builder: (context, state) =>
             const AuthGate(child: SleepRegisterPage()),
+      ),
+      GoRoute(
+        // /diaper/new — 기저귀 기록 (종류 + 색상 + 형태)
+        path: '/diaper/new',
+        name: 'diaperNew',
+        builder: (context, state) =>
+            const AuthGate(child: DiaperRegisterPage()),
       ),
     ],
   );
