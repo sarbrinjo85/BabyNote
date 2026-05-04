@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../auth/presentation/auth_providers.dart';
+import '../../inventory/presentation/diaper_inventory_providers.dart';
 import '../data/diaper_repository.dart';
 import '../domain/diaper.dart';
 
@@ -22,6 +23,7 @@ class DiaperCreationController extends AsyncNotifier<void> {
     String? color,
     String? consistency,
     String? amount,
+    String? diaperInventoryId,
     String? note,
   }) async {
     final user = ref.read(currentUserProvider);
@@ -39,9 +41,12 @@ class DiaperCreationController extends AsyncNotifier<void> {
         color: color,
         consistency: consistency,
         amount: amount,
+        diaperInventoryId: diaperInventoryId,
         note: note,
       );
       ref.invalidate(recentDiapersProvider(childId));
+      // 기저귀 기록 시 잔량 stats도 갱신 (family 전체 invalidate)
+      ref.invalidate(diaperInventoryStatsProvider);
     });
   }
 }

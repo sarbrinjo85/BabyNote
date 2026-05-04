@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../auth/presentation/auth_providers.dart';
+import '../../inventory/presentation/formula_inventory_providers.dart';
 import '../data/feeding_repository.dart';
 import '../domain/feeding.dart';
 
@@ -72,8 +73,8 @@ class FeedingCreationController extends AsyncNotifier<void> {
       );
       // 같은 자녀의 최근 기록 캐시 무효화 → 홈/목록 새로고침
       ref.invalidate(recentFeedingsProvider(childId));
-      // 분유 등록 시 잔량 stats 갱신 트리거
-      // (formulaInventoryStatsProvider는 family<..., FormulaInventory>라 인자 객체 단위 캐시. 전체 inventories도 같이 invalidate해서 stats provider 재구독 시 재계산)
+      // 분유 등록 시 잔량 stats도 갱신 (family 전체 invalidate)
+      ref.invalidate(formulaInventoryStatsProvider);
     });
   }
 }

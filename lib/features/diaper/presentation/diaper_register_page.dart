@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/tokens.dart';
 import '../../child/presentation/child_providers.dart';
+import '../../inventory/presentation/diaper_inventory_providers.dart';
 import 'diaper_providers.dart';
 
 /// 기저귀 기록 화면.
@@ -31,12 +32,20 @@ class _DiaperRegisterPageState extends ConsumerState<DiaperRegisterPage> {
   bool get _showColorAndConsistency => _type == 'poop' || _type == 'both';
 
   Future<void> _submit(String childId) async {
+    // FIFO: 활성 기저귀 팩 첫 번째에 자동 연결.
+    String? diaperInventoryId;
+    final actives = ref.read(activeDiaperInventoriesProvider(childId));
+    actives.whenData((list) {
+      if (list.isNotEmpty) diaperInventoryId = list.first.id;
+    });
+
     await ref.read(diaperCreationControllerProvider.notifier).create(
           childId: childId,
           type: _type,
           color: _color,
           consistency: _consistency,
           amount: _amount,
+          diaperInventoryId: diaperInventoryId,
           note: _note.trim().isEmpty ? null : _note.trim(),
         );
     if (!mounted) return;
@@ -73,6 +82,14 @@ class _DiaperRegisterPageState extends ConsumerState<DiaperRegisterPage> {
           final isAbnormal =
               _color == 'red' || _color == 'black' || _color == 'white';
 
+          // 활성 기저귀 팩 watch — 표시 + 자동 차감 연결
+          final asyncActiveDiaper =
+              ref.watch(activeDiaperInventoriesProvider(child.id));
+          final activeDiaper = asyncActiveDiaper.maybeWhen(
+            data: (list) => list.isEmpty ? null : list.first,
+            orElse: () => null,
+          );
+
           return SafeArea(
             top: false,
             child: ListView(
@@ -85,6 +102,63 @@ class _DiaperRegisterPageState extends ConsumerState<DiaperRegisterPage> {
                     Text('${child.name} 자녀',
                         style: Theme.of(context).textTheme.titleMedium),
                   ],
+                ),
+                const SizedBox(height: Spacing.md),
+
+                // ── 활성 기저귀 팩 카드 (P3-2b) ────────────────────────
+                Card(
+                  color: activeDiaper != null
+                      ? Theme.of(context).colorScheme.primaryContainer
+                      : Theme.of(context)
+                          .colorScheme
+                          .surfaceContainerHighest,
+                  child: Padding(
+                    padding: const EdgeInsets.all(Spacing.sm),
+                    child: activeDiaper != null
+                        ? Row(
+                            children: [
+                              const Text('🧷', style: TextStyle(fontSize: 24)),
+                              const SizedBox(width: Spacing.sm),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('사용 중',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelMedium),
+                                    Text(
+                                      '${activeDiaper.size} · ${activeDiaper.brand ?? ""}'
+                                          .trim()
+                                          .replaceAll(RegExp(r'·\s*$'), ''),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleSmall,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Text('등록 시 자동 차감',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurfaceVariant)),
+                            ],
+                          )
+                        : Row(
+                            children: [
+                              const Icon(Icons.inventory_2_outlined),
+                              const SizedBox(width: Spacing.sm),
+                              const Expanded(
+                                child: Text(
+                                    '사용 중인 기저귀 팩이 없어요.\n등록 후 자동으로 차감됩니다.'),
+                              ),
+                            ],
+                          ),
+                  ),
                 ),
                 const SizedBox(height: Spacing.lg),
 

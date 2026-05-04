@@ -18,6 +18,7 @@ class DiaperRepository {
     String? color,
     String? consistency,
     String? amount,
+    String? diaperInventoryId,
     String? note,
   }) async {
     final draft = Diaper(
@@ -28,6 +29,7 @@ class DiaperRepository {
       color: color,
       consistency: consistency,
       amount: amount,
+      diaperInventoryId: diaperInventoryId,
       note: note,
     );
 

@@ -13,6 +13,7 @@ class Diaper {
     this.color,
     this.consistency,
     this.amount,
+    this.diaperInventoryId,
     this.note,
     this.recordedBy,
     this.createdAt,
@@ -25,6 +26,8 @@ class Diaper {
   final String? color;      // 'yellow'|'brown'|'green'|'black'|'red'|'white'|'unknown'
   final String? consistency; // 'loose'|'normal'|'firm' (형태/질감)
   final String? amount;      // 'small'|'normal'|'large' (분량 — 조금/보통/많음)
+  /// FIFO로 자동 연결된 활성 기저귀 팩 id. 잔량 차감용. NULL 가능.
+  final String? diaperInventoryId;
   final String? note;
   final String? recordedBy;
   final DateTime? createdAt;
@@ -42,6 +45,7 @@ class Diaper {
       color: map['color'] as String?,
       consistency: map['consistency'] as String?,
       amount: map['amount'] as String?,
+      diaperInventoryId: map['diaper_inventory_id'] as String?,
       note: map['note'] as String?,
       recordedBy: map['recorded_by'] as String?,
       createdAt: map['created_at'] != null
@@ -59,6 +63,7 @@ class Diaper {
       if (color != null) 'color': color,
       if (consistency != null) 'consistency': consistency,
       if (amount != null) 'amount': amount,
+      if (diaperInventoryId != null) 'diaper_inventory_id': diaperInventoryId,
       if (note != null && note!.trim().isNotEmpty) 'note': note!.trim(),
     };
   }
