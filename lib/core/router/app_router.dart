@@ -7,6 +7,8 @@ import '../../features/diaper/presentation/diaper_register_page.dart';
 import '../../features/feeding/presentation/feeding_register_page.dart';
 import '../../features/growth/presentation/growth_register_page.dart';
 import '../../features/home/presentation/home_page.dart';
+import '../../features/inventory/presentation/diaper_inventory_list_page.dart';
+import '../../features/inventory/presentation/diaper_inventory_register_page.dart';
 import '../../features/inventory/presentation/formula_inventory_list_page.dart';
 import '../../features/inventory/presentation/formula_inventory_register_page.dart';
 import '../../features/sleep/presentation/sleep_register_page.dart';
@@ -76,6 +78,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'formulaInventoryNew',
         builder: (context, state) =>
             const AuthGate(child: FormulaInventoryRegisterPage()),
+      ),
+      GoRoute(
+        // /inventory/diaper — 기저귀 재고 목록
+        path: '/inventory/diaper',
+        name: 'diaperInventoryList',
+        builder: (context, state) =>
+            const AuthGate(child: DiaperInventoryListPage()),
+      ),
+      GoRoute(
+        // /inventory/diaper/new — 기저귀 한 팩 등록
+        path: '/inventory/diaper/new',
+        name: 'diaperInventoryNew',
+        builder: (context, state) =>
+            const AuthGate(child: DiaperInventoryRegisterPage()),
       ),
     ],
   );

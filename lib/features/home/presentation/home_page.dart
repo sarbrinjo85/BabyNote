@@ -159,6 +159,15 @@ class HomePage extends ConsumerWidget {
               alignment: Alignment.centerLeft,
             ),
           ),
+          const SizedBox(height: Spacing.xs),
+          OutlinedButton.icon(
+            onPressed: () => context.push('/inventory/diaper'),
+            icon: const Text('🧷', style: TextStyle(fontSize: 24)),
+            label: const Text('기저귀 재고 관리'),
+            style: OutlinedButton.styleFrom(
+              alignment: Alignment.centerLeft,
+            ),
+          ),
           const SizedBox(height: Spacing.xl),
         ],
       ),
