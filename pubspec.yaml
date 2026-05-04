@@ -40,6 +40,10 @@ dependencies:
   # NSPhotoLibraryUsageDescription 추가 필요 (iOS 빌드 시점에).
   image_picker: ^1.1.2
 
+  # 외부 앱 딥링크 (tel:, https://maps.google.com, geo: 등).
+  # 단골 병원 전화/길찾기에 사용. AndroidManifest의 <queries>에 intent 선언 필요할 수도.
+  url_launcher: ^6.3.0
+
   # NOTE — packages added in later phases (kept here for reference; uncomment when needed):
   # # Local DB (Phase 2 — records storage offline)
   # drift: ^2.22.0

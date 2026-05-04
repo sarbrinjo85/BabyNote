@@ -168,6 +168,20 @@ class HomePage extends ConsumerWidget {
               alignment: Alignment.centerLeft,
             ),
           ),
+
+          const SizedBox(height: Spacing.xl),
+
+          // ── 의료/케어 ───────────────────────────────────────────
+          const _SectionTitle('병원'),
+          const SizedBox(height: Spacing.xs),
+          OutlinedButton.icon(
+            onPressed: () => context.push('/hospital'),
+            icon: const Text('🏥', style: TextStyle(fontSize: 24)),
+            label: const Text('단골 병원 (전화 · 길찾기)'),
+            style: OutlinedButton.styleFrom(
+              alignment: Alignment.centerLeft,
+            ),
+          ),
           const SizedBox(height: Spacing.xl),
         ],
       ),

@@ -7,6 +7,8 @@ import '../../features/diaper/presentation/diaper_register_page.dart';
 import '../../features/feeding/presentation/feeding_register_page.dart';
 import '../../features/growth/presentation/growth_register_page.dart';
 import '../../features/home/presentation/home_page.dart';
+import '../../features/hospital/presentation/hospital_list_page.dart';
+import '../../features/hospital/presentation/hospital_register_page.dart';
 import '../../features/inventory/presentation/diaper_inventory_list_page.dart';
 import '../../features/inventory/presentation/diaper_inventory_register_page.dart';
 import '../../features/inventory/presentation/formula_inventory_list_page.dart';
@@ -92,6 +94,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'diaperInventoryNew',
         builder: (context, state) =>
             const AuthGate(child: DiaperInventoryRegisterPage()),
+      ),
+      GoRoute(
+        // /hospital — 단골 병원 목록 (전화/길찾기 딥링크 포함)
+        path: '/hospital',
+        name: 'hospitalList',
+        builder: (context, state) =>
+            const AuthGate(child: HospitalListPage()),
+      ),
+      GoRoute(
+        path: '/hospital/new',
+        name: 'hospitalNew',
+        builder: (context, state) =>
+            const AuthGate(child: HospitalRegisterPage()),
       ),
     ],
   );
