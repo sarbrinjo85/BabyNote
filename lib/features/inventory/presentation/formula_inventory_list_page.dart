@@ -133,24 +133,36 @@ class _InventoryTile extends StatelessWidget {
     }
 
     return Card(
-      child: ListTile(
-        title: Text(i.productName),
-        subtitle: Text(subtitle.toString()),
-        trailing: showOpenButton
-            ? TextButton(
-                onPressed: () =>
-                    ref.read(formulaInventoryControllerProvider.notifier)
-                        .open(childId, i.id),
-                child: const Text('개봉'),
-              )
-            : showDepleteButton
-                ? TextButton(
-                    onPressed: () =>
-                        ref.read(formulaInventoryControllerProvider.notifier)
-                            .deplete(childId, i.id),
-                    child: const Text('소진'),
-                  )
-                : null,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+            horizontal: Spacing.md, vertical: Spacing.xs),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(i.productName),
+              subtitle: Text(subtitle.toString()),
+              trailing: showOpenButton
+                  ? TextButton(
+                      onPressed: () =>
+                          ref.read(formulaInventoryControllerProvider.notifier)
+                              .open(childId, i.id),
+                      child: const Text('개봉'),
+                    )
+                  : showDepleteButton
+                      ? TextButton(
+                          onPressed: () => ref
+                              .read(formulaInventoryControllerProvider.notifier)
+                              .deplete(childId, i.id),
+                          child: const Text('소진'),
+                        )
+                      : null,
+            ),
+            // 사용 중 통: 잔량/소진 예상 표시 (P3-1c)
+            if (i.isActive) _StatsRow(inventory: i),
+          ],
+        ),
       ),
     );
   }
@@ -158,6 +170,78 @@ class _InventoryTile extends StatelessWidget {
   String _d(DateTime d) {
     String two(int v) => v.toString().padLeft(2, '0');
     return '${d.year}-${two(d.month)}-${two(d.day)}';
+  }
+}
+
+/// 사용 중인 통의 잔량 + 소진 예상일 행. stats provider watch.
+class _StatsRow extends ConsumerWidget {
+  const _StatsRow({required this.inventory});
+  final FormulaInventory inventory;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final asyncStats = ref.watch(formulaInventoryStatsProvider(inventory));
+    return asyncStats.when(
+      loading: () => const Padding(
+        padding: EdgeInsets.symmetric(vertical: Spacing.xs),
+        child: LinearProgressIndicator(minHeight: 6),
+      ),
+      error: (err, _) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: Spacing.xs),
+        child: Text('잔량 계산 실패: $err',
+            style: Theme.of(context).textTheme.bodySmall),
+      ),
+      data: (stats) {
+        final theme = Theme.of(context);
+        final remainText =
+            '${stats.remainingG.toStringAsFixed(0)}g / ${inventory.containerGrams}g';
+        final daysText = stats.expectedDaysLeft >= 999
+            ? '데이터 부족'
+            : '약 ${stats.expectedDaysLeft.toStringAsFixed(1)}일 후 소진';
+        final low = stats.confidence == 'low';
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: Radii.brSm,
+              child: LinearProgressIndicator(
+                value: stats.remainingRatio,
+                minHeight: 8,
+                backgroundColor: theme.colorScheme.surfaceContainerHighest,
+              ),
+            ),
+            const SizedBox(height: Spacing.xs),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(remainText, style: theme.textTheme.bodySmall),
+                Text(
+                  daysText,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: low
+                        ? theme.colorScheme.onSurfaceVariant
+                        : theme.colorScheme.primary,
+                  ),
+                ),
+              ],
+            ),
+            if (low)
+              Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Text(
+                  '※ 개봉 7일 미만 — 예측 정확도 낮음',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            const SizedBox(height: Spacing.xs),
+          ],
+        );
+      },
+    );
   }
 }
 

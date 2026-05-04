@@ -98,3 +98,43 @@ class FormulaInventory {
     return '${d.year}-${two(d.month)}-${two(d.day)}';
   }
 }
+
+
+/// 분유 통의 잔량/소비/소진 예상 통계 (계산 결과).
+///
+/// ── 계산 기준 ────────────────────────────────────────────────────────
+/// - consumedG = sum(linked feedings.amount_ml) / mlPerGram
+/// - remainingG = max(containerGrams - consumedG, 0)
+/// - daysOpened = today - opened_at (정수 일수)
+/// - dailyAvgG = consumedG / max(daysOpened, 1)
+/// - expectedDaysLeft = remainingG / max(dailyAvgG, 0.1)
+/// - confidence: opened_at 7일 이전이면 'low', 그 외 'normal'
+class FormulaInventoryStats {
+  const FormulaInventoryStats({
+    required this.inventory,
+    required this.consumedG,
+    required this.dailyAvgG,
+    required this.expectedDaysLeft,
+    required this.confidence,
+  });
+
+  final FormulaInventory inventory;
+  final double consumedG;
+  final double dailyAvgG;
+  final double expectedDaysLeft;
+  /// 'low' = 개봉 후 7일 이내(샘플 적음), 'normal' = 그 외
+  final String confidence;
+
+  /// 잔량 (그램, 음수 방지).
+  double get remainingG {
+    final r = inventory.containerGrams - consumedG;
+    return r < 0 ? 0 : r;
+  }
+
+  /// 잔량 비율 (0.0 ~ 1.0). 진행률 표시용.
+  double get remainingRatio {
+    if (inventory.containerGrams == 0) return 0;
+    return (remainingG / inventory.containerGrams).clamp(0.0, 1.0);
+  }
+}
+

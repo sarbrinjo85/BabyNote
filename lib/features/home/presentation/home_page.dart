@@ -8,6 +8,7 @@ import '../../../core/widgets/big_action_button.dart';
 import '../../auth/data/auth_repository.dart';
 import '../../auth/presentation/auth_providers.dart';
 import '../../child/presentation/child_providers.dart';
+import 'formula_status_card.dart';
 import 'last_activity_section.dart';
 import 'todays_summary_section.dart';
 
@@ -99,12 +100,14 @@ class HomePage extends ConsumerWidget {
             },
           ),
 
-          // ── 오늘의 요약 + 마지막 활동 (자녀 1명 이상일 때만) ─────────
+          // ── 분유 잔량 + 오늘의 요약 + 마지막 활동 (자녀 1명 이상일 때만) ──
           ...asyncChildren.maybeWhen(
             data: (cs) => cs.isEmpty
                 ? const <Widget>[]
                 : [
-                    const SizedBox(height: Spacing.xl),
+                    const SizedBox(height: Spacing.lg),
+                    FormulaStatusCard(childId: cs.first.id),
+                    const SizedBox(height: Spacing.md),
                     TodaysSummarySection(childId: cs.first.id),
                     const SizedBox(height: Spacing.lg),
                     const _SectionTitle('마지막 활동'),

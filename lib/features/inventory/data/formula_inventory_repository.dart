@@ -71,6 +71,24 @@ class FormulaInventoryRepository {
     String two(int v) => v.toString().padLeft(2, '0');
     return '${d.year}-${two(d.month)}-${two(d.day)}';
   }
+
+  /// 한 분유 통에 연결된 수유 기록의 amount_ml 합계.
+  /// formula_inventory_id로 join해서 sum.
+  ///
+  /// PostgREST에는 .sum() 같은 group by 한 줄 매개변수가 없어서
+  /// row를 가져와서 클라이언트에서 합산. 한 통당 보통 30~50건이라 부담 없음.
+  Future<int> sumConsumedMl(String inventoryId) async {
+    final rows = await _client
+        .from('feedings')
+        .select('amount_ml')
+        .eq('formula_inventory_id', inventoryId);
+    int total = 0;
+    for (final r in rows) {
+      final v = r['amount_ml'];
+      if (v is int) total += v;
+    }
+    return total;
+  }
 }
 
 final formulaInventoryRepositoryProvider =
