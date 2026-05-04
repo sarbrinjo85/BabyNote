@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:babynote/l10n/app_localizations.dart';
 import '../data/auth_repository.dart';
 
 /// 로그인 / 회원가입 화면.
@@ -41,8 +42,9 @@ class _AuthPageState extends ConsumerState<AuthPage> {
       // 성공 시 화면 전환은 AuthGate가 자동 처리 (auth state stream).
     } catch (e) {
       if (!mounted) return;
+      final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('실패: $e')));
+          .showSnackBar(SnackBar(content: Text(l10n.errorFailed(e))));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -72,13 +74,14 @@ class _AuthPageState extends ConsumerState<AuthPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return DefaultTabController(
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('베이비노트 시작'),
-          bottom: const TabBar(
-            tabs: [Tab(text: '로그인'), Tab(text: '회원가입')],
+          title: Text(l10n.authStartTitle),
+          bottom: TabBar(
+            tabs: [Tab(text: l10n.authLogin), Tab(text: l10n.authSignup)],
           ),
         ),
         // SafeArea(bottom: true)로 감싸서 시스템 네비게이션 바 영역만큼 자동으로
@@ -96,7 +99,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                         emailCtrl: _emailCtrl,
                         passwordCtrl: _passwordCtrl,
                         busy: _busy,
-                        submitLabel: '로그인',
+                        submitLabel: l10n.authLogin,
                         onSubmit: _signIn,
                       ),
                       // ── 회원가입 탭 ─────────────────────────────
@@ -104,28 +107,28 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                         emailCtrl: _emailCtrl,
                         passwordCtrl: _passwordCtrl,
                         busy: _busy,
-                        submitLabel: '회원가입',
+                        submitLabel: l10n.authSignup,
                         onSubmit: _signUp,
                       ),
                     ],
                   ),
                 ),
                 // ── 공통: 구분선 + Google 버튼 ─────────────────────
-                const Row(
+                Row(
                   children: [
-                    Expanded(child: Divider()),
+                    const Expanded(child: Divider()),
                     Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 12),
-                      child: Text('또는'),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Text(l10n.commonOr),
                     ),
-                    Expanded(child: Divider()),
+                    const Expanded(child: Divider()),
                   ],
                 ),
                 const SizedBox(height: 12),
                 OutlinedButton.icon(
                   onPressed: _busy ? null : _signInGoogle,
                   icon: const Icon(Icons.g_mobiledata, size: 28),
-                  label: const Text('Google 계정으로 계속'),
+                  label: const Text('Google'),
                   style: OutlinedButton.styleFrom(
                     minimumSize: const Size.fromHeight(48),
                   ),
@@ -157,12 +160,13 @@ class _EmailForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return ListView(
       children: [
         TextField(
           controller: emailCtrl,
-          decoration: const InputDecoration(
-            labelText: '이메일',
+          decoration: InputDecoration(
+            labelText: l10n.authEmail,
             hintText: 'name@example.com',
           ),
           keyboardType: TextInputType.emailAddress,
@@ -171,9 +175,8 @@ class _EmailForm extends StatelessWidget {
         const SizedBox(height: 16),
         TextField(
           controller: passwordCtrl,
-          decoration: const InputDecoration(
-            labelText: '비밀번호',
-            hintText: '6자 이상',
+          decoration: InputDecoration(
+            labelText: l10n.authPassword,
           ),
           obscureText: true,
         ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/theme/tokens.dart';
 import '../domain/hospital.dart';
 import 'hospital_actions.dart';
@@ -12,14 +13,15 @@ class HospitalListPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final asyncList = ref.watch(myHospitalsProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('단골 병원'),
+        title: Text(l10n.hospitalListTitle),
         actions: [
           IconButton(
-            tooltip: '추가',
+            tooltip: l10n.commonAdd,
             icon: const Icon(Icons.add),
             onPressed: () => context.push('/hospital/new'),
           ),
@@ -27,7 +29,7 @@ class HospitalListPage extends ConsumerWidget {
       ),
       body: asyncList.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => Center(child: Text('병원 목록 로딩 실패: $err')),
+        error: (err, _) => Center(child: Text(l10n.hospitalLoadFailure(err))),
         data: (list) {
           if (list.isEmpty) return _EmptyPlaceholder();
           return ListView(
@@ -46,14 +48,15 @@ class _HospitalCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final h = hospital;
     final theme = Theme.of(context);
 
     String specialtyLabel(String? s) => switch (s) {
-          'pediatrics' => '소아과',
-          'dental' => '치과',
-          'er' => '응급실',
-          'other' => '기타',
+          'pediatrics' => l10n.hospitalSpecialtyPediatrics,
+          'dental' => l10n.hospitalSpecialtyDental,
+          'er' => l10n.hospitalSpecialtyER,
+          'other' => l10n.hospitalSpecialtyOther,
           _ => '',
         };
 
@@ -118,13 +121,13 @@ class _HospitalCard extends ConsumerWidget {
                   },
                   itemBuilder: (context) => [
                     if (!h.isDefault)
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'default',
-                        child: Text('기본으로 설정'),
+                        child: Text(l10n.hospitalSetDefault),
                       ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'delete',
-                      child: Text('삭제'),
+                      child: Text(l10n.hospitalDelete),
                     ),
                   ],
                 ),
@@ -139,7 +142,7 @@ class _HospitalCard extends ConsumerWidget {
                         ? null
                         : () => _onCallPhone(context, h),
                     icon: const Icon(Icons.phone),
-                    label: const Text('전화'),
+                    label: Text(l10n.hospitalCall),
                   ),
                 ),
                 const SizedBox(width: Spacing.sm),
@@ -150,7 +153,7 @@ class _HospitalCard extends ConsumerWidget {
                             ? () => _onOpenMaps(context, h)
                             : null,
                     icon: const Icon(Icons.map),
-                    label: const Text('길찾기'),
+                    label: Text(l10n.hospitalDirections),
                   ),
                 ),
               ],
@@ -162,36 +165,39 @@ class _HospitalCard extends ConsumerWidget {
   }
 
   Future<void> _onCallPhone(BuildContext context, Hospital h) async {
+    final l10n = AppLocalizations.of(context);
     final ok = await HospitalActions.callPhone(h);
     if (!ok && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('전화 앱을 열 수 없어요.')),
+        SnackBar(content: Text(l10n.hospitalCallFailed)),
       );
     }
   }
 
   Future<void> _onOpenMaps(BuildContext context, Hospital h) async {
+    final l10n = AppLocalizations.of(context);
     final ok = await HospitalActions.openMaps(h);
     if (!ok && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('지도 앱을 열 수 없어요.')),
+        SnackBar(content: Text(l10n.hospitalMapsFailed)),
       );
     }
   }
 
   Future<bool> _confirmDelete(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
     final r = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('병원을 삭제할까요?'),
-        content: const Text('이 작업은 되돌릴 수 없어요.'),
+        title: Text(l10n.hospitalDeleteConfirmTitle),
+        content: Text(l10n.hospitalDeleteConfirmBody),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('취소')),
+              child: Text(l10n.commonCancel)),
           FilledButton(
               onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('삭제')),
+              child: Text(l10n.commonDelete)),
         ],
       ),
     );
@@ -202,6 +208,7 @@ class _HospitalCard extends ConsumerWidget {
 class _EmptyPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(Spacing.lg),
@@ -210,12 +217,12 @@ class _EmptyPlaceholder extends StatelessWidget {
           children: [
             const Text('🏥', style: TextStyle(fontSize: 48)),
             const SizedBox(height: Spacing.sm),
-            const Text('등록된 병원이 없어요'),
+            Text(l10n.hospitalNone),
             const SizedBox(height: Spacing.md),
             FilledButton.icon(
               onPressed: () => context.push('/hospital/new'),
               icon: const Icon(Icons.add),
-              label: const Text('병원 추가'),
+              label: Text(l10n.hospitalAdd),
             ),
           ],
         ),

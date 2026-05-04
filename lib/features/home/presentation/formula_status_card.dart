@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/theme/tokens.dart';
 import '../../inventory/presentation/formula_inventory_providers.dart';
 
@@ -31,6 +32,7 @@ class FormulaStatusCard extends ConsumerWidget {
           error: (_, _) => const SizedBox.shrink(),
           data: (stats) {
             final theme = Theme.of(context);
+            final l10n = AppLocalizations.of(context);
             final daysLeft = stats.expectedDaysLeft;
             final urgent = daysLeft < 3 && stats.confidence == 'normal';
 
@@ -52,14 +54,14 @@ class FormulaStatusCard extends ConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('분유 잔량',
+                            Text(l10n.formulaStatusTitle,
                                 style: theme.textTheme.labelMedium),
                             Text(
                               daysLeft >= 999
-                                  ? '데이터 부족'
+                                  ? l10n.commonDataInsufficient
                                   : urgent
-                                      ? '약 ${daysLeft.toStringAsFixed(1)}일 후 소진!'
-                                      : '약 ${daysLeft.toStringAsFixed(1)}일 분량 남음',
+                                      ? l10n.formulaStatusDaysUntilEmpty(daysLeft.toStringAsFixed(1))
+                                      : l10n.formulaStatusDaysSupply(daysLeft.toStringAsFixed(1)),
                               style: theme.textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.w700,
                               ),

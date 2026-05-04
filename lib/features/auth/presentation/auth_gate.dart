@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:babynote/l10n/app_localizations.dart';
 import 'auth_page.dart';
 import 'auth_providers.dart';
 
@@ -33,7 +34,7 @@ class AuthGate extends ConsumerWidget {
       ),
       // 스트림 자체가 에러 — 거의 발생 안 함
       error: (err, _) => Scaffold(
-        body: Center(child: Text('인증 스트림 에러: $err')),
+        body: Center(child: Text(AppLocalizations.of(context).errorAuthStream(err))),
       ),
       // stream에서 첫 이벤트 받음. 이후 user 값으로 분기.
       data: (_) => user == null ? const AuthPage() : child,

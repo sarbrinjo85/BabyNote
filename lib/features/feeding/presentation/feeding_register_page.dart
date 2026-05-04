@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
+import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/theme/tokens.dart';
 import '../../child/presentation/child_providers.dart';
 import '../../inventory/presentation/formula_inventory_providers.dart';
@@ -143,17 +144,18 @@ class _FeedingRegisterPageState extends ConsumerState<FeedingRegisterPage>
         );
 
     if (!mounted) return;
+    final l10n = AppLocalizations.of(context);
     final state = ref.read(feedingCreationControllerProvider);
     state.when(
       data: (_) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('수유 기록을 저장했어요 🍼')));
+            .showSnackBar(SnackBar(content: Text(l10n.feedingSavedToast)));
         context.pop();
       },
       loading: () {},
       error: (err, _) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('저장 실패: $err')));
+            .showSnackBar(SnackBar(content: Text(l10n.feedingSaveFailed(err))));
       },
     );
   }
@@ -173,32 +175,34 @@ class _FeedingRegisterPageState extends ConsumerState<FeedingRegisterPage>
       }
     } catch (e) {
       if (!mounted) return;
+      final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('사진 선택 실패: $e')));
+          .showSnackBar(SnackBar(content: Text(l10n.feedingPhotoFailed(e))));
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final asyncChildren = ref.watch(myChildrenProvider);
     final asyncCreate = ref.watch(feedingCreationControllerProvider);
     final isLoading = asyncCreate.isLoading;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('수유 기록'),
+        title: Text(l10n.feedingTitle),
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [
-            Tab(text: '모유'),
-            Tab(text: '분유'),
-            Tab(text: '이유식'),
+          tabs: [
+            Tab(text: l10n.feedingTabBreast),
+            Tab(text: l10n.feedingTabFormula),
+            Tab(text: l10n.feedingTabSolid),
           ],
         ),
       ),
       body: asyncChildren.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => Center(child: Text('자녀 목록 로딩 실패: $err')),
+        error: (err, _) => Center(child: Text(l10n.errorChildrenLoadFailed(err))),
         data: (children) {
           if (children.isEmpty) {
             // 자녀 0명 — 등록 화면 전에 자녀 등록 안내
@@ -261,9 +265,9 @@ class _FeedingRegisterPageState extends ConsumerState<FeedingRegisterPage>
                   child: Column(
                     children: [
                       TextField(
-                        decoration: const InputDecoration(
-                          labelText: '메모 (선택)',
-                          hintText: '예: 트림 잘 함, 입맛 까다로움',
+                        decoration: InputDecoration(
+                          labelText: l10n.commonMemoOptional,
+                          hintText: l10n.feedingMemoHint,
                         ),
                         onChanged: (v) => _note = v,
                         maxLines: 2,
@@ -281,7 +285,7 @@ class _FeedingRegisterPageState extends ConsumerState<FeedingRegisterPage>
                                     CircularProgressIndicator(strokeWidth: 2),
                               )
                             : const Icon(Icons.check),
-                        label: Text(isLoading ? '저장 중…' : '등록'),
+                        label: Text(isLoading ? l10n.commonSaving : l10n.commonRegister),
                       ),
                     ],
                   ),
@@ -311,25 +315,26 @@ class _BreastForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return ListView(
       padding: const EdgeInsets.all(Spacing.md),
       children: [
-        Text('어느 쪽?', style: Theme.of(context).textTheme.labelLarge),
+        Text(l10n.feedingBreastSide, style: Theme.of(context).textTheme.labelLarge),
         const SizedBox(height: Spacing.xs),
         SegmentedButton<String>(
-          segments: const [
-            ButtonSegment(value: 'left', label: Text('왼쪽')),
-            ButtonSegment(value: 'right', label: Text('오른쪽')),
-            ButtonSegment(value: 'both', label: Text('양쪽')),
+          segments: [
+            ButtonSegment(value: 'left', label: Text(l10n.feedingBreastLeft)),
+            ButtonSegment(value: 'right', label: Text(l10n.feedingBreastRight)),
+            ButtonSegment(value: 'both', label: Text(l10n.feedingBreastBoth)),
           ],
           selected: {side},
           onSelectionChanged: (s) => onSideChanged(s.first),
         ),
         const SizedBox(height: Spacing.lg),
         TextField(
-          decoration: const InputDecoration(
-            labelText: '양 (ml, 선택)',
-            hintText: '직접 짠 모유면 입력',
+          decoration: InputDecoration(
+            labelText: l10n.feedingBreastAmountLabel,
+            hintText: l10n.feedingBreastAmountHint,
             suffixText: 'ml',
           ),
           keyboardType: TextInputType.number,
@@ -385,6 +390,7 @@ class _FormulaFormState extends ConsumerState<_FormulaForm> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final asyncActive =
         ref.watch(activeFormulaInventoriesProvider(widget.childId));
     final activeFirst = asyncActive.maybeWhen(
@@ -411,7 +417,7 @@ class _FormulaFormState extends ConsumerState<_FormulaForm> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('사용 중',
+                            Text(l10n.feedingInUse,
                                 style: Theme.of(context).textTheme.labelMedium),
                             Text(activeFirst.productName,
                                 style:
@@ -419,7 +425,7 @@ class _FormulaFormState extends ConsumerState<_FormulaForm> {
                           ],
                         ),
                       ),
-                      Text('등록 시 자동 차감',
+                      Text(l10n.feedingAutoSubtract,
                           style:
                               Theme.of(context).textTheme.bodySmall?.copyWith(
                                     color: Theme.of(context)
@@ -432,8 +438,8 @@ class _FormulaFormState extends ConsumerState<_FormulaForm> {
                     children: [
                       const Icon(Icons.inventory_2_outlined),
                       const SizedBox(width: Spacing.sm),
-                      const Expanded(
-                        child: Text('사용 중인 분유 통이 없어요.\n등록 후 자동으로 차감됩니다.'),
+                      Expanded(
+                        child: Text(l10n.feedingNoActiveFormula),
                       ),
                     ],
                   ),
@@ -442,9 +448,9 @@ class _FormulaFormState extends ConsumerState<_FormulaForm> {
         const SizedBox(height: Spacing.md),
         TextField(
           controller: _amountCtrl,
-          decoration: const InputDecoration(
-            labelText: '양 (ml)',
-            hintText: '예: 120',
+          decoration: InputDecoration(
+            labelText: l10n.feedingFormulaAmountLabel,
+            hintText: l10n.feedingFormulaAmountHint,
             suffixText: 'ml',
           ),
           keyboardType: TextInputType.number,
@@ -472,9 +478,9 @@ class _FormulaFormState extends ConsumerState<_FormulaForm> {
         ),
         const SizedBox(height: Spacing.lg),
         TextField(
-          decoration: const InputDecoration(
-            labelText: '제품명/브랜드 (선택)',
-            hintText: '예: 압타밀 1단계',
+          decoration: InputDecoration(
+            labelText: l10n.feedingFormulaBrandLabel,
+            hintText: l10n.feedingFormulaBrandHint,
           ),
           onChanged: widget.onBrandChanged,
         ),
@@ -505,22 +511,23 @@ class _SolidForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return ListView(
       padding: const EdgeInsets.all(Spacing.md),
       children: [
         TextField(
-          decoration: const InputDecoration(
-            labelText: '음식 이름',
-            hintText: '예: 쌀미음, 호박죽, 사과 갈은 것',
+          decoration: InputDecoration(
+            labelText: l10n.feedingSolidFoodLabel,
+            hintText: l10n.feedingSolidFoodHint,
           ),
           onChanged: onFoodNameChanged,
           autofocus: true,
         ),
         const SizedBox(height: Spacing.lg),
         TextField(
-          decoration: const InputDecoration(
-            labelText: '양 (ml, 선택)',
-            hintText: '대략 분량',
+          decoration: InputDecoration(
+            labelText: l10n.feedingSolidAmountLabel,
+            hintText: l10n.feedingSolidAmountHint,
             suffixText: 'ml',
           ),
           keyboardType: TextInputType.number,
@@ -529,14 +536,14 @@ class _SolidForm extends StatelessWidget {
         const SizedBox(height: Spacing.lg),
 
         // ── 사진 첨부 영역 ───────────────────────────────────────
-        Text('사진 (선택)', style: Theme.of(context).textTheme.labelLarge),
+        Text(l10n.feedingPhotoOptional, style: Theme.of(context).textTheme.labelLarge),
         const SizedBox(height: Spacing.xs),
         if (photo == null)
           // 사진 미선택 — 추가 버튼만
           OutlinedButton.icon(
             onPressed: onPickPhoto,
             icon: const Icon(Icons.add_photo_alternate_outlined),
-            label: const Text('갤러리에서 사진 선택'),
+            label: Text(l10n.feedingPickFromGallery),
           )
         else
           // 사진 선택됨 — 미리보기 + 삭제 버튼
@@ -577,6 +584,7 @@ class _SolidForm extends StatelessWidget {
 class _NoChildPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(Spacing.lg),
@@ -585,7 +593,7 @@ class _NoChildPlaceholder extends StatelessWidget {
           children: [
             const Icon(Icons.child_friendly, size: 48),
             const SizedBox(height: Spacing.sm),
-            const Text('먼저 자녀를 등록해주세요.'),
+            Text(l10n.commonRegisterChildFirst),
             const SizedBox(height: Spacing.md),
             FilledButton.icon(
               onPressed: () {
@@ -593,7 +601,7 @@ class _NoChildPlaceholder extends StatelessWidget {
                 context.push('/child/new');
               },
               icon: const Icon(Icons.add),
-              label: const Text('자녀 등록하러 가기'),
+              label: Text(l10n.commonGoRegisterChild),
             ),
           ],
         ),

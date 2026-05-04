@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/theme/tokens.dart';
 import '../../child/presentation/child_providers.dart';
 import 'diaper_inventory_providers.dart';
@@ -21,7 +22,7 @@ class _DiaperInventoryRegisterPageState
   String _size = 'M';
   String _brand = '';
   String _quantity = '';
-  String? _usageKind; // null = 미선택 (= all로 저장 안 함, 미설정)
+  String? _usageKind;
   String _priceWon = '';
   String _store = '';
   DateTime? _purchasedAt;
@@ -44,6 +45,7 @@ class _DiaperInventoryRegisterPageState
   }
 
   Future<void> _submit(String childId) async {
+    final l10n = AppLocalizations.of(context);
     final form = _formKey.currentState;
     if (form == null || !form.validate()) return;
     form.save();
@@ -68,29 +70,30 @@ class _DiaperInventoryRegisterPageState
     state.when(
       data: (_) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('기저귀를 등록했어요 🧷')),
+          SnackBar(content: Text(l10n.diaperInventorySavedToast)),
         );
         context.pop();
       },
       loading: () {},
       error: (err, _) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('실패: $err')));
+            .showSnackBar(SnackBar(content: Text(l10n.errorFailed(err))));
       },
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final asyncChildren = ref.watch(myChildrenProvider);
     final asyncCtrl = ref.watch(diaperInventoryControllerProvider);
     final isLoading = asyncCtrl.isLoading;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('기저귀 등록')),
+      appBar: AppBar(title: Text(l10n.diaperInventoryRegister)),
       body: asyncChildren.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => Center(child: Text('자녀 목록 로딩 실패: $err')),
+        error: (err, _) => Center(child: Text(l10n.errorChildrenLoadFailed(err))),
         data: (children) {
           if (children.isEmpty) return _NoChildPlaceholder();
           final child = children.first;
@@ -106,13 +109,13 @@ class _DiaperInventoryRegisterPageState
                     children: [
                       const Icon(Icons.child_care),
                       const SizedBox(width: Spacing.xs),
-                      Text('${child.name} 자녀',
+                      Text(child.name,
                           style: Theme.of(context).textTheme.titleMedium),
                     ],
                   ),
                   const SizedBox(height: Spacing.lg),
 
-                  Text('사이즈', style: Theme.of(context).textTheme.labelLarge),
+                  Text(l10n.diaperInventorySize, style: Theme.of(context).textTheme.labelLarge),
                   const SizedBox(height: Spacing.xs),
                   Wrap(
                     spacing: Spacing.xs,
@@ -129,17 +132,17 @@ class _DiaperInventoryRegisterPageState
                   const SizedBox(height: Spacing.lg),
 
                   TextFormField(
-                    decoration: const InputDecoration(
-                      labelText: '매수',
-                      hintText: '예: 60',
-                      suffixText: '매',
+                    decoration: InputDecoration(
+                      labelText: l10n.diaperInventoryCount,
+                      hintText: l10n.diaperInventoryCountHint,
+                      suffixText: l10n.diaperInventoryCountUnit,
                     ),
                     keyboardType: TextInputType.number,
                     validator: (v) {
-                      if (v == null || v.trim().isEmpty) return '매수는 필수예요.';
+                      if (v == null || v.trim().isEmpty) return l10n.diaperInventoryCountRequired;
                       final n = int.tryParse(v);
-                      if (n == null || n <= 0) return '양수만 입력해주세요.';
-                      if (n > 1000) return '매수가 너무 많아요.';
+                      if (n == null || n <= 0) return l10n.commonPositiveOnly;
+                      if (n > 1000) return l10n.diaperInventoryCountTooMany;
                       return null;
                     },
                     onSaved: (v) => _quantity = v ?? '',
@@ -147,23 +150,23 @@ class _DiaperInventoryRegisterPageState
                   const SizedBox(height: Spacing.lg),
 
                   TextFormField(
-                    decoration: const InputDecoration(
-                      labelText: '브랜드 (선택)',
-                      hintText: '예: 하기스, 마미포코',
+                    decoration: InputDecoration(
+                      labelText: l10n.formulaBrandLabel,
+                      hintText: l10n.diaperInventoryBrandHint,
                     ),
                     onSaved: (v) => _brand = v ?? '',
                   ),
                   const SizedBox(height: Spacing.lg),
 
-                  Text('사용 종류 (선택)',
+                  Text(l10n.diaperInventoryUseType,
                       style: Theme.of(context).textTheme.labelLarge),
                   const SizedBox(height: Spacing.xs),
                   SegmentedButton<String>(
                     emptySelectionAllowed: true,
-                    segments: const [
-                      ButtonSegment(value: 'day', label: Text('낮용')),
-                      ButtonSegment(value: 'night', label: Text('밤용')),
-                      ButtonSegment(value: 'all', label: Text('공용')),
+                    segments: [
+                      ButtonSegment(value: 'day', label: Text(l10n.diaperInventoryDay)),
+                      ButtonSegment(value: 'night', label: Text(l10n.diaperInventoryNight)),
+                      ButtonSegment(value: 'all', label: Text(l10n.diaperInventoryAll)),
                     ],
                     selected: _usageKind == null ? {} : {_usageKind!},
                     onSelectionChanged: (s) =>
@@ -173,13 +176,13 @@ class _DiaperInventoryRegisterPageState
 
                   ListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: const Text('구매일 (선택)'),
+                    title: Text(l10n.formulaPurchaseDateOptional),
                     subtitle: Text(_purchasedAt == null
-                        ? '탭해서 선택'
+                        ? l10n.commonTapToSelect
                         : _formatDate(_purchasedAt!)),
                     trailing: const Icon(Icons.calendar_today),
                     onTap: () => _pickDate(
-                      label: '구매일',
+                      label: l10n.formulaPurchaseDateLabel,
                       current: _purchasedAt,
                       onPicked: (d) => setState(() => _purchasedAt = d),
                     ),
@@ -187,13 +190,13 @@ class _DiaperInventoryRegisterPageState
                   const Divider(),
                   ListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: const Text('개봉일 (선택, 비워두면 보관 중)'),
+                    title: Text(l10n.formulaOpenedDateOptional),
                     subtitle: Text(_openedAt == null
-                        ? '아직 안 열었음'
+                        ? l10n.formulaNotOpenedYet
                         : _formatDate(_openedAt!)),
                     trailing: const Icon(Icons.calendar_today),
                     onTap: () => _pickDate(
-                      label: '개봉일',
+                      label: l10n.formulaOpenedDateLabel,
                       current: _openedAt,
                       onPicked: (d) => setState(() => _openedAt = d),
                     ),
@@ -202,23 +205,23 @@ class _DiaperInventoryRegisterPageState
                   const SizedBox(height: Spacing.md),
 
                   TextFormField(
-                    decoration: const InputDecoration(
-                      labelText: '가격 (선택, 원)',
-                      suffixText: '원',
+                    decoration: InputDecoration(
+                      labelText: l10n.formulaPriceLabel,
+                      suffixText: l10n.formulaPriceUnit,
                     ),
                     keyboardType: TextInputType.number,
                     validator: (v) {
                       if (v == null || v.isEmpty) return null;
                       final n = int.tryParse(v);
-                      if (n == null || n < 0) return '0 이상의 숫자만.';
+                      if (n == null || n < 0) return l10n.commonPositiveOnly;
                       return null;
                     },
                     onSaved: (v) => _priceWon = v ?? '',
                   ),
                   const SizedBox(height: Spacing.md),
                   TextFormField(
-                    decoration: const InputDecoration(
-                      labelText: '구매처 (선택)',
+                    decoration: InputDecoration(
+                      labelText: l10n.formulaShopLabel,
                     ),
                     onSaved: (v) => _store = v ?? '',
                   ),
@@ -233,7 +236,7 @@ class _DiaperInventoryRegisterPageState
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : const Icon(Icons.check),
-                    label: Text(isLoading ? '저장 중…' : '등록'),
+                    label: Text(isLoading ? l10n.commonSaving : l10n.commonRegister),
                     style: FilledButton.styleFrom(
                       minimumSize: const Size.fromHeight(TouchTarget.huge),
                     ),
@@ -256,6 +259,7 @@ class _DiaperInventoryRegisterPageState
 class _NoChildPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(Spacing.lg),
@@ -264,7 +268,7 @@ class _NoChildPlaceholder extends StatelessWidget {
           children: [
             const Icon(Icons.child_friendly, size: 48),
             const SizedBox(height: Spacing.sm),
-            const Text('먼저 자녀를 등록해주세요.'),
+            Text(l10n.commonRegisterChildFirst),
             const SizedBox(height: Spacing.md),
             FilledButton.icon(
               onPressed: () {
@@ -272,7 +276,7 @@ class _NoChildPlaceholder extends StatelessWidget {
                 context.push('/child/new');
               },
               icon: const Icon(Icons.add),
-              label: const Text('자녀 등록하러 가기'),
+              label: Text(l10n.commonGoRegisterChild),
             ),
           ],
         ),

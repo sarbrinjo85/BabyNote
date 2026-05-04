@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/theme/tokens.dart';
 import '../../diaper/presentation/diaper_providers.dart';
 import '../../feeding/presentation/feeding_providers.dart';
@@ -24,6 +25,7 @@ class TodaysSummarySection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final asyncFeedings = ref.watch(recentFeedingsProvider(childId));
     final asyncSleeps = ref.watch(recentSleepsProvider(childId));
     final asyncDiapers = ref.watch(recentDiapersProvider(childId));
@@ -38,7 +40,7 @@ class TodaysSummarySection extends ConsumerWidget {
             list.where((f) => f.startedAt.isAfter(startOfToday)).toList();
         final totalMl = today.fold<int>(
             0, (sum, f) => sum + (f.amountMl ?? 0));
-        return _Summary(count: today.length, value: '${today.length}회 / $totalMl ml');
+        return _Summary(count: today.length, value: '${today.length}× / $totalMl ml');
       },
       orElse: () => null,
     );
@@ -54,11 +56,11 @@ class TodaysSummarySection extends ConsumerWidget {
           (sum, s) => sum + s.endedAt!.difference(s.startedAt).inMinutes,
         );
         if (totalMinutes == 0) {
-          return _Summary(count: today.length, value: '0분');
+          return _Summary(count: today.length, value: l10n.sleepDurationMinutes(0));
         }
         final h = totalMinutes ~/ 60;
         final m = totalMinutes % 60;
-        final text = h == 0 ? '$m분' : (m == 0 ? '$h시간' : '$h시간 $m분');
+        final text = h == 0 ? l10n.sleepDurationMinutes(m) : (m == 0 ? '${h}h' : '${h}h ${m}m');
         return _Summary(count: today.length, value: text);
       },
       orElse: () => null,
@@ -69,7 +71,7 @@ class TodaysSummarySection extends ConsumerWidget {
       data: (list) {
         final today =
             list.where((d) => d.recordedAt.isAfter(startOfToday)).toList();
-        return _Summary(count: today.length, value: '${today.length}회');
+        return _Summary(count: today.length, value: '${today.length}×');
       },
       orElse: () => null,
     );
@@ -82,7 +84,7 @@ class TodaysSummarySection extends ConsumerWidget {
           children: [
             Row(
               children: [
-                Text('오늘의 요약',
+                Text(l10n.summaryTitle,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w700,
                         )),
@@ -96,11 +98,11 @@ class TodaysSummarySection extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: Spacing.sm),
-            _MetricRow(icon: '🍼', label: '수유', summary: feedingSummary),
+            _MetricRow(icon: '🍼', label: l10n.summaryFeeding, summary: feedingSummary),
             const SizedBox(height: Spacing.xs),
-            _MetricRow(icon: '💤', label: '수면', summary: sleepSummary),
+            _MetricRow(icon: '💤', label: l10n.summarySleep, summary: sleepSummary),
             const SizedBox(height: Spacing.xs),
-            _MetricRow(icon: '💩', label: '기저귀', summary: diaperSummary),
+            _MetricRow(icon: '💩', label: l10n.summaryDiaper, summary: diaperSummary),
           ],
         ),
       ),
@@ -129,6 +131,7 @@ class _MetricRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final empty = summary == null || summary!.count == 0;
     return Row(
@@ -138,7 +141,7 @@ class _MetricRow extends StatelessWidget {
         SizedBox(width: 56, child: Text(label, style: theme.textTheme.bodyMedium)),
         Expanded(
           child: Text(
-            empty ? '아직 없음' : summary!.value,
+            empty ? l10n.commonNoEntryYet : summary!.value,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
               color: empty

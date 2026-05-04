@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/theme/tokens.dart';
 import '../../child/domain/child.dart';
 import '../../child/presentation/child_providers.dart';
@@ -25,13 +26,14 @@ class VaccineListPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final asyncChildren = ref.watch(myChildrenProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('예방접종 일정')),
+      appBar: AppBar(title: Text(l10n.vaccineListTitle)),
       body: asyncChildren.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => Center(child: Text('자녀 로딩 실패: $err')),
+        error: (err, _) => Center(child: Text(l10n.errorChildLoadFailed(err))),
         data: (children) {
           if (children.isEmpty) return _NoChildPlaceholder();
           final child = children.first;
@@ -45,10 +47,10 @@ class VaccineListPage extends ConsumerWidget {
             return const Center(child: CircularProgressIndicator());
           }
           if (asyncSchedules.hasError) {
-            return Center(child: Text('일정 로딩 실패: ${asyncSchedules.error}'));
+            return Center(child: Text(l10n.vaccineScheduleLoadFailure(asyncSchedules.error!)));
           }
           if (asyncVaccinations.hasError) {
-            return Center(child: Text('접종 기록 로딩 실패: ${asyncVaccinations.error}'));
+            return Center(child: Text(l10n.vaccineRecordsLoadFailure(asyncVaccinations.error!)));
           }
 
           final schedules = asyncSchedules.value ?? const [];
@@ -69,17 +71,17 @@ class VaccineListPage extends ConsumerWidget {
               _Header(child: child),
               const SizedBox(height: Spacing.md),
               if (overdue.isNotEmpty) ...[
-                const _Section('지났는데 미접종', urgent: true),
+                _Section(l10n.vaccineSectionOverdue, urgent: true),
                 ...overdue.map((e) => _VaccineCard(entry: e, childId: child.id)),
                 const SizedBox(height: Spacing.lg),
               ],
               if (upcoming.isNotEmpty) ...[
-                const _Section('다가오는 / 미접종'),
+                _Section(l10n.vaccineSectionUpcoming),
                 ...upcoming.map((e) => _VaccineCard(entry: e, childId: child.id)),
                 const SizedBox(height: Spacing.lg),
               ],
               if (completed.isNotEmpty) ...[
-                const _Section('완료'),
+                _Section(l10n.vaccineSectionCompleted),
                 ...completed.map((e) => _VaccineCard(entry: e, childId: child.id)),
               ],
             ],
@@ -148,7 +150,7 @@ class _Header extends StatelessWidget {
       children: [
         const Icon(Icons.child_care),
         const SizedBox(width: Spacing.xs),
-        Text('${child.name} · 생후 ${child.ageInDays(DateTime.now())}일',
+        Text(child.name,
             style: Theme.of(context).textTheme.titleMedium),
       ],
     );
@@ -269,6 +271,7 @@ class _VaccineCard extends StatelessWidget {
 class _NoChildPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(Spacing.lg),
@@ -277,7 +280,7 @@ class _NoChildPlaceholder extends StatelessWidget {
           children: [
             const Icon(Icons.child_friendly, size: 48),
             const SizedBox(height: Spacing.sm),
-            const Text('먼저 자녀를 등록해주세요.'),
+            Text(l10n.commonRegisterChildFirst),
           ],
         ),
       ),

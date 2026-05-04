@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/theme/tokens.dart';
 import '../../child/presentation/child_providers.dart';
 import '../domain/diaper_inventory.dart';
@@ -12,14 +13,15 @@ class DiaperInventoryListPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final asyncChildren = ref.watch(myChildrenProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('기저귀 재고'),
+        title: Text(l10n.diaperInventoryTitle),
         actions: [
           IconButton(
-            tooltip: '추가',
+            tooltip: l10n.commonAdd,
             icon: const Icon(Icons.add),
             onPressed: () => context.push('/inventory/diaper/new'),
           ),
@@ -27,7 +29,7 @@ class DiaperInventoryListPage extends ConsumerWidget {
       ),
       body: asyncChildren.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => Center(child: Text('자녀 로딩 실패: $err')),
+        error: (err, _) => Center(child: Text(l10n.errorChildLoadFailed(err))),
         data: (children) {
           if (children.isEmpty) return _NoChildPlaceholder();
           final childId = children.first.id;
@@ -35,7 +37,7 @@ class DiaperInventoryListPage extends ConsumerWidget {
 
           return asyncList.when(
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (err, _) => Center(child: Text('재고 로딩 실패: $err')),
+            error: (err, _) => Center(child: Text(l10n.diaperInventoryLoadFailure(err))),
             data: (list) {
               if (list.isEmpty) return _EmptyPlaceholder();
               final active = list.where((i) => i.isActive).toList();
@@ -46,7 +48,7 @@ class DiaperInventoryListPage extends ConsumerWidget {
                 padding: const EdgeInsets.all(Spacing.md),
                 children: [
                   if (active.isNotEmpty) ...[
-                    const _Section('사용 중'),
+                    _Section(l10n.formulaSectionInUse),
                     ...active.map((i) => _InventoryTile(
                           inventory: i,
                           childId: childId,
@@ -57,7 +59,7 @@ class DiaperInventoryListPage extends ConsumerWidget {
                     const SizedBox(height: Spacing.lg),
                   ],
                   if (stocked.isNotEmpty) ...[
-                    const _Section('보관 중'),
+                    _Section(l10n.formulaSectionStored),
                     ...stocked.map((i) => _InventoryTile(
                           inventory: i,
                           childId: childId,
@@ -68,7 +70,7 @@ class DiaperInventoryListPage extends ConsumerWidget {
                     const SizedBox(height: Spacing.lg),
                   ],
                   if (depleted.isNotEmpty) ...[
-                    const _Section('소진'),
+                    _Section(l10n.formulaSectionDepleted),
                     ...depleted.map((i) => _InventoryTile(
                           inventory: i,
                           childId: childId,
@@ -121,22 +123,24 @@ class _InventoryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final i = inventory;
-    final subtitle = StringBuffer('${i.size} · ${i.quantity}매');
+    final unit = l10n.diaperInventoryCountUnit;
+    final subtitle = StringBuffer('${i.size} · ${i.quantity}$unit');
     if (i.brand != null && i.brand!.isNotEmpty) subtitle.write(' · ${i.brand}');
     if (i.usageKind != null) {
       final kind = switch (i.usageKind!) {
-        'day' => '낮용',
-        'night' => '밤용',
-        'all' => '공용',
+        'day' => l10n.diaperInventoryDay,
+        'night' => l10n.diaperInventoryNight,
+        'all' => l10n.diaperInventoryAll,
         _ => i.usageKind!,
       };
       subtitle.write(' · $kind');
     }
     if (i.openedAt != null) {
-      subtitle.write(' · 개봉 ${_d(i.openedAt!)}');
+      subtitle.write(' · ${_d(i.openedAt!)}');
     } else if (i.purchasedAt != null) {
-      subtitle.write(' · 구매 ${_d(i.purchasedAt!)}');
+      subtitle.write(' · ${_d(i.purchasedAt!)}');
     }
 
     return Card(
@@ -148,21 +152,21 @@ class _InventoryTile extends StatelessWidget {
           children: [
             ListTile(
               contentPadding: EdgeInsets.zero,
-              title: Text('${i.size} 사이즈'),
+              title: Text(i.size),
               subtitle: Text(subtitle.toString()),
               trailing: showOpenButton
                   ? TextButton(
                       onPressed: () => ref
                           .read(diaperInventoryControllerProvider.notifier)
                           .open(childId, i.id),
-                      child: const Text('개봉'),
+                      child: Text(l10n.formulaActionOpen),
                     )
                   : showDepleteButton
                       ? TextButton(
                           onPressed: () => ref
                               .read(diaperInventoryControllerProvider.notifier)
                               .deplete(childId, i.id),
-                          child: const Text('소진'),
+                          child: Text(l10n.formulaActionDeplete),
                         )
                       : null,
             ),
@@ -185,6 +189,7 @@ class _StatsRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final asyncStats = ref.watch(diaperInventoryStatsProvider(inventory));
     return asyncStats.when(
       loading: () => const Padding(
@@ -194,15 +199,16 @@ class _StatsRow extends ConsumerWidget {
       error: (err, _) => Padding(
         padding: const EdgeInsets.symmetric(vertical: Spacing.xs),
         child:
-            Text('잔량 계산 실패: $err', style: Theme.of(context).textTheme.bodySmall),
+            Text(l10n.formulaRemainCalcFailed(err), style: Theme.of(context).textTheme.bodySmall),
       ),
       data: (stats) {
         final theme = Theme.of(context);
+        final unit = l10n.diaperInventoryCountUnit;
         final remainText =
-            '${stats.remainingCount}매 / ${inventory.quantity}매';
+            '${stats.remainingCount}$unit / ${inventory.quantity}$unit';
         final daysText = stats.expectedDaysLeft >= 999
-            ? '데이터 부족'
-            : '약 ${stats.expectedDaysLeft.toStringAsFixed(1)}일 후 소진';
+            ? l10n.commonDataInsufficient
+            : l10n.formulaExpectedDays(stats.expectedDaysLeft.toStringAsFixed(1));
         final low = stats.confidence == 'low';
 
         return Column(
@@ -232,16 +238,6 @@ class _StatsRow extends ConsumerWidget {
                 ),
               ],
             ),
-            if (low)
-              Padding(
-                padding: const EdgeInsets.only(top: 2),
-                child: Text(
-                  '※ 개봉 7일 미만 — 예측 정확도 낮음',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ),
             const SizedBox(height: Spacing.xs),
           ],
         );
@@ -253,6 +249,7 @@ class _StatsRow extends ConsumerWidget {
 class _EmptyPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(Spacing.lg),
@@ -261,12 +258,12 @@ class _EmptyPlaceholder extends StatelessWidget {
           children: [
             const Text('🧷', style: TextStyle(fontSize: 48)),
             const SizedBox(height: Spacing.sm),
-            const Text('등록된 기저귀가 없어요'),
+            Text(l10n.diaperInventoryNone),
             const SizedBox(height: Spacing.md),
             FilledButton.icon(
               onPressed: () => context.push('/inventory/diaper/new'),
               icon: const Icon(Icons.add),
-              label: const Text('기저귀 추가'),
+              label: Text(l10n.diaperInventoryAdd),
             ),
           ],
         ),
@@ -278,6 +275,7 @@ class _EmptyPlaceholder extends StatelessWidget {
 class _NoChildPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(Spacing.lg),
@@ -286,7 +284,7 @@ class _NoChildPlaceholder extends StatelessWidget {
           children: [
             const Icon(Icons.child_friendly, size: 48),
             const SizedBox(height: Spacing.sm),
-            const Text('먼저 자녀를 등록해주세요.'),
+            Text(l10n.commonRegisterChildFirst),
           ],
         ),
       ),

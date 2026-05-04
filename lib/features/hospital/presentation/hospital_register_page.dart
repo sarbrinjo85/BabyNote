@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/theme/tokens.dart';
 import 'hospital_providers.dart';
 
@@ -21,9 +22,10 @@ class _HospitalRegisterPageState extends ConsumerState<HospitalRegisterPage> {
   String _phone = '';
   String _address = '';
   String _note = '';
-  bool _isDefault = true; // 첫 등록은 보통 default
+  bool _isDefault = true;
 
   Future<void> _submit() async {
+    final l10n = AppLocalizations.of(context);
     final form = _formKey.currentState;
     if (form == null || !form.validate()) return;
     form.save();
@@ -41,25 +43,26 @@ class _HospitalRegisterPageState extends ConsumerState<HospitalRegisterPage> {
     state.when(
       data: (_) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('병원을 등록했어요 🏥')),
+          SnackBar(content: Text(l10n.hospitalSavedToast)),
         );
         context.pop();
       },
       loading: () {},
       error: (err, _) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('실패: $err')));
+            .showSnackBar(SnackBar(content: Text(l10n.errorFailed(err))));
       },
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final asyncCtrl = ref.watch(hospitalControllerProvider);
     final isLoading = asyncCtrl.isLoading;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('병원 등록')),
+      appBar: AppBar(title: Text(l10n.hospitalRegisterTitle)),
       body: SafeArea(
         top: false,
         child: Form(
@@ -68,25 +71,25 @@ class _HospitalRegisterPageState extends ConsumerState<HospitalRegisterPage> {
             padding: const EdgeInsets.all(Spacing.md),
             children: [
               TextFormField(
-                decoration: const InputDecoration(
-                  labelText: '병원 이름',
-                  hintText: '예: 우리동네 소아과',
+                decoration: InputDecoration(
+                  labelText: l10n.hospitalNameLabel,
+                  hintText: l10n.hospitalNameHint,
                 ),
                 autofocus: true,
                 validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? '병원 이름은 필수예요.' : null,
+                    (v == null || v.trim().isEmpty) ? l10n.hospitalNameRequired : null,
                 onSaved: (v) => _name = v ?? '',
               ),
               const SizedBox(height: Spacing.lg),
 
-              Text('진료과', style: Theme.of(context).textTheme.labelLarge),
+              Text(l10n.hospitalSpecialty, style: Theme.of(context).textTheme.labelLarge),
               const SizedBox(height: Spacing.xs),
               SegmentedButton<String>(
-                segments: const [
-                  ButtonSegment(value: 'pediatrics', label: Text('소아과')),
-                  ButtonSegment(value: 'dental', label: Text('치과')),
-                  ButtonSegment(value: 'er', label: Text('응급실')),
-                  ButtonSegment(value: 'other', label: Text('기타')),
+                segments: [
+                  ButtonSegment(value: 'pediatrics', label: Text(l10n.hospitalSpecialtyPediatrics)),
+                  ButtonSegment(value: 'dental', label: Text(l10n.hospitalSpecialtyDental)),
+                  ButtonSegment(value: 'er', label: Text(l10n.hospitalSpecialtyER)),
+                  ButtonSegment(value: 'other', label: Text(l10n.hospitalSpecialtyOther)),
                 ],
                 selected: {_specialty},
                 onSelectionChanged: (s) =>
@@ -95,9 +98,9 @@ class _HospitalRegisterPageState extends ConsumerState<HospitalRegisterPage> {
               const SizedBox(height: Spacing.lg),
 
               TextFormField(
-                decoration: const InputDecoration(
-                  labelText: '전화번호',
-                  hintText: '예: 02-123-4567',
+                decoration: InputDecoration(
+                  labelText: l10n.hospitalPhone,
+                  hintText: l10n.hospitalPhoneHint,
                 ),
                 keyboardType: TextInputType.phone,
                 onSaved: (v) => _phone = v ?? '',
@@ -105,18 +108,18 @@ class _HospitalRegisterPageState extends ConsumerState<HospitalRegisterPage> {
               const SizedBox(height: Spacing.md),
 
               TextFormField(
-                decoration: const InputDecoration(
-                  labelText: '주소',
-                  hintText: '예: 서울 강남구 테헤란로 123',
+                decoration: InputDecoration(
+                  labelText: l10n.hospitalAddress,
+                  hintText: l10n.hospitalAddressHint,
                 ),
                 onSaved: (v) => _address = v ?? '',
               ),
               const SizedBox(height: Spacing.md),
 
               TextFormField(
-                decoration: const InputDecoration(
-                  labelText: '메모 (선택)',
-                  hintText: '예: 야간 진료 가능, 친절한 의사',
+                decoration: InputDecoration(
+                  labelText: l10n.commonMemoOptional,
+                  hintText: l10n.hospitalMemoHint,
                 ),
                 onSaved: (v) => _note = v ?? '',
                 maxLines: 2,
@@ -125,8 +128,8 @@ class _HospitalRegisterPageState extends ConsumerState<HospitalRegisterPage> {
 
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('기본 병원으로 설정'),
-                subtitle: const Text('알림/원클릭 전화 등에서 우선 표시'),
+                title: Text(l10n.hospitalDefaultTitle),
+                subtitle: Text(l10n.hospitalDefaultSubtitle),
                 value: _isDefault,
                 onChanged: (v) => setState(() => _isDefault = v),
               ),
@@ -141,7 +144,7 @@ class _HospitalRegisterPageState extends ConsumerState<HospitalRegisterPage> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.check),
-                label: Text(isLoading ? '저장 중…' : '등록'),
+                label: Text(isLoading ? l10n.commonSaving : l10n.commonRegister),
                 style: FilledButton.styleFrom(
                   minimumSize: const Size.fromHeight(TouchTarget.huge),
                 ),

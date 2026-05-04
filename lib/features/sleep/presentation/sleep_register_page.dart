@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/theme/tokens.dart';
 import '../../child/presentation/child_providers.dart';
 import '../domain/sleep.dart';
@@ -40,18 +41,19 @@ class _SleepRegisterPageState extends ConsumerState<SleepRegisterPage> {
           note: _note.trim().isEmpty ? null : _note.trim(),
         );
     if (!mounted) return;
+    final l10n = AppLocalizations.of(context);
     final state = ref.read(sleepControllerProvider);
     state.when(
       data: (_) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('수면 시작! 자장자장 💤')),
+          SnackBar(content: Text(l10n.sleepStartedToast)),
         );
         // 시작 후엔 그대로 같은 화면 유지 (진행 중 카드로 자동 전환)
       },
       loading: () {},
       error: (err, _) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('실패: $err')));
+            .showSnackBar(SnackBar(content: Text(l10n.errorFailed(err))));
       },
     );
   }
@@ -62,33 +64,35 @@ class _SleepRegisterPageState extends ConsumerState<SleepRegisterPage> {
           sleepId: sleepId,
         );
     if (!mounted) return;
+    final l10n = AppLocalizations.of(context);
     final state = ref.read(sleepControllerProvider);
     state.when(
       data: (_) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('수면 기록 완료 ✅')),
+          SnackBar(content: Text(l10n.sleepFinishedToast)),
         );
         context.pop();
       },
       loading: () {},
       error: (err, _) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('실패: $err')));
+            .showSnackBar(SnackBar(content: Text(l10n.errorFailed(err))));
       },
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final asyncChildren = ref.watch(myChildrenProvider);
     final asyncCtrl = ref.watch(sleepControllerProvider);
     final isLoading = asyncCtrl.isLoading;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('수면 기록')),
+      appBar: AppBar(title: Text(l10n.sleepTitle)),
       body: asyncChildren.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => Center(child: Text('자녀 목록 로딩 실패: $err')),
+        error: (err, _) => Center(child: Text(l10n.errorChildrenLoadFailed(err))),
         data: (children) {
           if (children.isEmpty) return _NoChildPlaceholder();
           final child = children.first;
@@ -103,7 +107,7 @@ class _SleepRegisterPageState extends ConsumerState<SleepRegisterPage> {
               child: asyncOngoing.when(
                 loading: () =>
                     const Center(child: CircularProgressIndicator()),
-                error: (err, _) => Center(child: Text('진행 중 수면 조회 실패: $err')),
+                error: (err, _) => Center(child: Text(l10n.sleepInProgressLoadFailure(err))),
                 data: (ongoing) {
                   if (ongoing == null) {
                     return _StartForm(
@@ -152,37 +156,33 @@ class _StartForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return ListView(
       children: [
         Row(
           children: [
             const Icon(Icons.child_care),
             const SizedBox(width: Spacing.xs),
-            Text('$childName 자녀',
+            Text(childName,
                 style: Theme.of(context).textTheme.titleMedium),
           ],
         ),
         const SizedBox(height: Spacing.lg),
-        Text('낮잠/밤잠', style: Theme.of(context).textTheme.labelLarge),
+        Text(l10n.sleepNapNight, style: Theme.of(context).textTheme.labelLarge),
         const SizedBox(height: Spacing.xs),
         SegmentedButton<String>(
-          segments: const [
-            ButtonSegment(value: 'nap', label: Text('낮잠')),
-            ButtonSegment(value: 'night', label: Text('밤잠')),
+          segments: [
+            ButtonSegment(value: 'nap', label: Text(l10n.sleepNap)),
+            ButtonSegment(value: 'night', label: Text(l10n.sleepNight)),
           ],
           selected: {napOrNight},
           onSelectionChanged: (s) => onNapOrNightChanged(s.first),
         ),
-        const SizedBox(height: Spacing.xs),
-        Text(
-          '※ 19시~07시는 자동 밤잠 판정 (수정 가능)',
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
         const SizedBox(height: Spacing.lg),
         TextField(
-          decoration: const InputDecoration(
-            labelText: '메모 (선택)',
-            hintText: '예: 안고 재움, 모빌 보다가 잠듦',
+          decoration: InputDecoration(
+            labelText: l10n.commonMemoOptional,
+            hintText: l10n.sleepMemoHint,
           ),
           onChanged: onNoteChanged,
           maxLines: 2,
@@ -197,7 +197,7 @@ class _StartForm extends StatelessWidget {
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
               : const Icon(Icons.bedtime),
-          label: Text(isLoading ? '시작 중…' : '잠들었어요'),
+          label: Text(isLoading ? l10n.sleepStarting : l10n.sleepGoToSleep),
           style: FilledButton.styleFrom(
             minimumSize: const Size.fromHeight(TouchTarget.huge),
           ),
@@ -223,11 +223,14 @@ class _OngoingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
     final elapsed = sleep.elapsedMinutes(DateTime.now());
     final hours = elapsed ~/ 60;
     final mins = elapsed % 60;
-    final elapsedText = hours > 0 ? '$hours시간 $mins분' : '$mins분';
+    final elapsedText = hours > 0
+        ? '${hours}h ${mins}m'
+        : l10n.sleepDurationMinutes(mins);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -241,11 +244,13 @@ class _OngoingCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Text('💤', style: const TextStyle(fontSize: 36)),
+                    const Text('💤', style: TextStyle(fontSize: 36)),
                     const SizedBox(width: Spacing.sm),
                     Expanded(
                       child: Text(
-                        '$childName 자녀가 자고 있어요',
+                        sleep.napOrNight == 'night'
+                            ? l10n.sleepNightInProgress
+                            : l10n.sleepNapInProgress,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                               color: cs.onPrimaryContainer,
                             ),
@@ -255,18 +260,18 @@ class _OngoingCard extends StatelessWidget {
                 ),
                 const SizedBox(height: Spacing.md),
                 _Row(
-                  label: '시작',
+                  label: l10n.sleepStartLabel,
                   value: _formatTime(sleep.startedAt),
                 ),
                 const SizedBox(height: Spacing.xs),
                 _Row(
-                  label: '경과',
+                  label: l10n.sleepElapsed,
                   value: elapsedText,
                 ),
                 const SizedBox(height: Spacing.xs),
                 _Row(
-                  label: '구분',
-                  value: sleep.napOrNight == 'night' ? '밤잠' : '낮잠',
+                  label: l10n.sleepKindLabel,
+                  value: sleep.napOrNight == 'night' ? l10n.sleepNight : l10n.sleepNap,
                 ),
               ],
             ),
@@ -282,7 +287,7 @@ class _OngoingCard extends StatelessWidget {
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
               : const Icon(Icons.alarm),
-          label: Text(isLoading ? '종료 중…' : '지금 깼어요'),
+          label: Text(isLoading ? l10n.sleepFinishing : l10n.sleepWakeUp),
           style: FilledButton.styleFrom(
             minimumSize: const Size.fromHeight(TouchTarget.huge),
           ),
@@ -316,6 +321,7 @@ class _Row extends StatelessWidget {
 class _NoChildPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(Spacing.lg),
@@ -324,7 +330,7 @@ class _NoChildPlaceholder extends StatelessWidget {
           children: [
             const Icon(Icons.child_friendly, size: 48),
             const SizedBox(height: Spacing.sm),
-            const Text('먼저 자녀를 등록해주세요.'),
+            Text(l10n.commonRegisterChildFirst),
             const SizedBox(height: Spacing.md),
             FilledButton.icon(
               onPressed: () {
@@ -332,7 +338,7 @@ class _NoChildPlaceholder extends StatelessWidget {
                 context.push('/child/new');
               },
               icon: const Icon(Icons.add),
-              label: const Text('자녀 등록하러 가기'),
+              label: Text(l10n.commonGoRegisterChild),
             ),
           ],
         ),

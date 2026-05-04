@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:babynote/l10n/app_localizations.dart';
 import 'child_providers.dart';
 
 /// 자녀 등록 화면.
@@ -43,7 +44,7 @@ class _ChildRegisterPageState extends ConsumerState<ChildRegisterPage> {
       initialDate: _birthDate ?? now,
       firstDate: DateTime(now.year - 5), // 5년 전까지만 (너무 큰 아이는 앱 타겟 외)
       lastDate: now, // 미래 날짜 차단
-      helpText: '자녀 생년월일 선택',
+      helpText: AppLocalizations.of(context).childBirthDateHelp,
     );
     if (picked != null) {
       setState(() => _birthDate = picked);
@@ -52,11 +53,12 @@ class _ChildRegisterPageState extends ConsumerState<ChildRegisterPage> {
 
   /// 폼 제출.
   Future<void> _submit() async {
+    final l10n = AppLocalizations.of(context);
     final form = _formKey.currentState;
     if (form == null || !form.validate()) return;
     if (_birthDate == null) {
       ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('생년월일을 선택해주세요.')));
+          .showSnackBar(SnackBar(content: Text(l10n.childBirthDateRequired)));
       return;
     }
     form.save();
@@ -85,7 +87,7 @@ class _ChildRegisterPageState extends ConsumerState<ChildRegisterPage> {
       loading: () {}, // submit 직후엔 loading일 수 있음, 그냥 두기
       error: (err, _) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('등록 실패: $err')),
+          SnackBar(content: Text(l10n.childRegisterFailed(err))),
         );
       },
     );
@@ -93,12 +95,13 @@ class _ChildRegisterPageState extends ConsumerState<ChildRegisterPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     // 진행 상태 구독 — submit 중이면 버튼을 disable + 스피너 표시.
     final asyncCreate = ref.watch(childCreationControllerProvider);
     final isLoading = asyncCreate.isLoading;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('자녀 등록')),
+      appBar: AppBar(title: Text(l10n.childRegisterTitle)),
       body: Form(
         key: _formKey,
         child: ListView(
@@ -106,26 +109,26 @@ class _ChildRegisterPageState extends ConsumerState<ChildRegisterPage> {
           children: [
             // ── 이름 (필수) ─────────────────────────────────────
             TextFormField(
-              decoration: const InputDecoration(
-                labelText: '이름',
-                hintText: '예: 김아기',
+              decoration: InputDecoration(
+                labelText: l10n.childName,
+                hintText: l10n.childNameHint,
               ),
               autofocus: true,
               textCapitalization: TextCapitalization.words,
               validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? '이름은 필수예요.' : null,
+                  (v == null || v.trim().isEmpty) ? l10n.childNameRequired : null,
               onSaved: (v) => _name = v ?? '',
             ),
             const SizedBox(height: 16),
 
             // ── 성별 (Dropdown, 기본 female) ────────────────────
             DropdownButtonFormField<String>(
-              decoration: const InputDecoration(labelText: '성별'),
+              decoration: InputDecoration(labelText: l10n.childGender),
               initialValue: _gender,
-              items: const [
-                DropdownMenuItem(value: 'female', child: Text('여아')),
-                DropdownMenuItem(value: 'male', child: Text('남아')),
-                DropdownMenuItem(value: 'other', child: Text('기타')),
+              items: [
+                DropdownMenuItem(value: 'female', child: Text(l10n.childGenderFemale)),
+                DropdownMenuItem(value: 'male', child: Text(l10n.childGenderMale)),
+                DropdownMenuItem(value: 'other', child: Text(l10n.childGenderOther)),
               ],
               onChanged: (v) => setState(() => _gender = v ?? 'female'),
             ),
@@ -135,10 +138,10 @@ class _ChildRegisterPageState extends ConsumerState<ChildRegisterPage> {
             // TextFormField 대신 ListTile + onTap으로 날짜 선택 UX 구현.
             ListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('생년월일'),
+              title: Text(l10n.childBirthDate),
               subtitle: Text(
                 _birthDate == null
-                    ? '탭해서 선택'
+                    ? l10n.commonTapToSelect
                     : '${_birthDate!.year}-${_birthDate!.month.toString().padLeft(2, '0')}-${_birthDate!.day.toString().padLeft(2, '0')}',
               ),
               trailing: const Icon(Icons.calendar_today),
@@ -149,9 +152,9 @@ class _ChildRegisterPageState extends ConsumerState<ChildRegisterPage> {
 
             // ── 출생 시 무게 (선택) ──────────────────────────────
             TextFormField(
-              decoration: const InputDecoration(
-                labelText: '출생 시 무게 (kg, 선택)',
-                hintText: '예: 3.45',
+              decoration: InputDecoration(
+                labelText: l10n.childBirthWeightLabel,
+                hintText: l10n.childBirthWeightHint,
                 suffixText: 'kg',
               ),
               keyboardType:
@@ -159,8 +162,8 @@ class _ChildRegisterPageState extends ConsumerState<ChildRegisterPage> {
               validator: (v) {
                 if (v == null || v.isEmpty) return null; // 선택 항목
                 final n = double.tryParse(v);
-                if (n == null) return '숫자만 입력해주세요.';
-                if (n < 0.5 || n > 8.0) return '0.5~8.0 kg 사이여야 해요.';
+                if (n == null) return l10n.commonNumberOnly;
+                if (n < 0.5 || n > 8.0) return '0.5~8.0 kg';
                 return null;
               },
               onSaved: (v) => _weightKg = v ?? '',
@@ -169,9 +172,9 @@ class _ChildRegisterPageState extends ConsumerState<ChildRegisterPage> {
 
             // ── 출생 시 키 (선택) ────────────────────────────────
             TextFormField(
-              decoration: const InputDecoration(
-                labelText: '출생 시 키 (cm, 선택)',
-                hintText: '예: 51.5',
+              decoration: InputDecoration(
+                labelText: l10n.childBirthHeightLabel,
+                hintText: l10n.childBirthHeightHint,
                 suffixText: 'cm',
               ),
               keyboardType:
@@ -179,8 +182,8 @@ class _ChildRegisterPageState extends ConsumerState<ChildRegisterPage> {
               validator: (v) {
                 if (v == null || v.isEmpty) return null;
                 final n = double.tryParse(v);
-                if (n == null) return '숫자만 입력해주세요.';
-                if (n < 30 || n > 80) return '30~80 cm 사이여야 해요.';
+                if (n == null) return l10n.commonNumberOnly;
+                if (n < 30 || n > 80) return '30~80 cm';
                 return null;
               },
               onSaved: (v) => _heightCm = v ?? '',
@@ -197,7 +200,7 @@ class _ChildRegisterPageState extends ConsumerState<ChildRegisterPage> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.check),
-              label: Text(isLoading ? '등록 중…' : '등록'),
+              label: Text(isLoading ? l10n.commonRegistering : l10n.commonRegister),
             ),
           ],
         ),

@@ -36,7 +36,7 @@ class HomePage extends ConsumerWidget {
         title: Text(l10n.appTitle),
         actions: [
           IconButton(
-            tooltip: '로그아웃',
+            tooltip: l10n.homeLogout,
             icon: const Icon(Icons.logout),
             onPressed: () async {
               await ref.read(authRepositoryProvider).signOut();
@@ -60,7 +60,7 @@ class HomePage extends ConsumerWidget {
           const SizedBox(height: Spacing.lg),
 
           // ── 자녀 섹션 ──────────────────────────────────────────
-          const _SectionTitle('내 자녀'),
+          _SectionTitle(l10n.homeMyChildren),
           const SizedBox(height: Spacing.xs),
           asyncChildren.when(
             loading: () => const Padding(
@@ -71,7 +71,7 @@ class HomePage extends ConsumerWidget {
               color: Theme.of(context).colorScheme.errorContainer,
               child: Padding(
                 padding: const EdgeInsets.all(Spacing.sm),
-                child: Text('자녀 목록 로딩 실패: $err'),
+                child: Text(l10n.errorChildrenLoadFailed(err)),
               ),
             ),
             data: (children) {
@@ -85,7 +85,10 @@ class HomePage extends ConsumerWidget {
                           leading: const Icon(Icons.child_care),
                           title: Text(c.name),
                           subtitle: Text(
-                            '${_genderLabel(c.gender)} · 생후 ${c.ageInDays(DateTime.now())}일',
+                            l10n.homeChildSubtitle(
+                              _genderLabel(context, c.gender),
+                              c.ageInDays(DateTime.now()),
+                            ),
                           ),
                         ),
                       )),
@@ -93,7 +96,7 @@ class HomePage extends ConsumerWidget {
                   OutlinedButton.icon(
                     onPressed: () => context.push('/child/new'),
                     icon: const Icon(Icons.add),
-                    label: const Text('자녀 추가'),
+                    label: Text(l10n.homeAddChild),
                   ),
                 ],
               );
@@ -110,7 +113,7 @@ class HomePage extends ConsumerWidget {
                     const SizedBox(height: Spacing.md),
                     TodaysSummarySection(childId: cs.first.id),
                     const SizedBox(height: Spacing.lg),
-                    const _SectionTitle('마지막 활동'),
+                    _SectionTitle(l10n.homeLastActivity),
                     const SizedBox(height: Spacing.xs),
                     LastActivitySection(childId: cs.first.id),
                   ],
@@ -120,28 +123,28 @@ class HomePage extends ConsumerWidget {
           const SizedBox(height: Spacing.xl),
 
           // ── 4개 큰 기록 버튼 ────────────────────────────────────
-          const _SectionTitle('오늘의 기록'),
+          _SectionTitle(l10n.homeTodayRecord),
           const SizedBox(height: Spacing.xs),
           BigActionButton(
-            label: '수유',
+            label: l10n.summaryFeeding,
             icon: const Text('🍼', style: TextStyle(fontSize: 28)),
             onPressed: () => context.push('/feeding/new'),
           ),
           const SizedBox(height: Spacing.xs),
           BigActionButton(
-            label: '수면',
+            label: l10n.summarySleep,
             icon: const Text('💤', style: TextStyle(fontSize: 28)),
             onPressed: () => context.push('/sleep/new'),
           ),
           const SizedBox(height: Spacing.xs),
           BigActionButton(
-            label: '기저귀',
+            label: l10n.summaryDiaper,
             icon: const Text('💩', style: TextStyle(fontSize: 28)),
             onPressed: () => context.push('/diaper/new'),
           ),
           const SizedBox(height: Spacing.xs),
           BigActionButton(
-            label: '성장',
+            label: l10n.summaryGrowth,
             icon: const Text('📏', style: TextStyle(fontSize: 28)),
             onPressed: () => context.push('/growth/new'),
           ),
@@ -149,12 +152,12 @@ class HomePage extends ConsumerWidget {
           const SizedBox(height: Spacing.xl),
 
           // ── 재고 관리 (Phase 3 차별화) ────────────────────────────
-          const _SectionTitle('재고 관리'),
+          _SectionTitle(l10n.homeInventory),
           const SizedBox(height: Spacing.xs),
           OutlinedButton.icon(
             onPressed: () => context.push('/inventory/formula'),
             icon: const Text('🍼', style: TextStyle(fontSize: 24)),
-            label: const Text('분유 재고 관리'),
+            label: Text(l10n.homeFormulaInventoryEntry),
             style: OutlinedButton.styleFrom(
               alignment: Alignment.centerLeft,
             ),
@@ -163,7 +166,7 @@ class HomePage extends ConsumerWidget {
           OutlinedButton.icon(
             onPressed: () => context.push('/inventory/diaper'),
             icon: const Text('🧷', style: TextStyle(fontSize: 24)),
-            label: const Text('기저귀 재고 관리'),
+            label: Text(l10n.homeDiaperInventoryEntry),
             style: OutlinedButton.styleFrom(
               alignment: Alignment.centerLeft,
             ),
@@ -172,12 +175,12 @@ class HomePage extends ConsumerWidget {
           const SizedBox(height: Spacing.xl),
 
           // ── 의료/케어 ───────────────────────────────────────────
-          const _SectionTitle('병원'),
+          _SectionTitle(l10n.homeHospital),
           const SizedBox(height: Spacing.xs),
           OutlinedButton.icon(
             onPressed: () => context.push('/hospital'),
             icon: const Text('🏥', style: TextStyle(fontSize: 24)),
-            label: const Text('단골 병원 (전화 · 길찾기)'),
+            label: Text(l10n.homeHospitalEntry),
             style: OutlinedButton.styleFrom(
               alignment: Alignment.centerLeft,
             ),
@@ -186,7 +189,7 @@ class HomePage extends ConsumerWidget {
           OutlinedButton.icon(
             onPressed: () => context.push('/vaccine'),
             icon: const Text('💉', style: TextStyle(fontSize: 24)),
-            label: const Text('예방접종 일정'),
+            label: Text(l10n.homeVaccineEntry),
             style: OutlinedButton.styleFrom(
               alignment: Alignment.centerLeft,
             ),
@@ -199,16 +202,17 @@ class HomePage extends ConsumerWidget {
 
   // 4개 기록 모두 화면 연결 완료. _comingSoon은 더 이상 사용 안 함 → 제거.
 
-  String _genderLabel(String? g) {
+  String _genderLabel(BuildContext context, String? g) {
+    final l10n = AppLocalizations.of(context);
     switch (g) {
       case 'female':
-        return '여아';
+        return l10n.childGenderFemale;
       case 'male':
-        return '남아';
+        return l10n.childGenderMale;
       case 'other':
-        return '기타';
+        return l10n.childGenderOther;
       default:
-        return '미지정';
+        return l10n.childGenderUnset;
     }
   }
 }
@@ -230,6 +234,7 @@ class _SectionTitle extends StatelessWidget {
 class _EmptyChildrenCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(Spacing.md),
@@ -237,12 +242,12 @@ class _EmptyChildrenCard extends StatelessWidget {
           children: [
             const Icon(Icons.child_friendly, size: 40),
             const SizedBox(height: Spacing.xs),
-            const Text('아직 등록된 자녀가 없어요'),
+            Text(l10n.homeNoChildYet),
             const SizedBox(height: Spacing.sm),
             FilledButton.icon(
               onPressed: () => context.push('/child/new'),
               icon: const Icon(Icons.add),
-              label: const Text('첫 자녀 등록'),
+              label: Text(l10n.homeFirstChild),
             ),
           ],
         ),
@@ -257,15 +262,16 @@ class _UserChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     if (user == null) {
-      return const Chip(label: Text('비로그인'));
+      return Chip(label: Text(l10n.homeNoLogin));
     }
     final id = user.id as String;
     final isAnon = (user.isAnonymous as bool?) ?? false;
     final email = (user.email as String?) ?? '';
     final label = email.isNotEmpty
         ? email
-        : '${isAnon ? "익명" : "사용자"}: ${id.substring(0, 8)}…';
+        : '${isAnon ? l10n.homeAnonymous : l10n.homeUser}: ${id.substring(0, 8)}…';
     return Chip(
       avatar: Icon(isAnon ? Icons.person_outline : Icons.person),
       label: Text(label),
