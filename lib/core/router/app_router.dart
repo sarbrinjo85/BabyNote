@@ -7,6 +7,8 @@ import '../../features/diaper/presentation/diaper_register_page.dart';
 import '../../features/feeding/presentation/feeding_register_page.dart';
 import '../../features/growth/presentation/growth_register_page.dart';
 import '../../features/home/presentation/home_page.dart';
+import '../../features/inventory/presentation/formula_inventory_list_page.dart';
+import '../../features/inventory/presentation/formula_inventory_register_page.dart';
 import '../../features/sleep/presentation/sleep_register_page.dart';
 
 /// 앱 전체 라우팅 정의.
@@ -60,6 +62,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'growthNew',
         builder: (context, state) =>
             const AuthGate(child: GrowthRegisterPage()),
+      ),
+      GoRoute(
+        // /inventory/formula — 분유 재고 목록
+        path: '/inventory/formula',
+        name: 'formulaInventoryList',
+        builder: (context, state) =>
+            const AuthGate(child: FormulaInventoryListPage()),
+      ),
+      GoRoute(
+        // /inventory/formula/new — 분유 한 통 등록
+        path: '/inventory/formula/new',
+        name: 'formulaInventoryNew',
+        builder: (context, state) =>
+            const AuthGate(child: FormulaInventoryRegisterPage()),
       ),
     ],
   );

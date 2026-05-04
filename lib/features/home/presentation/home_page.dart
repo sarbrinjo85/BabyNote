@@ -142,6 +142,20 @@ class HomePage extends ConsumerWidget {
             icon: const Text('📏', style: TextStyle(fontSize: 28)),
             onPressed: () => context.push('/growth/new'),
           ),
+
+          const SizedBox(height: Spacing.xl),
+
+          // ── 재고 관리 (Phase 3 차별화) ────────────────────────────
+          const _SectionTitle('재고 관리'),
+          const SizedBox(height: Spacing.xs),
+          OutlinedButton.icon(
+            onPressed: () => context.push('/inventory/formula'),
+            icon: const Text('🍼', style: TextStyle(fontSize: 24)),
+            label: const Text('분유 재고 관리'),
+            style: OutlinedButton.styleFrom(
+              alignment: Alignment.centerLeft,
+            ),
+          ),
           const SizedBox(height: Spacing.xl),
         ],
       ),
