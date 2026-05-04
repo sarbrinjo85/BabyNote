@@ -3,15 +3,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:babynote/l10n/app_localizations.dart';
+import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/big_action_button.dart';
 import '../../auth/data/auth_repository.dart';
 import '../../auth/presentation/auth_providers.dart';
 import '../../child/presentation/child_providers.dart';
-import '../../vaccination/presentation/first_vaccine_provider.dart';
 
 /// 홈 화면 (인증 후).
 ///
 /// AuthGate로 감싸져 있어 여기 도달했다는 건 user != null. 그래도 방어적으로
 /// currentUser를 한 번 더 watch.
+///
+/// ── Phase 1 시점 구성 ────────────────────────────────────────────────
+/// 1. AppBar: 타이틀 + 로그아웃 버튼
+/// 2. _UserChip: 현재 user 칩 (학습 데모용, 추후 제거)
+/// 3. 내 자녀 섹션: 목록 + "자녀 추가" CTA
+/// 4. 4개 큰 기록 버튼 (수유/수면/기저귀/성장) — placeholder, Phase 2에서 화면 연결
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
@@ -19,7 +26,6 @@ class HomePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final currentUser = ref.watch(currentUserProvider);
-    final asyncVaccine = ref.watch(firstKoreanVaccineProvider);
     final asyncChildren = ref.watch(myChildrenProvider);
 
     return Scaffold(
@@ -38,28 +44,30 @@ class HomePage extends ConsumerWidget {
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(Spacing.md),
         children: [
           Center(
-            child: Text(l10n.homeWelcome,
-                style: Theme.of(context).textTheme.headlineMedium),
+            child: Text(
+              l10n.homeWelcome,
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: Spacing.sm),
           Center(child: _UserChip(user: currentUser)),
-          const SizedBox(height: 24),
+          const SizedBox(height: Spacing.lg),
 
           // ── 자녀 섹션 ──────────────────────────────────────────
-          _SectionTitle('내 자녀'),
-          const SizedBox(height: 8),
+          const _SectionTitle('내 자녀'),
+          const SizedBox(height: Spacing.xs),
           asyncChildren.when(
             loading: () => const Padding(
-              padding: EdgeInsets.symmetric(vertical: 16),
+              padding: EdgeInsets.symmetric(vertical: Spacing.md),
               child: Center(child: CircularProgressIndicator()),
             ),
             error: (err, _) => Card(
               color: Theme.of(context).colorScheme.errorContainer,
               child: Padding(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(Spacing.sm),
                 child: Text('자녀 목록 로딩 실패: $err'),
               ),
             ),
@@ -78,7 +86,7 @@ class HomePage extends ConsumerWidget {
                           ),
                         ),
                       )),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: Spacing.xs),
                   OutlinedButton.icon(
                     onPressed: () => context.push('/child/new'),
                     icon: const Icon(Icons.add),
@@ -89,43 +97,44 @@ class HomePage extends ConsumerWidget {
             },
           ),
 
-          const SizedBox(height: 32),
+          const SizedBox(height: Spacing.xl),
 
-          // ── (학습 데모) 백신 카드 ──────────────────────────────
-          _SectionTitle('학습 데모: 한국 첫 예방접종'),
-          const SizedBox(height: 8),
-          asyncVaccine.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (err, _) => Text('Supabase 연결 실패: $err',
-                style: TextStyle(color: Theme.of(context).colorScheme.error)),
-            data: (vaccine) {
-              if (vaccine == null) return const Text('등록된 한국 백신 일정이 없습니다.');
-              return Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('🇰🇷 첫 번째 예방접종 (Supabase에서)',
-                          style: Theme.of(context).textTheme.labelMedium),
-                      const SizedBox(height: 8),
-                      Text(vaccine.name,
-                          style: Theme.of(context).textTheme.titleLarge),
-                      const SizedBox(height: 4),
-                      Text('코드: ${vaccine.code} (${vaccine.doseNumber}차)'),
-                      Text('권장 시기: 생후 ${vaccine.recommendedAgeDays}일'),
-                      if (vaccine.description != null) ...[
-                        const SizedBox(height: 8),
-                        Text(vaccine.description!),
-                      ],
-                    ],
-                  ),
-                ),
-              );
-            },
+          // ── 4개 큰 기록 버튼 (placeholder) ────────────────────────
+          // Phase 2에서 각 화면 연결 예정.
+          const _SectionTitle('오늘의 기록'),
+          const SizedBox(height: Spacing.xs),
+          BigActionButton(
+            label: '수유',
+            icon: const Text('🍼', style: TextStyle(fontSize: 28)),
+            onPressed: () => _comingSoon(context, '수유'),
           ),
+          const SizedBox(height: Spacing.xs),
+          BigActionButton(
+            label: '수면',
+            icon: const Text('💤', style: TextStyle(fontSize: 28)),
+            onPressed: () => _comingSoon(context, '수면'),
+          ),
+          const SizedBox(height: Spacing.xs),
+          BigActionButton(
+            label: '기저귀',
+            icon: const Text('💩', style: TextStyle(fontSize: 28)),
+            onPressed: () => _comingSoon(context, '기저귀'),
+          ),
+          const SizedBox(height: Spacing.xs),
+          BigActionButton(
+            label: '성장',
+            icon: const Text('📏', style: TextStyle(fontSize: 28)),
+            onPressed: () => _comingSoon(context, '성장'),
+          ),
+          const SizedBox(height: Spacing.xl),
         ],
       ),
+    );
+  }
+
+  void _comingSoon(BuildContext context, String label) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('$label 기록 화면은 Phase 2에서 만들 예정이에요.')),
     );
   }
 
@@ -151,7 +160,7 @@ class _SectionTitle extends StatelessWidget {
     return Text(
       text,
       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w700,
           ),
     );
   }
@@ -162,13 +171,13 @@ class _EmptyChildrenCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(Spacing.md),
         child: Column(
           children: [
             const Icon(Icons.child_friendly, size: 40),
-            const SizedBox(height: 8),
+            const SizedBox(height: Spacing.xs),
             const Text('아직 등록된 자녀가 없어요'),
-            const SizedBox(height: 12),
+            const SizedBox(height: Spacing.sm),
             FilledButton.icon(
               onPressed: () => context.push('/child/new'),
               icon: const Icon(Icons.add),
