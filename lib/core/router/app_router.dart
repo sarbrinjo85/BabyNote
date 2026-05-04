@@ -5,6 +5,7 @@ import '../../features/auth/presentation/auth_gate.dart';
 import '../../features/child/presentation/child_register_page.dart';
 import '../../features/feeding/presentation/feeding_register_page.dart';
 import '../../features/home/presentation/home_page.dart';
+import '../../features/sleep/presentation/sleep_register_page.dart';
 
 /// 앱 전체 라우팅 정의.
 ///
@@ -36,6 +37,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'feedingNew',
         builder: (context, state) =>
             const AuthGate(child: FeedingRegisterPage()),
+      ),
+      GoRoute(
+        // /sleep/new — 수면 시작/종료 (진행 중이면 종료 화면 자동)
+        path: '/sleep/new',
+        name: 'sleepNew',
+        builder: (context, state) =>
+            const AuthGate(child: SleepRegisterPage()),
       ),
     ],
   );
