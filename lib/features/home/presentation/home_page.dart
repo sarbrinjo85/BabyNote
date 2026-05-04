@@ -182,6 +182,15 @@ class HomePage extends ConsumerWidget {
               alignment: Alignment.centerLeft,
             ),
           ),
+          const SizedBox(height: Spacing.xs),
+          OutlinedButton.icon(
+            onPressed: () => context.push('/vaccine'),
+            icon: const Text('💉', style: TextStyle(fontSize: 24)),
+            label: const Text('예방접종 일정'),
+            style: OutlinedButton.styleFrom(
+              alignment: Alignment.centerLeft,
+            ),
+          ),
           const SizedBox(height: Spacing.xl),
         ],
       ),

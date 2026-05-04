@@ -13,6 +13,9 @@ import '../../features/inventory/presentation/diaper_inventory_list_page.dart';
 import '../../features/inventory/presentation/diaper_inventory_register_page.dart';
 import '../../features/inventory/presentation/formula_inventory_list_page.dart';
 import '../../features/inventory/presentation/formula_inventory_register_page.dart';
+import '../../features/vaccination/domain/vaccine_schedule.dart';
+import '../../features/vaccination/presentation/vaccine_list_page.dart';
+import '../../features/vaccination/presentation/vaccine_record_page.dart';
 import '../../features/sleep/presentation/sleep_register_page.dart';
 
 /// 앱 전체 라우팅 정의.
@@ -107,6 +110,27 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'hospitalNew',
         builder: (context, state) =>
             const AuthGate(child: HospitalRegisterPage()),
+      ),
+      GoRoute(
+        // /vaccine — 자녀 예방접종 일정 (다가오는/미접종/완료 분류)
+        path: '/vaccine',
+        name: 'vaccineList',
+        builder: (context, state) =>
+            const AuthGate(child: VaccineListPage()),
+      ),
+      GoRoute(
+        // /vaccine/record — 특정 백신 접종 완료 기록 (extra로 schedule + childId 전달)
+        path: '/vaccine/record',
+        name: 'vaccineRecord',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>;
+          return AuthGate(
+            child: VaccineRecordPage(
+              schedule: extra['schedule'] as VaccineSchedule,
+              childId: extra['childId'] as String,
+            ),
+          );
+        },
       ),
     ],
   );

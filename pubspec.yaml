@@ -80,6 +80,10 @@ dev_dependencies:
   custom_lint: ^0.7.0
   riverpod_lint: ^2.6.3
 
+  # 앱 아이콘 자동 생성 (PNG 1장 → Android mipmap 5종 + iOS appiconset 14종)
+  # 실행: dart run flutter_launcher_icons
+  flutter_launcher_icons: ^0.14.0
+
   # NOTE — added with their runtime counterparts later:
   # drift_dev: ^2.22.0          # with drift
   # brick_offline_first_with_supabase_build: ^1.4.0  # with brick
@@ -87,3 +91,18 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   generate: true  # enables flutter_localizations ARB → Dart codegen
+
+# ── flutter_launcher_icons 설정 ────────────────────────────────────────────
+# `dart run flutter_launcher_icons` 실행 시 image_path 의 PNG를 기준으로
+# Android (mipmap-mdpi ~ xxxhdpi 5종) + iOS (AppIcon.appiconset 14종) 자동 생성.
+# adaptive_icon_background 는 Android 8+ Adaptive Icon 의 배경 단색.
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/launcher_icon.png"
+  remove_alpha_ios: true                       # iOS는 투명 배경 금지 → 자동으로 흰색 깔아줌
+  # adaptive icon은 Android가 외곽 33%를 잘라(67% 안전영역)서 박스가 작게 보임.
+  # → legacy 아이콘만 사용 (mipmap-* PNG 그대로). launcher가 모양만 적용.
+  # adaptive_icon_background: "#FFE6BB"
+  # adaptive_icon_foreground: "assets/launcher_icon.png"
+  min_sdk_android: 29

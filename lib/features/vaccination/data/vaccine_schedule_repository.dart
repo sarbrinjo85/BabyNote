@@ -46,6 +46,18 @@ class VaccineScheduleRepository {
     if (row == null) return null;
     return VaccineSchedule.fromMap(row);
   }
+
+  /// 한 국가의 모든 표준 예방접종 일정 (생후 일수 순).
+  Future<List<VaccineSchedule>> listByCountry(String country) async {
+    final rows = await _client
+        .from('vaccine_schedules')
+        .select(
+            'id, country, code, name, dose_number, recommended_age_days, description')
+        .eq('country', country)
+        .order('recommended_age_days', ascending: true)
+        .order('dose_number', ascending: true);
+    return rows.map((r) => VaccineSchedule.fromMap(r)).toList();
+  }
 }
 
 /// Repository 인스턴스를 만들고 의존성(SupabaseClient)을 주입하는 provider.
