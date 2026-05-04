@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../core/theme/tokens.dart';
 import '../../child/presentation/child_providers.dart';
+import '../../inventory/presentation/formula_inventory_providers.dart';
 import 'feeding_providers.dart';
 
 /// 수유 기록 등록 화면.
@@ -101,6 +102,7 @@ class _FeedingRegisterPageState extends ConsumerState<FeedingRegisterPage>
     String? breastSide;
     String? foodName;
     String? formulaBrand;
+    String? formulaInventoryId;
 
     switch (type) {
       case 'breast':
@@ -111,6 +113,14 @@ class _FeedingRegisterPageState extends ConsumerState<FeedingRegisterPage>
         amountMl = int.tryParse(_formulaAmount);
         formulaBrand =
             _formulaBrand.trim().isEmpty ? null : _formulaBrand.trim();
+        // FIFO: 활성 분유 통 첫 번째(가장 먼저 개봉한 것)에 자동 연결.
+        // P3-1c에서 잔량 계산할 때 이 id로 join.
+        final actives = ref.read(
+          activeFormulaInventoriesProvider(childId),
+        );
+        actives.whenData((list) {
+          if (list.isNotEmpty) formulaInventoryId = list.first.id;
+        });
         break;
       case 'solid':
         foodName = _foodName.trim();
@@ -127,6 +137,7 @@ class _FeedingRegisterPageState extends ConsumerState<FeedingRegisterPage>
           breastSide: breastSide,
           foodName: foodName,
           formulaBrand: formulaBrand,
+          formulaInventoryId: formulaInventoryId,
           note: _note.trim().isEmpty ? null : _note.trim(),
           photoFile: type == 'solid' ? _solidPhoto : null,
         );
@@ -222,6 +233,7 @@ class _FeedingRegisterPageState extends ConsumerState<FeedingRegisterPage>
                       onAmountChanged: (v) => _breastAmount = v,
                     ),
                     _FormulaForm(
+                      childId: child.id,
                       amount: _formulaAmount,
                       brand: _formulaBrand,
                       onAmountChanged: (v) =>
@@ -329,24 +341,29 @@ class _BreastForm extends StatelessWidget {
 }
 
 /// 분유 입력 폼.
-class _FormulaForm extends StatefulWidget {
+///
+/// 상단에 "현재 사용 중인 분유" 카드 — 활성 통이 있으면 자동 연결되어 차감됨을 안내.
+/// 없으면 "분유 등록하러 가기" 버튼.
+class _FormulaForm extends ConsumerStatefulWidget {
   const _FormulaForm({
+    required this.childId,
     required this.amount,
     required this.brand,
     required this.onAmountChanged,
     required this.onBrandChanged,
   });
 
+  final String childId;
   final String amount;
   final String brand;
   final ValueChanged<String> onAmountChanged;
   final ValueChanged<String> onBrandChanged;
 
   @override
-  State<_FormulaForm> createState() => _FormulaFormState();
+  ConsumerState<_FormulaForm> createState() => _FormulaFormState();
 }
 
-class _FormulaFormState extends State<_FormulaForm> {
+class _FormulaFormState extends ConsumerState<_FormulaForm> {
   late final TextEditingController _amountCtrl;
 
   @override
@@ -368,9 +385,61 @@ class _FormulaFormState extends State<_FormulaForm> {
 
   @override
   Widget build(BuildContext context) {
+    final asyncActive =
+        ref.watch(activeFormulaInventoriesProvider(widget.childId));
+    final activeFirst = asyncActive.maybeWhen(
+      data: (list) => list.isEmpty ? null : list.first,
+      orElse: () => null,
+    );
+
     return ListView(
       padding: const EdgeInsets.all(Spacing.md),
       children: [
+        // ── 활성 분유 통 카드 (P3-1b) ──────────────────────────────
+        Card(
+          color: activeFirst != null
+              ? Theme.of(context).colorScheme.primaryContainer
+              : Theme.of(context).colorScheme.surfaceContainerHighest,
+          child: Padding(
+            padding: const EdgeInsets.all(Spacing.sm),
+            child: activeFirst != null
+                ? Row(
+                    children: [
+                      const Text('🍼', style: TextStyle(fontSize: 24)),
+                      const SizedBox(width: Spacing.sm),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('사용 중',
+                                style: Theme.of(context).textTheme.labelMedium),
+                            Text(activeFirst.productName,
+                                style:
+                                    Theme.of(context).textTheme.titleSmall),
+                          ],
+                        ),
+                      ),
+                      Text('등록 시 자동 차감',
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  )),
+                    ],
+                  )
+                : Row(
+                    children: [
+                      const Icon(Icons.inventory_2_outlined),
+                      const SizedBox(width: Spacing.sm),
+                      const Expanded(
+                        child: Text('사용 중인 분유 통이 없어요.\n등록 후 자동으로 차감됩니다.'),
+                      ),
+                    ],
+                  ),
+          ),
+        ),
+        const SizedBox(height: Spacing.md),
         TextField(
           controller: _amountCtrl,
           decoration: const InputDecoration(

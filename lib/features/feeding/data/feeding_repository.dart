@@ -27,6 +27,7 @@ class FeedingRepository {
     String? breastSide,
     String? foodName,
     String? formulaBrand,
+    String? formulaInventoryId,
     String? note,
     String? photoPath,
   }) async {
@@ -40,6 +41,7 @@ class FeedingRepository {
       breastSide: breastSide,
       foodName: foodName,
       formulaBrand: formulaBrand,
+      formulaInventoryId: formulaInventoryId,
       note: note,
       photoPath: photoPath,
     );

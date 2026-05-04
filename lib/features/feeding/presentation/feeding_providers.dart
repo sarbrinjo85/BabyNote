@@ -33,6 +33,7 @@ class FeedingCreationController extends AsyncNotifier<void> {
     String? breastSide,
     String? foodName,
     String? formulaBrand,
+    String? formulaInventoryId,
     String? note,
     /// 첨부 사진(있으면). 업로드 후 path를 photo_path 컬럼에 저장.
     File? photoFile,
@@ -65,6 +66,7 @@ class FeedingCreationController extends AsyncNotifier<void> {
         breastSide: breastSide,
         foodName: foodName,
         formulaBrand: formulaBrand,
+        formulaInventoryId: formulaInventoryId,
         note: note,
         photoPath: photoPath,
       );

@@ -19,6 +19,7 @@ class Feeding {
     this.breastSide,
     this.foodName,
     this.formulaBrand,
+    this.formulaInventoryId,
     this.note,
     this.photoPath,
     this.recordedBy,
@@ -34,6 +35,8 @@ class Feeding {
   final String? breastSide; // 'left' | 'right' | 'both'
   final String? foodName;
   final String? formulaBrand;
+  /// FIFO로 자동 연결된 활성 분유 통 id. P3-1b부터 사용. NULL 가능.
+  final String? formulaInventoryId;
   final String? note;
   /// Storage 경로 (예: `<user_id>/20260502_193512.jpg`).
   /// 실제 표시 URL은 supabase.storage.from('feeding-photos').getPublicUrl(photoPath).
@@ -55,6 +58,7 @@ class Feeding {
       breastSide: map['breast_side'] as String?,
       foodName: map['food_name'] as String?,
       formulaBrand: map['formula_brand'] as String?,
+      formulaInventoryId: map['formula_inventory_id'] as String?,
       note: map['note'] as String?,
       photoPath: map['photo_path'] as String?,
       recordedBy: map['recorded_by'] as String?,
@@ -78,6 +82,7 @@ class Feeding {
       if (breastSide != null) 'breast_side': breastSide,
       if (foodName != null) 'food_name': foodName,
       if (formulaBrand != null) 'formula_brand': formulaBrand,
+      if (formulaInventoryId != null) 'formula_inventory_id': formulaInventoryId,
       if (note != null && note!.trim().isNotEmpty) 'note': note!.trim(),
       if (photoPath != null) 'photo_path': photoPath,
     };
