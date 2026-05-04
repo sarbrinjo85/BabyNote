@@ -8,6 +8,7 @@ import '../../../core/widgets/big_action_button.dart';
 import '../../auth/data/auth_repository.dart';
 import '../../auth/presentation/auth_providers.dart';
 import '../../child/presentation/child_providers.dart';
+import 'last_activity_section.dart';
 
 /// 홈 화면 (인증 후).
 ///
@@ -97,10 +98,23 @@ class HomePage extends ConsumerWidget {
             },
           ),
 
+          // ── 마지막 활동 섹션 (자녀 1명 이상일 때만) ──────────────
+          // children watch는 이미 위에서 했으므로 firstChildId 한 번 더 추출.
+          ...asyncChildren.maybeWhen(
+            data: (cs) => cs.isEmpty
+                ? const <Widget>[]
+                : [
+                    const SizedBox(height: Spacing.xl),
+                    const _SectionTitle('마지막 활동'),
+                    const SizedBox(height: Spacing.xs),
+                    LastActivitySection(childId: cs.first.id),
+                  ],
+            orElse: () => const <Widget>[],
+          ),
+
           const SizedBox(height: Spacing.xl),
 
-          // ── 4개 큰 기록 버튼 (placeholder) ────────────────────────
-          // Phase 2에서 각 화면 연결 예정.
+          // ── 4개 큰 기록 버튼 ────────────────────────────────────
           const _SectionTitle('오늘의 기록'),
           const SizedBox(height: Spacing.xs),
           BigActionButton(
