@@ -1070,4 +1070,19 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get recordsDeleteBody =>
       'This action cannot be undone. Long-press a card to delete one entry.';
+
+  @override
+  String get feedingEditTitle => 'Edit feeding';
+
+  @override
+  String get sleepEditTitle => 'Edit sleep';
+
+  @override
+  String get diaperEditTitle => 'Edit diaper';
+
+  @override
+  String get growthEditTitle => 'Edit growth';
+
+  @override
+  String get recordEditSaved => 'Record updated';
 }

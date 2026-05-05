@@ -144,6 +144,7 @@ class _FeedingList extends ConsumerWidget {
               icon: '🍼',
               title: _summarizeFeeding(l10n, f),
               subtitle: TimeAgo.format(l10n, f.startedAt),
+              onTap: () => context.push('/feeding/new', extra: f),
               onLongPress: () => _confirmAndDelete(
                 context,
                 delete: () async {
@@ -211,6 +212,10 @@ class _SleepList extends ConsumerWidget {
               icon: '💤',
               title: _summarizeSleep(l10n, s),
               subtitle: TimeAgo.format(l10n, s.startedAt),
+              // 진행 중 수면은 편집 막음 — 종료 후 편집.
+              onTap: s.isOngoing
+                  ? null
+                  : () => context.push('/sleep/new', extra: s),
               onLongPress: () => _confirmAndDelete(
                 context,
                 delete: () async {
@@ -267,6 +272,7 @@ class _DiaperList extends ConsumerWidget {
               icon: '💩',
               title: _summarizeDiaper(l10n, d),
               subtitle: TimeAgo.format(l10n, d.recordedAt),
+              onTap: () => context.push('/diaper/new', extra: d),
               onLongPress: () => _confirmAndDelete(
                 context,
                 delete: () async {
@@ -350,6 +356,7 @@ class _GrowthList extends ConsumerWidget {
               icon: '📏',
               title: _summarizeGrowth(g),
               subtitle: TimeAgo.format(l10n, g.measuredAt),
+              onTap: () => context.push('/growth/new', extra: g),
               onLongPress: () => _confirmAndDelete(
                 context,
                 delete: () async {
@@ -390,18 +397,22 @@ class _RecordCard extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.onLongPress,
+    this.onTap,
   });
 
   final String icon;
   final String title;
   final String subtitle;
   final VoidCallback onLongPress;
+  /// 단축 탭 — 편집 화면으로 이동. null이면 편집 불가 (진행 중 수면 등).
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Card(
       child: InkWell(
+        onTap: onTap,
         onLongPress: onLongPress,
         borderRadius: Radii.brMd,
         child: Padding(

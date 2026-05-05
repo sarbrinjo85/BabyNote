@@ -2055,6 +2055,36 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'이 작업은 되돌릴 수 없어요. 카드를 길게 눌러서 한 건씩 삭제할 수 있어요.'**
   String get recordsDeleteBody;
+
+  /// No description provided for @feedingEditTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'수유 기록 편집'**
+  String get feedingEditTitle;
+
+  /// No description provided for @sleepEditTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'수면 기록 편집'**
+  String get sleepEditTitle;
+
+  /// No description provided for @diaperEditTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'기저귀 기록 편집'**
+  String get diaperEditTitle;
+
+  /// No description provided for @growthEditTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'성장 기록 편집'**
+  String get growthEditTitle;
+
+  /// No description provided for @recordEditSaved.
+  ///
+  /// In ko, this message translates to:
+  /// **'기록을 수정했어요'**
+  String get recordEditSaved;
 }
 
 class _AppLocalizationsDelegate

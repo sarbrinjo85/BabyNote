@@ -49,6 +49,31 @@ class DiaperCreationController extends AsyncNotifier<void> {
       ref.invalidate(diaperInventoryStatsProvider);
     });
   }
+
+  Future<void> saveEdit({
+    required String childId,
+    required String id,
+    required String type,
+    String? color,
+    String? consistency,
+    String? amount,
+    String? note,
+  }) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      final repo = ref.read(diaperRepositoryProvider);
+      await repo.updateDiaper(
+        id: id,
+        type: type,
+        color: color,
+        consistency: consistency,
+        amount: amount,
+        note: note,
+      );
+      ref.invalidate(recentDiapersProvider(childId));
+      ref.invalidate(diaperInventoryStatsProvider);
+    });
+  }
 }
 
 final diaperCreationControllerProvider =

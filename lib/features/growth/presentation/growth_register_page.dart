@@ -7,11 +7,14 @@ import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/child_picker_action.dart';
 import '../../child/presentation/child_providers.dart';
 import '../../child/presentation/selected_child_provider.dart';
+import '../domain/growth.dart';
 import 'growth_providers.dart';
 
-/// 성장 측정 화면 (체중/키/머리둘레).
+/// 성장 측정 화면 (체중/키/머리둘레). 등록 + 편집 통합.
 class GrowthRegisterPage extends ConsumerStatefulWidget {
-  const GrowthRegisterPage({super.key});
+  const GrowthRegisterPage({super.key, this.editing});
+
+  final Growth? editing;
 
   @override
   ConsumerState<GrowthRegisterPage> createState() =>
@@ -20,11 +23,30 @@ class GrowthRegisterPage extends ConsumerStatefulWidget {
 
 class _GrowthRegisterPageState extends ConsumerState<GrowthRegisterPage> {
   final _formKey = GlobalKey<FormState>();
-  DateTime _measuredAt = DateTime.now();
-  String _weightKg = '';
-  String _heightCm = '';
-  String _headCm = '';
-  String _note = '';
+  late DateTime _measuredAt;
+  late String _weightKg;
+  late String _heightCm;
+  late String _headCm;
+  late String _note;
+
+  bool get _isEdit => widget.editing != null;
+
+  @override
+  void initState() {
+    super.initState();
+    final e = widget.editing;
+    _measuredAt = e?.measuredAt ?? DateTime.now();
+    _weightKg = e?.weightG != null
+        ? (e!.weightG! / 1000).toStringAsFixed(2)
+        : '';
+    _heightCm = e?.heightMm != null
+        ? (e!.heightMm! / 10).toStringAsFixed(1)
+        : '';
+    _headCm = e?.headCircumferenceMm != null
+        ? (e!.headCircumferenceMm! / 10).toStringAsFixed(1)
+        : '';
+    _note = e?.note ?? '';
+  }
 
   Future<void> _pickDate() async {
     final l10n = AppLocalizations.of(context);
@@ -58,21 +80,33 @@ class _GrowthRegisterPageState extends ConsumerState<GrowthRegisterPage> {
       return;
     }
 
-    await ref.read(growthCreationControllerProvider.notifier).create(
-          childId: childId,
-          measuredAt: _measuredAt,
-          weightG: w == null ? null : (w * 1000).round(),
-          heightMm: h == null ? null : (h * 10).round(),
-          headCircumferenceMm: hd == null ? null : (hd * 10).round(),
-          note: _note.trim().isEmpty ? null : _note.trim(),
-        );
+    if (_isEdit) {
+      await ref.read(growthCreationControllerProvider.notifier).saveEdit(
+            childId: childId,
+            id: widget.editing!.id,
+            measuredAt: _measuredAt,
+            weightG: w == null ? null : (w * 1000).round(),
+            heightMm: h == null ? null : (h * 10).round(),
+            headCircumferenceMm: hd == null ? null : (hd * 10).round(),
+            note: _note.trim().isEmpty ? null : _note.trim(),
+          );
+    } else {
+      await ref.read(growthCreationControllerProvider.notifier).create(
+            childId: childId,
+            measuredAt: _measuredAt,
+            weightG: w == null ? null : (w * 1000).round(),
+            heightMm: h == null ? null : (h * 10).round(),
+            headCircumferenceMm: hd == null ? null : (hd * 10).round(),
+            note: _note.trim().isEmpty ? null : _note.trim(),
+          );
+    }
 
     if (!mounted) return;
     final state = ref.read(growthCreationControllerProvider);
     state.when(
       data: (_) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.growthSavedToast)),
+          SnackBar(content: Text(_isEdit ? l10n.recordEditSaved : l10n.growthSavedToast)),
         );
         context.pop();
       },
@@ -93,15 +127,20 @@ class _GrowthRegisterPageState extends ConsumerState<GrowthRegisterPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.growthTitle),
-        actions: const [ChildPickerAction()],
+        title: Text(_isEdit ? l10n.growthEditTitle : l10n.growthTitle),
+        actions: _isEdit ? null : const [ChildPickerAction()],
       ),
       body: asyncChildren.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => Center(child: Text(l10n.errorChildrenLoadFailed(err))),
         data: (children) {
           if (children.isEmpty) return _NoChildPlaceholder();
-          final child = ref.watch(selectedChildProvider) ?? children.first;
+          final child = _isEdit
+              ? children.firstWhere(
+                  (c) => c.id == widget.editing!.childId,
+                  orElse: () => children.first,
+                )
+              : (ref.watch(selectedChildProvider) ?? children.first);
 
           return SafeArea(
             top: false,
@@ -194,7 +233,9 @@ class _GrowthRegisterPageState extends ConsumerState<GrowthRegisterPage> {
                                 CircularProgressIndicator(strokeWidth: 2),
                           )
                         : const Icon(Icons.check),
-                    label: Text(isLoading ? l10n.commonSaving : l10n.commonRegister),
+                    label: Text(isLoading
+                        ? l10n.commonSaving
+                        : (_isEdit ? l10n.commonSave : l10n.commonRegister)),
                     style: FilledButton.styleFrom(
                       minimumSize:
                           const Size.fromHeight(TouchTarget.huge),

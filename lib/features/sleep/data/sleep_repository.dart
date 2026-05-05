@@ -74,6 +74,20 @@ class SleepRepository {
     await _client.from('sleeps').delete().eq('id', id);
   }
 
+  /// 수면 기록 수정 — napOrNight + note만 변경 가능.
+  /// 시작/종료 시각은 ongoingSleepProvider 흐름과 충돌 방지 위해 보류.
+  Future<void> updateSleep({
+    required String id,
+    required String napOrNight,
+    String? note,
+  }) async {
+    final patch = <String, dynamic>{
+      'nap_or_night': napOrNight,
+      'note': (note != null && note.trim().isNotEmpty) ? note.trim() : null,
+    };
+    await _client.from('sleeps').update(patch).eq('id', id);
+  }
+
   /// 최근 수면 기록 N건.
   Future<List<Sleep>> listRecent(String childId, {int limit = 20}) async {
     final rows = await _client

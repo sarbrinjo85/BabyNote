@@ -8,6 +8,7 @@ import '../../../core/widgets/child_picker_action.dart';
 import '../../child/presentation/child_providers.dart';
 import '../../child/presentation/selected_child_provider.dart';
 import '../../inventory/presentation/diaper_inventory_providers.dart';
+import '../domain/diaper.dart';
 import 'diaper_providers.dart';
 
 /// 기저귀 기록 화면.
@@ -17,7 +18,9 @@ import 'diaper_providers.dart';
 ///
 /// 이상 색상(빨강/검정/흰색) 선택 시 경고 카드 표시 (의사 상담 권장).
 class DiaperRegisterPage extends ConsumerStatefulWidget {
-  const DiaperRegisterPage({super.key});
+  const DiaperRegisterPage({super.key, this.editing});
+
+  final Diaper? editing;
 
   @override
   ConsumerState<DiaperRegisterPage> createState() =>
@@ -25,37 +28,73 @@ class DiaperRegisterPage extends ConsumerStatefulWidget {
 }
 
 class _DiaperRegisterPageState extends ConsumerState<DiaperRegisterPage> {
-  String _type = 'pee';
+  late String _type;
   String? _color;
   String? _consistency;
   String? _amount;
-  String _note = '';
+  late final TextEditingController _noteCtrl;
 
+  bool get _isEdit => widget.editing != null;
   bool get _showColorAndConsistency => _type == 'poop' || _type == 'both';
 
-  Future<void> _submit(String childId) async {
-    String? diaperInventoryId;
-    final actives = ref.read(activeDiaperInventoriesProvider(childId));
-    actives.whenData((list) {
-      if (list.isNotEmpty) diaperInventoryId = list.first.id;
-    });
+  @override
+  void initState() {
+    super.initState();
+    final e = widget.editing;
+    if (e != null) {
+      _type = e.type;
+      _color = e.color;
+      _consistency = e.consistency;
+      _amount = e.amount;
+      _noteCtrl = TextEditingController(text: e.note ?? '');
+    } else {
+      _type = 'pee';
+      _noteCtrl = TextEditingController();
+    }
+  }
 
-    await ref.read(diaperCreationControllerProvider.notifier).create(
-          childId: childId,
-          type: _type,
-          color: _color,
-          consistency: _consistency,
-          amount: _amount,
-          diaperInventoryId: diaperInventoryId,
-          note: _note.trim().isEmpty ? null : _note.trim(),
-        );
-    if (!mounted) return;
+  @override
+  void dispose() {
+    _noteCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit(String childId) async {
     final l10n = AppLocalizations.of(context);
+    final noteText = _noteCtrl.text.trim().isEmpty ? null : _noteCtrl.text.trim();
+    if (_isEdit) {
+      await ref.read(diaperCreationControllerProvider.notifier).saveEdit(
+            childId: childId,
+            id: widget.editing!.id,
+            type: _type,
+            color: _color,
+            consistency: _consistency,
+            amount: _amount,
+            note: noteText,
+          );
+    } else {
+      String? diaperInventoryId;
+      final actives = ref.read(activeDiaperInventoriesProvider(childId));
+      actives.whenData((list) {
+        if (list.isNotEmpty) diaperInventoryId = list.first.id;
+      });
+
+      await ref.read(diaperCreationControllerProvider.notifier).create(
+            childId: childId,
+            type: _type,
+            color: _color,
+            consistency: _consistency,
+            amount: _amount,
+            diaperInventoryId: diaperInventoryId,
+            note: noteText,
+          );
+    }
+    if (!mounted) return;
     final state = ref.read(diaperCreationControllerProvider);
     state.when(
       data: (_) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.diaperSavedToast)),
+          SnackBar(content: Text(_isEdit ? l10n.recordEditSaved : l10n.diaperSavedToast)),
         );
         context.pop();
       },
@@ -76,15 +115,20 @@ class _DiaperRegisterPageState extends ConsumerState<DiaperRegisterPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.diaperTitle),
-        actions: const [ChildPickerAction()],
+        title: Text(_isEdit ? l10n.diaperEditTitle : l10n.diaperTitle),
+        actions: _isEdit ? null : const [ChildPickerAction()],
       ),
       body: asyncChildren.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => Center(child: Text(l10n.errorChildrenLoadFailed(err))),
         data: (children) {
           if (children.isEmpty) return _NoChildPlaceholder();
-          final child = ref.watch(selectedChildProvider) ?? children.first;
+          final child = _isEdit
+              ? children.firstWhere(
+                  (c) => c.id == widget.editing!.childId,
+                  orElse: () => children.first,
+                )
+              : (ref.watch(selectedChildProvider) ?? children.first);
           final isAbnormal =
               _color == 'red' || _color == 'black' || _color == 'white';
 
@@ -265,11 +309,11 @@ class _DiaperRegisterPageState extends ConsumerState<DiaperRegisterPage> {
 
                 const SizedBox(height: Spacing.lg),
                 TextField(
+                  controller: _noteCtrl,
                   decoration: InputDecoration(
                     labelText: l10n.commonMemoOptional,
                     hintText: l10n.diaperMemoHint,
                   ),
-                  onChanged: (v) => _note = v,
                   maxLines: 2,
                 ),
 
@@ -283,7 +327,9 @@ class _DiaperRegisterPageState extends ConsumerState<DiaperRegisterPage> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.check),
-                  label: Text(isLoading ? l10n.commonSaving : l10n.commonRegister),
+                  label: Text(isLoading
+                      ? l10n.commonSaving
+                      : (_isEdit ? l10n.commonSave : l10n.commonRegister)),
                   style: FilledButton.styleFrom(
                     minimumSize: const Size.fromHeight(TouchTarget.huge),
                   ),

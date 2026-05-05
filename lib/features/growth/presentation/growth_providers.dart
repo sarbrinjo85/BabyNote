@@ -42,6 +42,30 @@ class GrowthCreationController extends AsyncNotifier<void> {
       ref.invalidate(growthsProvider(childId));
     });
   }
+
+  Future<void> saveEdit({
+    required String childId,
+    required String id,
+    required DateTime measuredAt,
+    int? weightG,
+    int? heightMm,
+    int? headCircumferenceMm,
+    String? note,
+  }) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      final repo = ref.read(growthRepositoryProvider);
+      await repo.updateGrowth(
+        id: id,
+        measuredAt: measuredAt,
+        weightG: weightG,
+        heightMm: heightMm,
+        headCircumferenceMm: headCircumferenceMm,
+        note: note,
+      );
+      ref.invalidate(growthsProvider(childId));
+    });
+  }
 }
 
 final growthCreationControllerProvider =

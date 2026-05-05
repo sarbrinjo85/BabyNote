@@ -18,7 +18,10 @@ import 'sleep_providers.dart';
 ///
 /// 자녀 여러 명 처리는 Phase 2 후반(자녀 선택 UI). 지금은 첫 자녀 자동 사용.
 class SleepRegisterPage extends ConsumerStatefulWidget {
-  const SleepRegisterPage({super.key});
+  const SleepRegisterPage({super.key, this.editing});
+
+  /// not-null이면 편집 모드 — 폼 prefill + 저장 시 update API 호출.
+  final Sleep? editing;
 
   @override
   ConsumerState<SleepRegisterPage> createState() => _SleepRegisterPageState();
@@ -27,20 +30,59 @@ class SleepRegisterPage extends ConsumerStatefulWidget {
 class _SleepRegisterPageState extends ConsumerState<SleepRegisterPage> {
   // 시작용 폼 상태
   late String _napOrNight;
-  String _note = '';
+  late final TextEditingController _noteCtrl;
+
+  bool get _isEdit => widget.editing != null;
 
   @override
   void initState() {
     super.initState();
-    // 현재 시각 기준 자동 판정 (19~07시 = night)
-    _napOrNight = Sleep.classifyNapOrNight(DateTime.now());
+    if (widget.editing != null) {
+      _napOrNight = widget.editing!.napOrNight;
+      _noteCtrl = TextEditingController(text: widget.editing!.note ?? '');
+    } else {
+      // 현재 시각 기준 자동 판정 (19~07시 = night)
+      _napOrNight = Sleep.classifyNapOrNight(DateTime.now());
+      _noteCtrl = TextEditingController();
+    }
+  }
+
+  @override
+  void dispose() {
+    _noteCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _saveEdit(String childId) async {
+    await ref.read(sleepControllerProvider.notifier).saveEdit(
+          childId: childId,
+          id: widget.editing!.id,
+          napOrNight: _napOrNight,
+          note: _noteCtrl.text.trim().isEmpty ? null : _noteCtrl.text.trim(),
+        );
+    if (!mounted) return;
+    final l10n = AppLocalizations.of(context);
+    final state = ref.read(sleepControllerProvider);
+    state.when(
+      data: (_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.recordEditSaved)),
+        );
+        context.pop();
+      },
+      loading: () {},
+      error: (err, _) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.errorFailed(err))));
+      },
+    );
   }
 
   Future<void> _start(String childId) async {
     await ref.read(sleepControllerProvider.notifier).startSleep(
           childId: childId,
           napOrNight: _napOrNight,
-          note: _note.trim().isEmpty ? null : _note.trim(),
+          note: _noteCtrl.text.trim().isEmpty ? null : _noteCtrl.text.trim(),
         );
     if (!mounted) return;
     final l10n = AppLocalizations.of(context);
@@ -92,15 +134,41 @@ class _SleepRegisterPageState extends ConsumerState<SleepRegisterPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.sleepTitle),
-        actions: const [ChildPickerAction()],
+        title: Text(_isEdit ? l10n.sleepEditTitle : l10n.sleepTitle),
+        // 편집 모드는 자녀 변경 의미 없음 — 기존 기록의 자녀로 고정.
+        actions: _isEdit ? null : const [ChildPickerAction()],
       ),
       body: asyncChildren.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => Center(child: Text(l10n.errorChildrenLoadFailed(err))),
         data: (children) {
           if (children.isEmpty) return _NoChildPlaceholder();
-          final child = ref.watch(selectedChildProvider) ?? children.first;
+          final child = _isEdit
+              ? children.firstWhere(
+                  (c) => c.id == widget.editing!.childId,
+                  orElse: () => children.first,
+                )
+              : (ref.watch(selectedChildProvider) ?? children.first);
+
+          // 편집 모드: ongoing 무시하고 바로 _StartForm을 편집용으로 노출.
+          if (_isEdit) {
+            return SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.all(Spacing.md),
+                child: _StartForm(
+                  childName: child.name,
+                  napOrNight: _napOrNight,
+                  noteCtrl: _noteCtrl,
+                  isLoading: isLoading,
+                  onNapOrNightChanged: (v) =>
+                      setState(() => _napOrNight = v),
+                  onStart: () => _saveEdit(child.id),
+                  submitLabel: l10n.commonSave,
+                ),
+              ),
+            );
+          }
 
           // 진행 중 수면 watch — 시작/종료 시점에 invalidate되어 자동 갱신
           final asyncOngoing = ref.watch(ongoingSleepProvider(child.id));
@@ -118,10 +186,10 @@ class _SleepRegisterPageState extends ConsumerState<SleepRegisterPage> {
                     return _StartForm(
                       childName: child.name,
                       napOrNight: _napOrNight,
+                      noteCtrl: _noteCtrl,
                       isLoading: isLoading,
                       onNapOrNightChanged: (v) =>
                           setState(() => _napOrNight = v),
-                      onNoteChanged: (v) => _note = v,
                       onStart: () => _start(child.id),
                     );
                   }
@@ -141,23 +209,26 @@ class _SleepRegisterPageState extends ConsumerState<SleepRegisterPage> {
   }
 }
 
-/// 시작 폼 (수면 진행 중 아닐 때).
+/// 시작 폼 (수면 진행 중 아닐 때) — 또는 편집 폼.
 class _StartForm extends StatelessWidget {
   const _StartForm({
     required this.childName,
     required this.napOrNight,
+    required this.noteCtrl,
     required this.isLoading,
     required this.onNapOrNightChanged,
-    required this.onNoteChanged,
     required this.onStart,
+    this.submitLabel,
   });
 
   final String childName;
   final String napOrNight;
+  final TextEditingController noteCtrl;
   final bool isLoading;
   final ValueChanged<String> onNapOrNightChanged;
-  final ValueChanged<String> onNoteChanged;
   final VoidCallback onStart;
+  /// 편집 모드 등에서 버튼 라벨을 다르게 하고 싶을 때. null이면 기본 "잠들었어요".
+  final String? submitLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -185,11 +256,11 @@ class _StartForm extends StatelessWidget {
         ),
         const SizedBox(height: Spacing.lg),
         TextField(
+          controller: noteCtrl,
           decoration: InputDecoration(
             labelText: l10n.commonMemoOptional,
             hintText: l10n.sleepMemoHint,
           ),
-          onChanged: onNoteChanged,
           maxLines: 2,
         ),
         const SizedBox(height: Spacing.xl),
@@ -201,8 +272,10 @@ class _StartForm extends StatelessWidget {
                   height: 18,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Icon(Icons.bedtime),
-          label: Text(isLoading ? l10n.sleepStarting : l10n.sleepGoToSleep),
+              : Icon(submitLabel != null ? Icons.save : Icons.bedtime),
+          label: Text(isLoading
+              ? (submitLabel != null ? l10n.commonSaving : l10n.sleepStarting)
+              : (submitLabel ?? l10n.sleepGoToSleep)),
           style: FilledButton.styleFrom(
             minimumSize: const Size.fromHeight(TouchTarget.huge),
           ),

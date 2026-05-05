@@ -46,6 +46,26 @@ class DiaperRepository {
     await _client.from('diapers').delete().eq('id', id);
   }
 
+  /// 기저귀 기록 수정 — type/color/consistency/amount/note 변경 가능.
+  /// diaper_inventory_id는 자동 연결 보존.
+  Future<void> updateDiaper({
+    required String id,
+    required String type,
+    String? color,
+    String? consistency,
+    String? amount,
+    String? note,
+  }) async {
+    final patch = <String, dynamic>{
+      'type': type,
+      'color': color,
+      'consistency': consistency,
+      'amount': amount,
+      'note': (note != null && note.trim().isNotEmpty) ? note.trim() : null,
+    };
+    await _client.from('diapers').update(patch).eq('id', id);
+  }
+
   Future<List<Diaper>> listRecent(String childId, {int limit = 20}) async {
     final rows = await _client
         .from('diapers')

@@ -348,5 +348,11 @@
   "recordsTitle": "All records",
   "recordsEntryHome": "View all records",
   "recordsEmpty": "No records yet. Add new entries from the home screen.",
-  "recordsDeleteBody": "This action cannot be undone. Long-press a card to delete one entry."
+  "recordsDeleteBody": "This action cannot be undone. Long-press a card to delete one entry.",
+
+  "feedingEditTitle": "Edit feeding",
+  "sleepEditTitle": "Edit sleep",
+  "diaperEditTitle": "Edit diaper",
+  "growthEditTitle": "Edit growth",
+  "recordEditSaved": "Record updated"
 }

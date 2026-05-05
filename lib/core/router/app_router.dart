@@ -5,12 +5,15 @@ import '../../features/auth/presentation/auth_gate.dart';
 import '../../features/child/domain/child.dart';
 import '../../features/child/presentation/child_edit_page.dart';
 import '../../features/child/presentation/child_register_page.dart';
+import '../../features/diaper/domain/diaper.dart';
 import '../../features/diaper/presentation/diaper_register_page.dart';
 import '../../features/family/presentation/family_join_page.dart';
 import '../../features/family/presentation/family_page.dart';
 import '../../features/records/presentation/records_page.dart';
 import '../../features/stats/presentation/statistics_page.dart';
+import '../../features/feeding/domain/feeding.dart';
 import '../../features/feeding/presentation/feeding_register_page.dart';
+import '../../features/growth/domain/growth.dart';
 import '../../features/growth/presentation/growth_register_page.dart';
 import '../../features/home/presentation/home_page.dart';
 import '../../features/hospital/presentation/hospital_list_page.dart';
@@ -22,6 +25,7 @@ import '../../features/inventory/presentation/formula_inventory_register_page.da
 import '../../features/vaccination/domain/vaccine_schedule.dart';
 import '../../features/vaccination/presentation/vaccine_list_page.dart';
 import '../../features/vaccination/presentation/vaccine_record_page.dart';
+import '../../features/sleep/domain/sleep.dart';
 import '../../features/sleep/presentation/sleep_register_page.dart';
 
 /// 앱 전체 라우팅 정의.
@@ -59,31 +63,40 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         // /feeding/new — 수유 기록 등록 (3 탭: 모유/분유/이유식)
+        // extra=Feeding이면 편집 모드로 동작.
         path: '/feeding/new',
         name: 'feedingNew',
-        builder: (context, state) =>
-            const AuthGate(child: FeedingRegisterPage()),
+        builder: (context, state) {
+          final editing = state.extra as Feeding?;
+          return AuthGate(child: FeedingRegisterPage(editing: editing));
+        },
       ),
       GoRoute(
-        // /sleep/new — 수면 시작/종료 (진행 중이면 종료 화면 자동)
+        // /sleep/new — 수면 시작/종료 (진행 중이면 종료 화면 자동). extra=Sleep이면 편집.
         path: '/sleep/new',
         name: 'sleepNew',
-        builder: (context, state) =>
-            const AuthGate(child: SleepRegisterPage()),
+        builder: (context, state) {
+          final editing = state.extra as Sleep?;
+          return AuthGate(child: SleepRegisterPage(editing: editing));
+        },
       ),
       GoRoute(
-        // /diaper/new — 기저귀 기록 (종류 + 색상 + 형태)
+        // /diaper/new — 기저귀 기록. extra=Diaper면 편집.
         path: '/diaper/new',
         name: 'diaperNew',
-        builder: (context, state) =>
-            const AuthGate(child: DiaperRegisterPage()),
+        builder: (context, state) {
+          final editing = state.extra as Diaper?;
+          return AuthGate(child: DiaperRegisterPage(editing: editing));
+        },
       ),
       GoRoute(
-        // /growth/new — 성장 기록 (체중/키/머리둘레)
+        // /growth/new — 성장 기록. extra=Growth면 편집.
         path: '/growth/new',
         name: 'growthNew',
-        builder: (context, state) =>
-            const AuthGate(child: GrowthRegisterPage()),
+        builder: (context, state) {
+          final editing = state.extra as Growth?;
+          return AuthGate(child: GrowthRegisterPage(editing: editing));
+        },
       ),
       GoRoute(
         // /inventory/formula — 분유 재고 목록

@@ -1058,4 +1058,19 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get recordsDeleteBody => '이 작업은 되돌릴 수 없어요. 카드를 길게 눌러서 한 건씩 삭제할 수 있어요.';
+
+  @override
+  String get feedingEditTitle => '수유 기록 편집';
+
+  @override
+  String get sleepEditTitle => '수면 기록 편집';
+
+  @override
+  String get diaperEditTitle => '기저귀 기록 편집';
+
+  @override
+  String get growthEditTitle => '성장 기록 편집';
+
+  @override
+  String get recordEditSaved => '기록을 수정했어요';
 }

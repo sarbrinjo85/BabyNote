@@ -40,6 +40,25 @@ class GrowthRepository {
     await _client.from('growths').delete().eq('id', id);
   }
 
+  /// 성장 기록 수정 — 측정일/체중/키/머리둘레/메모 모두 변경 가능.
+  Future<void> updateGrowth({
+    required String id,
+    required DateTime measuredAt,
+    int? weightG,
+    int? heightMm,
+    int? headCircumferenceMm,
+    String? note,
+  }) async {
+    final patch = <String, dynamic>{
+      'measured_at': '${measuredAt.year}-${measuredAt.month.toString().padLeft(2, '0')}-${measuredAt.day.toString().padLeft(2, '0')}',
+      'weight_g': weightG,
+      'height_mm': heightMm,
+      'head_circumference_mm': headCircumferenceMm,
+      'note': (note != null && note.trim().isNotEmpty) ? note.trim() : null,
+    };
+    await _client.from('growths').update(patch).eq('id', id);
+  }
+
   /// 성장 기록은 차트로도 보여줘야 해서 시간 순서가 중요.
   /// asc로 가져오면 그래프에 그대로 사용 가능.
   Future<List<Growth>> listAll(String childId) async {

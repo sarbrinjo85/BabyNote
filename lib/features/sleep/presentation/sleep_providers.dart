@@ -65,6 +65,22 @@ class SleepController extends AsyncNotifier<void> {
       ref.invalidate(recentSleepsProvider(childId));
     });
   }
+
+  /// 기존 수면 기록 수정 — napOrNight + note만.
+  Future<void> saveEdit({
+    required String childId,
+    required String id,
+    required String napOrNight,
+    String? note,
+  }) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      final repo = ref.read(sleepRepositoryProvider);
+      await repo.updateSleep(id: id, napOrNight: napOrNight, note: note);
+      ref.invalidate(recentSleepsProvider(childId));
+      ref.invalidate(ongoingSleepProvider(childId));
+    });
+  }
 }
 
 final sleepControllerProvider =

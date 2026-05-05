@@ -77,6 +77,35 @@ class FeedingCreationController extends AsyncNotifier<void> {
       ref.invalidate(formulaInventoryStatsProvider);
     });
   }
+
+  /// 기존 수유 기록 수정. type 변경(모유 → 분유 등) + 수치 수정.
+  /// formula_inventory_id는 보존 (자동 연결 로직 안 깨짐).
+  Future<void> saveEdit({
+    required String childId,
+    required String id,
+    required String type,
+    int? amountMl,
+    String? breastSide,
+    String? foodName,
+    String? formulaBrand,
+    String? note,
+  }) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      final repo = ref.read(feedingRepositoryProvider);
+      await repo.updateFeeding(
+        id: id,
+        type: type,
+        amountMl: amountMl,
+        breastSide: breastSide,
+        foodName: foodName,
+        formulaBrand: formulaBrand,
+        note: note,
+      );
+      ref.invalidate(recentFeedingsProvider(childId));
+      ref.invalidate(formulaInventoryStatsProvider);
+    });
+  }
 }
 
 final feedingCreationControllerProvider =

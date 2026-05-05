@@ -1057,4 +1057,19 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get recordsDeleteBody => 'この操作は取り消せません。カードを長押しで1件ずつ削除できます。';
+
+  @override
+  String get feedingEditTitle => '授乳記録の編集';
+
+  @override
+  String get sleepEditTitle => '睡眠記録の編集';
+
+  @override
+  String get diaperEditTitle => 'おむつ記録の編集';
+
+  @override
+  String get growthEditTitle => '成長記録の編集';
+
+  @override
+  String get recordEditSaved => '記録を更新しました';
 }

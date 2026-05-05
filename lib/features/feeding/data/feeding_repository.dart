@@ -115,6 +115,35 @@ class FeedingRepository {
   Future<void> deleteFeeding(String id) async {
     await _client.from('feedings').delete().eq('id', id);
   }
+
+  /// 수유 기록 부분 수정. type은 변경 가능 (모유 → 분유 등 오기 정정).
+  /// formulaInventoryId는 일부러 변경 불가 — 자동 연결 로직 보존.
+  Future<Feeding> updateFeeding({
+    required String id,
+    required String type,
+    int? amountMl,
+    String? breastSide,
+    String? foodName,
+    String? formulaBrand,
+    String? note,
+  }) async {
+    // null로 명시적 clear 가능하게 patch는 모든 키 포함.
+    final patch = <String, dynamic>{
+      'type': type,
+      'amount_ml': amountMl,
+      'breast_side': breastSide,
+      'food_name': foodName,
+      'formula_brand': formulaBrand,
+      'note': (note != null && note.trim().isNotEmpty) ? note.trim() : null,
+    };
+    final updated = await _client
+        .from('feedings')
+        .update(patch)
+        .eq('id', id)
+        .select()
+        .single();
+    return Feeding.fromMap(updated);
+  }
 }
 
 final feedingRepositoryProvider = Provider<FeedingRepository>((ref) {

@@ -11,6 +11,7 @@ import '../../../core/widgets/child_picker_action.dart';
 import '../../child/presentation/child_providers.dart';
 import '../../child/presentation/selected_child_provider.dart';
 import '../../inventory/presentation/formula_inventory_providers.dart';
+import '../domain/feeding.dart';
 import 'feeding_providers.dart';
 
 /// 수유 기록 등록 화면.
@@ -25,7 +26,9 @@ import 'feeding_providers.dart';
 /// - 탭마다 다른 폼 → 별도의 _BreastForm/_FormulaForm/_SolidForm StatefulWidget
 /// - 부모(이 화면)가 탭 인덱스 보고 어떤 데이터 보낼지 결정
 class FeedingRegisterPage extends ConsumerStatefulWidget {
-  const FeedingRegisterPage({super.key});
+  const FeedingRegisterPage({super.key, this.editing});
+
+  final Feeding? editing;
 
   @override
   ConsumerState<FeedingRegisterPage> createState() =>
@@ -36,35 +39,77 @@ class _FeedingRegisterPageState extends ConsumerState<FeedingRegisterPage>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
 
-  // 모유 탭 상태
+  // 모유 탭 상태 (side는 SegmentedButton selected로 표시되므로 String만)
   String _breastSide = 'left';
-  String _breastAmount = ''; // 양은 선택 (직접 짠 모유량 등)
+  late final TextEditingController _breastAmountCtrl;
 
   // 분유 탭 상태
-  String _formulaAmount = ''; // 필수
-  String _formulaBrand = '';
+  late final TextEditingController _formulaAmountCtrl;
+  late final TextEditingController _formulaBrandCtrl;
 
   // 이유식 탭 상태
-  String _foodName = '';
-  String _solidAmount = ''; // 선택
-  File? _solidPhoto;        // 첨부 사진 (선택)
+  late final TextEditingController _foodNameCtrl;
+  late final TextEditingController _solidAmountCtrl;
+  File? _solidPhoto;
 
   // 공통 메모
-  String _note = '';
+  late final TextEditingController _noteCtrl;
+
+  bool get _isEdit => widget.editing != null;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    final e = widget.editing;
+    final initialIndex = _initialTabIndex();
+    _tabController = TabController(
+      length: 3, vsync: this, initialIndex: initialIndex,
+    );
     _tabController.addListener(() {
-      // 탭 바뀔 때 setState로 등록 버튼 활성/비활성 갱신.
       if (mounted) setState(() {});
     });
+
+    // 편집 모드면 type별 prefill, 아니면 빈 컨트롤러
+    _breastSide = (e?.type == 'breast' ? e!.breastSide : null) ?? 'left';
+    _breastAmountCtrl = TextEditingController(
+      text: e?.type == 'breast' ? (e!.amountMl?.toString() ?? '') : '',
+    );
+    _formulaAmountCtrl = TextEditingController(
+      text: e?.type == 'formula' ? (e!.amountMl?.toString() ?? '') : '',
+    );
+    _formulaBrandCtrl = TextEditingController(
+      text: e?.type == 'formula' ? (e!.formulaBrand ?? '') : '',
+    );
+    _foodNameCtrl = TextEditingController(
+      text: e?.type == 'solid' ? (e!.foodName ?? '') : '',
+    );
+    _solidAmountCtrl = TextEditingController(
+      text: e?.type == 'solid' ? (e!.amountMl?.toString() ?? '') : '',
+    );
+    _noteCtrl = TextEditingController(text: e?.note ?? '');
+
+    // 분유 빠른 선택 버튼 강조용 — amount 변할 때마다 rebuild
+    _formulaAmountCtrl.addListener(() {
+      if (mounted) setState(() {});
+    });
+  }
+
+  int _initialTabIndex() {
+    final t = widget.editing?.type;
+    if (t == 'formula') return 1;
+    if (t == 'solid') return 2;
+    return 0;
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _breastAmountCtrl.dispose();
+    _formulaAmountCtrl.dispose();
+    _formulaBrandCtrl.dispose();
+    _foodNameCtrl.dispose();
+    _solidAmountCtrl.dispose();
+    _noteCtrl.dispose();
     super.dispose();
   }
 
@@ -88,10 +133,10 @@ class _FeedingRegisterPageState extends ConsumerState<FeedingRegisterPage>
       case 'breast':
         return true; // breastSide만 있으면 OK (default 'left')
       case 'formula':
-        final n = int.tryParse(_formulaAmount);
+        final n = int.tryParse(_formulaAmountCtrl.text);
         return n != null && n > 0;
       case 'solid':
-        return _foodName.trim().isNotEmpty;
+        return _foodNameCtrl.text.trim().isNotEmpty;
       default:
         return false;
     }
@@ -110,12 +155,13 @@ class _FeedingRegisterPageState extends ConsumerState<FeedingRegisterPage>
     switch (type) {
       case 'breast':
         breastSide = _breastSide;
-        amountMl = int.tryParse(_breastAmount);
+        amountMl = int.tryParse(_breastAmountCtrl.text);
         break;
       case 'formula':
-        amountMl = int.tryParse(_formulaAmount);
-        formulaBrand =
-            _formulaBrand.trim().isEmpty ? null : _formulaBrand.trim();
+        amountMl = int.tryParse(_formulaAmountCtrl.text);
+        formulaBrand = _formulaBrandCtrl.text.trim().isEmpty
+            ? null
+            : _formulaBrandCtrl.text.trim();
         // FIFO: 활성 분유 통 첫 번째(가장 먼저 개봉한 것)에 자동 연결.
         // P3-1c에서 잔량 계산할 때 이 id로 join.
         final actives = ref.read(
@@ -126,32 +172,48 @@ class _FeedingRegisterPageState extends ConsumerState<FeedingRegisterPage>
         });
         break;
       case 'solid':
-        foodName = _foodName.trim();
-        amountMl = int.tryParse(_solidAmount);
+        foodName = _foodNameCtrl.text.trim();
+        amountMl = int.tryParse(_solidAmountCtrl.text);
         break;
     }
+    final noteText = _noteCtrl.text.trim().isEmpty ? null : _noteCtrl.text.trim();
 
-    await ref.read(feedingCreationControllerProvider.notifier).create(
-          childId: childId,
-          type: type,
-          startedAt: now,
-          endedAt: now,
-          amountMl: amountMl,
-          breastSide: breastSide,
-          foodName: foodName,
-          formulaBrand: formulaBrand,
-          formulaInventoryId: formulaInventoryId,
-          note: _note.trim().isEmpty ? null : _note.trim(),
-          photoFile: type == 'solid' ? _solidPhoto : null,
-        );
+    if (_isEdit) {
+      // 편집 모드: photo는 변경 안 함 (단순화). type/수치/메모만 update.
+      await ref.read(feedingCreationControllerProvider.notifier).saveEdit(
+            childId: childId,
+            id: widget.editing!.id,
+            type: type,
+            amountMl: amountMl,
+            breastSide: breastSide,
+            foodName: foodName,
+            formulaBrand: formulaBrand,
+            note: noteText,
+          );
+    } else {
+      await ref.read(feedingCreationControllerProvider.notifier).create(
+            childId: childId,
+            type: type,
+            startedAt: now,
+            endedAt: now,
+            amountMl: amountMl,
+            breastSide: breastSide,
+            foodName: foodName,
+            formulaBrand: formulaBrand,
+            formulaInventoryId: formulaInventoryId,
+            note: noteText,
+            photoFile: type == 'solid' ? _solidPhoto : null,
+          );
+    }
 
     if (!mounted) return;
     final l10n = AppLocalizations.of(context);
     final state = ref.read(feedingCreationControllerProvider);
     state.when(
       data: (_) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(l10n.feedingSavedToast)));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(_isEdit ? l10n.recordEditSaved : l10n.feedingSavedToast),
+        ));
         context.pop();
       },
       loading: () {},
@@ -192,8 +254,8 @@ class _FeedingRegisterPageState extends ConsumerState<FeedingRegisterPage>
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.feedingTitle),
-        actions: const [ChildPickerAction()],
+        title: Text(_isEdit ? l10n.feedingEditTitle : l10n.feedingTitle),
+        actions: _isEdit ? null : const [ChildPickerAction()],
         bottom: TabBar(
           controller: _tabController,
           tabs: [
@@ -212,7 +274,12 @@ class _FeedingRegisterPageState extends ConsumerState<FeedingRegisterPage>
             return _NoChildPlaceholder();
           }
           // selectedChild는 myChildrenProvider 결과 안에서 매칭된 1명 (없으면 첫 자녀).
-          final child = ref.watch(selectedChildProvider) ?? children.first;
+          final child = _isEdit
+              ? children.firstWhere(
+                  (c) => c.id == widget.editing!.childId,
+                  orElse: () => children.first,
+                )
+              : (ref.watch(selectedChildProvider) ?? children.first);
 
           return Column(
             children: [
@@ -235,24 +302,19 @@ class _FeedingRegisterPageState extends ConsumerState<FeedingRegisterPage>
                   children: [
                     _BreastForm(
                       side: _breastSide,
-                      amount: _breastAmount,
+                      amountCtrl: _breastAmountCtrl,
                       onSideChanged: (s) => setState(() => _breastSide = s),
-                      onAmountChanged: (v) => _breastAmount = v,
                     ),
                     _FormulaForm(
                       childId: child.id,
-                      amount: _formulaAmount,
-                      brand: _formulaBrand,
-                      onAmountChanged: (v) =>
-                          setState(() => _formulaAmount = v),
-                      onBrandChanged: (v) => _formulaBrand = v,
+                      amountCtrl: _formulaAmountCtrl,
+                      brandCtrl: _formulaBrandCtrl,
                     ),
                     _SolidForm(
-                      foodName: _foodName,
-                      amount: _solidAmount,
+                      foodNameCtrl: _foodNameCtrl,
+                      amountCtrl: _solidAmountCtrl,
                       photo: _solidPhoto,
-                      onFoodNameChanged: (v) => setState(() => _foodName = v),
-                      onAmountChanged: (v) => _solidAmount = v,
+                      onFoodNameChanged: () => setState(() {}),
                       onPickPhoto: _pickSolidPhoto,
                       onRemovePhoto: () => setState(() => _solidPhoto = null),
                     ),
@@ -268,11 +330,11 @@ class _FeedingRegisterPageState extends ConsumerState<FeedingRegisterPage>
                   child: Column(
                     children: [
                       TextField(
+                        controller: _noteCtrl,
                         decoration: InputDecoration(
                           labelText: l10n.commonMemoOptional,
                           hintText: l10n.feedingMemoHint,
                         ),
-                        onChanged: (v) => _note = v,
                         maxLines: 2,
                       ),
                       const SizedBox(height: Spacing.md),
@@ -288,7 +350,9 @@ class _FeedingRegisterPageState extends ConsumerState<FeedingRegisterPage>
                                     CircularProgressIndicator(strokeWidth: 2),
                               )
                             : const Icon(Icons.check),
-                        label: Text(isLoading ? l10n.commonSaving : l10n.commonRegister),
+                        label: Text(isLoading
+                            ? l10n.commonSaving
+                            : (_isEdit ? l10n.commonSave : l10n.commonRegister)),
                       ),
                     ],
                   ),
@@ -306,15 +370,13 @@ class _FeedingRegisterPageState extends ConsumerState<FeedingRegisterPage>
 class _BreastForm extends StatelessWidget {
   const _BreastForm({
     required this.side,
-    required this.amount,
+    required this.amountCtrl,
     required this.onSideChanged,
-    required this.onAmountChanged,
   });
 
   final String side;
-  final String amount;
+  final TextEditingController amountCtrl;
   final ValueChanged<String> onSideChanged;
-  final ValueChanged<String> onAmountChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -335,67 +397,42 @@ class _BreastForm extends StatelessWidget {
         ),
         const SizedBox(height: Spacing.lg),
         TextField(
+          controller: amountCtrl,
           decoration: InputDecoration(
             labelText: l10n.feedingBreastAmountLabel,
             hintText: l10n.feedingBreastAmountHint,
             suffixText: 'ml',
           ),
           keyboardType: TextInputType.number,
-          onChanged: onAmountChanged,
         ),
       ],
     );
   }
 }
 
-/// 분유 입력 폼.
-///
-/// 상단에 "현재 사용 중인 분유" 카드 — 활성 통이 있으면 자동 연결되어 차감됨을 안내.
-/// 없으면 "분유 등록하러 가기" 버튼.
-class _FormulaForm extends ConsumerStatefulWidget {
+/// 분유 입력 폼. 컨트롤러는 부모(_FeedingRegisterPageState)가 소유.
+class _FormulaForm extends ConsumerWidget {
   const _FormulaForm({
     required this.childId,
-    required this.amount,
-    required this.brand,
-    required this.onAmountChanged,
-    required this.onBrandChanged,
+    required this.amountCtrl,
+    required this.brandCtrl,
   });
 
   final String childId;
-  final String amount;
-  final String brand;
-  final ValueChanged<String> onAmountChanged;
-  final ValueChanged<String> onBrandChanged;
-
-  @override
-  ConsumerState<_FormulaForm> createState() => _FormulaFormState();
-}
-
-class _FormulaFormState extends ConsumerState<_FormulaForm> {
-  late final TextEditingController _amountCtrl;
-
-  @override
-  void initState() {
-    super.initState();
-    _amountCtrl = TextEditingController(text: widget.amount);
-  }
-
-  @override
-  void dispose() {
-    _amountCtrl.dispose();
-    super.dispose();
-  }
+  final TextEditingController amountCtrl;
+  final TextEditingController brandCtrl;
 
   void _setAmount(int v) {
-    _amountCtrl.text = v.toString();
-    widget.onAmountChanged(_amountCtrl.text);
+    amountCtrl.text = v.toString();
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    // 현재 amount 값 — 빠른 선택 버튼 강조에 사용
+    final currentMl = int.tryParse(amountCtrl.text);
     final asyncActive =
-        ref.watch(activeFormulaInventoriesProvider(widget.childId));
+        ref.watch(activeFormulaInventoriesProvider(childId));
     final activeFirst = asyncActive.maybeWhen(
       data: (list) => list.isEmpty ? null : list.first,
       orElse: () => null,
@@ -450,65 +487,73 @@ class _FormulaFormState extends ConsumerState<_FormulaForm> {
         ),
         const SizedBox(height: Spacing.md),
         TextField(
-          controller: _amountCtrl,
+          controller: amountCtrl,
           decoration: InputDecoration(
             labelText: l10n.feedingFormulaAmountLabel,
             hintText: l10n.feedingFormulaAmountHint,
             suffixText: 'ml',
           ),
           keyboardType: TextInputType.number,
-          onChanged: widget.onAmountChanged,
         ),
         const SizedBox(height: Spacing.sm),
-        // 빠른 선택: 10~250 ml, 10ml 단위 (25개)
-        // List.generate로 [10, 20, ..., 250] 생성. (i+1)*10 패턴.
+        // 빠른 선택: 10~250 ml, 10ml 단위 (25개).
+        // 현재 입력값과 일치하는 버튼은 FilledButton으로 강조 (편집 시 이전 값 시각화).
         Wrap(
           spacing: Spacing.xs,
           runSpacing: Spacing.xs,
           children: List.generate(25, (i) {
             final v = (i + 1) * 10;
-            return OutlinedButton(
-              onPressed: () => _setAmount(v),
-              style: OutlinedButton.styleFrom(
-                minimumSize: const Size(0, 36),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: Spacing.sm),
-                textStyle: const TextStyle(fontSize: 14),
-              ),
-              child: Text('${v}ml'),
+            final isSelected = currentMl == v;
+            final style = ButtonStyle(
+              minimumSize:
+                  const WidgetStatePropertyAll(Size(0, 36)),
+              padding: const WidgetStatePropertyAll(
+                  EdgeInsets.symmetric(horizontal: Spacing.sm)),
+              textStyle:
+                  const WidgetStatePropertyAll(TextStyle(fontSize: 14)),
             );
+            return isSelected
+                ? FilledButton(
+                    onPressed: () => _setAmount(v),
+                    style: style,
+                    child: Text('${v}ml'),
+                  )
+                : OutlinedButton(
+                    onPressed: () => _setAmount(v),
+                    style: style,
+                    child: Text('${v}ml'),
+                  );
           }),
         ),
         const SizedBox(height: Spacing.lg),
         TextField(
+          controller: brandCtrl,
           decoration: InputDecoration(
             labelText: l10n.feedingFormulaBrandLabel,
             hintText: l10n.feedingFormulaBrandHint,
           ),
-          onChanged: widget.onBrandChanged,
         ),
       ],
     );
   }
 }
 
-/// 이유식 입력 폼.
+/// 이유식 입력 폼. 컨트롤러는 부모가 소유.
 class _SolidForm extends StatelessWidget {
   const _SolidForm({
-    required this.foodName,
-    required this.amount,
+    required this.foodNameCtrl,
+    required this.amountCtrl,
     required this.photo,
     required this.onFoodNameChanged,
-    required this.onAmountChanged,
     required this.onPickPhoto,
     required this.onRemovePhoto,
   });
 
-  final String foodName;
-  final String amount;
+  final TextEditingController foodNameCtrl;
+  final TextEditingController amountCtrl;
   final File? photo;
-  final ValueChanged<String> onFoodNameChanged;
-  final ValueChanged<String> onAmountChanged;
+  /// foodName 변경 시 부모에 setState 트리거 (등록 버튼 활성/비활성).
+  final VoidCallback onFoodNameChanged;
   final VoidCallback onPickPhoto;
   final VoidCallback onRemovePhoto;
 
@@ -519,22 +564,24 @@ class _SolidForm extends StatelessWidget {
       padding: const EdgeInsets.all(Spacing.md),
       children: [
         TextField(
+          controller: foodNameCtrl,
           decoration: InputDecoration(
             labelText: l10n.feedingSolidFoodLabel,
             hintText: l10n.feedingSolidFoodHint,
           ),
-          onChanged: onFoodNameChanged,
+          // 폼 비어있다가 텍스트 들어오면 등록 버튼 활성 → 부모 setState 필요
+          onChanged: (_) => onFoodNameChanged(),
           autofocus: true,
         ),
         const SizedBox(height: Spacing.lg),
         TextField(
+          controller: amountCtrl,
           decoration: InputDecoration(
             labelText: l10n.feedingSolidAmountLabel,
             hintText: l10n.feedingSolidAmountHint,
             suffixText: 'ml',
           ),
           keyboardType: TextInputType.number,
-          onChanged: onAmountChanged,
         ),
         const SizedBox(height: Spacing.lg),
 
