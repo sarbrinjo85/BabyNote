@@ -34,14 +34,15 @@ class QuickFeedingFab extends ConsumerWidget {
     // FAB는 1탭 빠른 기록 전용. 직접 입력하려면 홈 화면의 BigActionButton(수유)
     // 또는 길게 누르지 않고 마지막 기록 없을 때 자동으로 /feeding/new 이동.
     // GestureDetector로 감싸서 길게 누름 제스처를 가로챔.
-    // FAB의 onPressed는 짧은 탭 전용 — 제스처 아레나에서 longPress가 우선됨.
+    // ⚠️ tooltip을 지정하면 FAB 내부 Tooltip 위젯이 longPress를 먼저
+    //    가져가 툴팁만 뜨고 onLongPress 콜백은 안 불림 → tooltip 제거.
+    //    안내는 처음 진입 시 hint dialog 또는 SnackBar에서 다른 방법으로.
     return GestureDetector(
       onLongPress: () => _onLongPress(context, ref),
       child: FloatingActionButton.extended(
         onPressed: () => _onTap(context, ref),
         icon: const Text('🍼', style: TextStyle(fontSize: 22)),
         label: Text(l10n.fabQuickFeed),
-        tooltip: l10n.fabQuickFeedTooltip,
       ),
     );
   }
