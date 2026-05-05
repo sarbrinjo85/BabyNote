@@ -120,6 +120,8 @@ class RecordButtonsGrid extends ConsumerWidget {
                   '${_summarizeSleep(l10n, lastSleep)}',
           time: null,
           info: sleepInProgress, // 진행 중 표시 (urgent X, info O)
+          // 수면중일 때 이전 수면 정보가 길어질 수 있어 2줄 허용
+          summaryMaxLines: sleepInProgress ? 2 : 1,
           onTap: () => context.push('/sleep/new'),
         ),
         _Tile(
@@ -203,6 +205,7 @@ class _Tile extends StatelessWidget {
     required this.onTap,
     this.alert = false,
     this.info = false,
+    this.summaryMaxLines = 1,
   });
   final String emoji;
   final String label;
@@ -213,6 +216,8 @@ class _Tile extends StatelessWidget {
   final bool alert;
   /// 정보 강조 (진행 중 등) — 카드 색상 secondary로.
   final bool info;
+  /// summary 텍스트 최대 줄 수 (기본 1).
+  final int summaryMaxLines;
 
   @override
   Widget build(BuildContext context) {
@@ -266,7 +271,7 @@ class _Tile extends StatelessWidget {
                               ? theme.colorScheme.onSurfaceVariant
                               : theme.colorScheme.primary,
                     ),
-                    maxLines: 1,
+                    maxLines: summaryMaxLines,
                     overflow: TextOverflow.ellipsis,
                   ),
                   if (time != null)
