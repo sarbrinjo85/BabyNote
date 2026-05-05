@@ -41,6 +41,9 @@
   "authSignup": "Sign Up",
   "authEmail": "Email",
   "authPassword": "Password",
+  "authDisplayNameLabel": "Display name (optional)",
+  "authDisplayNameHint": "e.g. Mom, Dad",
+  "authDisplayNameHelp": "Visible to others when sharing with family",
 
   "homeLogout": "Sign out",
   "homeMyChildren": "My Children",

@@ -133,6 +133,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authPassword => 'Password';
 
   @override
+  String get authDisplayNameLabel => 'Display name (optional)';
+
+  @override
+  String get authDisplayNameHint => 'e.g. Mom, Dad';
+
+  @override
+  String get authDisplayNameHelp =>
+      'Visible to others when sharing with family';
+
+  @override
   String get homeLogout => 'Sign out';
 
   @override

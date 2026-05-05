@@ -49,8 +49,18 @@ class AuthRepository {
   Future<User> signUpWithEmail({
     required String email,
     required String password,
+    String? displayName,
   }) async {
-    final response = await _client.auth.signUp(email: email, password: password);
+    // raw_user_meta_data에 display_name 포함 → handle_new_user 트리거가
+    // user_profiles.display_name으로 자동 옮김 (01_users_caregivers.sql).
+    final response = await _client.auth.signUp(
+      email: email,
+      password: password,
+      data: {
+        if (displayName != null && displayName.trim().isNotEmpty)
+          'display_name': displayName.trim(),
+      },
+    );
     final user = response.user;
     if (user == null) throw StateError('가입 응답에 user가 없습니다.');
     return user;

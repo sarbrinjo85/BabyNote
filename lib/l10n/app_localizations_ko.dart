@@ -133,6 +133,15 @@ class AppLocalizationsKo extends AppLocalizations {
   String get authPassword => '비밀번호';
 
   @override
+  String get authDisplayNameLabel => '표시 이름 (선택)';
+
+  @override
+  String get authDisplayNameHint => '예: 김엄마, 김아빠';
+
+  @override
+  String get authDisplayNameHelp => '가족 공유 시 다른 사람에게 보이는 이름';
+
+  @override
   String get homeLogout => '로그아웃';
 
   @override

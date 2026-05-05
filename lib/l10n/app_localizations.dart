@@ -316,6 +316,24 @@ abstract class AppLocalizations {
   /// **'비밀번호'**
   String get authPassword;
 
+  /// No description provided for @authDisplayNameLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'표시 이름 (선택)'**
+  String get authDisplayNameLabel;
+
+  /// No description provided for @authDisplayNameHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'예: 김엄마, 김아빠'**
+  String get authDisplayNameHint;
+
+  /// No description provided for @authDisplayNameHelp.
+  ///
+  /// In ko, this message translates to:
+  /// **'가족 공유 시 다른 사람에게 보이는 이름'**
+  String get authDisplayNameHelp;
+
   /// No description provided for @homeLogout.
   ///
   /// In ko, this message translates to:

@@ -49,6 +49,9 @@
   "authSignup": "회원가입",
   "authEmail": "이메일",
   "authPassword": "비밀번호",
+  "authDisplayNameLabel": "표시 이름 (선택)",
+  "authDisplayNameHint": "예: 김엄마, 김아빠",
+  "authDisplayNameHelp": "가족 공유 시 다른 사람에게 보이는 이름",
 
   "homeLogout": "로그아웃",
   "homeMyChildren": "내 자녀",

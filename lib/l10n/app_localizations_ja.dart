@@ -133,6 +133,15 @@ class AppLocalizationsJa extends AppLocalizations {
   String get authPassword => 'パスワード';
 
   @override
+  String get authDisplayNameLabel => '表示名 (任意)';
+
+  @override
+  String get authDisplayNameHint => '例: ママ、パパ';
+
+  @override
+  String get authDisplayNameHelp => '家族共有時に他の人に表示される名前';
+
+  @override
   String get homeLogout => 'ログアウト';
 
   @override

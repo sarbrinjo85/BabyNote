@@ -25,6 +25,8 @@ class _AuthPageState extends ConsumerState<AuthPage> {
   // 두 탭이 컨트롤러를 공유하지 않게 별도 키 — DefaultTabController로 단순화.
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
+  // 회원가입 탭에서만 사용 — 가족 공유 시 다른 부모에게 보이는 표시 이름.
+  final _displayNameCtrl = TextEditingController();
   bool _busy = false;
 
   @override
@@ -32,6 +34,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
     // TextEditingController는 명시적 dispose 안 하면 메모리 leak.
     _emailCtrl.dispose();
     _passwordCtrl.dispose();
+    _displayNameCtrl.dispose();
     super.dispose();
   }
 
@@ -63,6 +66,9 @@ class _AuthPageState extends ConsumerState<AuthPage> {
     await _runAuth(() => repo.signUpWithEmail(
           email: _emailCtrl.text.trim(),
           password: _passwordCtrl.text,
+          displayName: _displayNameCtrl.text.trim().isEmpty
+              ? null
+              : _displayNameCtrl.text.trim(),
         ));
   }
 
@@ -98,6 +104,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                       _EmailForm(
                         emailCtrl: _emailCtrl,
                         passwordCtrl: _passwordCtrl,
+                        displayNameCtrl: null,
                         busy: _busy,
                         submitLabel: l10n.authLogin,
                         onSubmit: _signIn,
@@ -106,6 +113,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                       _EmailForm(
                         emailCtrl: _emailCtrl,
                         passwordCtrl: _passwordCtrl,
+                        displayNameCtrl: _displayNameCtrl,
                         busy: _busy,
                         submitLabel: l10n.authSignup,
                         onSubmit: _signUp,
@@ -143,10 +151,12 @@ class _AuthPageState extends ConsumerState<AuthPage> {
 }
 
 /// 이메일 + 비밀번호 입력 폼 (로그인/가입 둘이 공유).
+/// 회원가입 모드는 displayNameCtrl이 not-null이면 displayName 필드 추가.
 class _EmailForm extends StatelessWidget {
   const _EmailForm({
     required this.emailCtrl,
     required this.passwordCtrl,
+    required this.displayNameCtrl,
     required this.busy,
     required this.submitLabel,
     required this.onSubmit,
@@ -154,6 +164,8 @@ class _EmailForm extends StatelessWidget {
 
   final TextEditingController emailCtrl;
   final TextEditingController passwordCtrl;
+  /// null이면 폼에 displayName 필드 표시 안 함 (로그인 모드).
+  final TextEditingController? displayNameCtrl;
   final bool busy;
   final String submitLabel;
   final Future<void> Function() onSubmit;
@@ -180,6 +192,18 @@ class _EmailForm extends StatelessWidget {
           ),
           obscureText: true,
         ),
+        if (displayNameCtrl != null) ...[
+          const SizedBox(height: 16),
+          TextField(
+            controller: displayNameCtrl!,
+            decoration: InputDecoration(
+              labelText: l10n.authDisplayNameLabel,
+              hintText: l10n.authDisplayNameHint,
+              helperText: l10n.authDisplayNameHelp,
+            ),
+            textCapitalization: TextCapitalization.words,
+          ),
+        ],
         const SizedBox(height: 24),
         FilledButton(
           onPressed: busy ? null : onSubmit,

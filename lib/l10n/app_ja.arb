@@ -41,6 +41,9 @@
   "authSignup": "新規登録",
   "authEmail": "メール",
   "authPassword": "パスワード",
+  "authDisplayNameLabel": "表示名 (任意)",
+  "authDisplayNameHint": "例: ママ、パパ",
+  "authDisplayNameHelp": "家族共有時に他の人に表示される名前",
 
   "homeLogout": "ログアウト",
   "homeMyChildren": "お子さま",
