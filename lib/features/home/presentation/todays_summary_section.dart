@@ -90,7 +90,7 @@ class TodaysSummarySection extends ConsumerWidget {
                         )),
                 const Spacer(),
                 Text(
-                  '${now.year}-${_two(now.month)}-${_two(now.day)}',
+                  '${now.year}.${_two(now.month)}.${_two(now.day)}',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),

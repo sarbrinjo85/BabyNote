@@ -100,7 +100,7 @@ class TodaysSummaryChart extends ConsumerWidget {
                     )),
                 const Spacer(),
                 Text(
-                  '${now.month}/${now.day}',
+                  '${now.year}.${now.month.toString().padLeft(2, '0')}.${now.day.toString().padLeft(2, '0')}',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
