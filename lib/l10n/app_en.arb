@@ -336,5 +336,9 @@
   "childDeleteAction": "Delete child",
   "childDeleteTitle": "Delete this child?",
   "childDeleteWarning": "{name} and all records (feedings, sleep, diapers, growth, inventory, vaccinations) will be permanently deleted. This cannot be undone.",
-  "childDeleted": "Child deleted"
+  "childDeleted": "Child deleted",
+
+  "recordDeleteTitle": "Delete this record?",
+  "recordDeleteBody": "This action cannot be undone. Long-press deletes only the most recent entry.",
+  "recordDeleted": "Record deleted"
 }

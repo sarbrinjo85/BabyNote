@@ -1027,4 +1027,13 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get childDeleted => 'お子さまを削除しました';
+
+  @override
+  String get recordDeleteTitle => 'この記録を削除しますか?';
+
+  @override
+  String get recordDeleteBody => 'この操作は取り消せません。長押しで削除できるのは最新の1件です。';
+
+  @override
+  String get recordDeleted => '記録を削除しました';
 }

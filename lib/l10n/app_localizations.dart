@@ -1995,6 +1995,24 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'자녀를 삭제했어요'**
   String get childDeleted;
+
+  /// No description provided for @recordDeleteTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'이 기록을 삭제할까요?'**
+  String get recordDeleteTitle;
+
+  /// No description provided for @recordDeleteBody.
+  ///
+  /// In ko, this message translates to:
+  /// **'이 작업은 되돌릴 수 없어요. 길게 눌러 삭제할 수 있는 건 가장 최근 1건이에요.'**
+  String get recordDeleteBody;
+
+  /// No description provided for @recordDeleted.
+  ///
+  /// In ko, this message translates to:
+  /// **'기록을 삭제했어요'**
+  String get recordDeleted;
 }
 
 class _AppLocalizationsDelegate

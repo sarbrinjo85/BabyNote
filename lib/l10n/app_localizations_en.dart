@@ -1036,4 +1036,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get childDeleted => 'Child deleted';
+
+  @override
+  String get recordDeleteTitle => 'Delete this record?';
+
+  @override
+  String get recordDeleteBody =>
+      'This action cannot be undone. Long-press deletes only the most recent entry.';
+
+  @override
+  String get recordDeleted => 'Record deleted';
 }

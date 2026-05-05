@@ -41,6 +41,11 @@ class DiaperRepository {
     return Diaper.fromMap(inserted);
   }
 
+  /// 기저귀 기록 1건 삭제.
+  Future<void> deleteDiaper(String id) async {
+    await _client.from('diapers').delete().eq('id', id);
+  }
+
   Future<List<Diaper>> listRecent(String childId, {int limit = 20}) async {
     final rows = await _client
         .from('diapers')

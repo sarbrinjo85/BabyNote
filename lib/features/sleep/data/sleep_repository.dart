@@ -69,6 +69,11 @@ class SleepRepository {
     return Sleep.fromMap(row);
   }
 
+  /// 수면 기록 1건 삭제.
+  Future<void> deleteSleep(String id) async {
+    await _client.from('sleeps').delete().eq('id', id);
+  }
+
   /// 최근 수면 기록 N건.
   Future<List<Sleep>> listRecent(String childId, {int limit = 20}) async {
     final rows = await _client

@@ -35,6 +35,11 @@ class GrowthRepository {
     return Growth.fromMap(inserted);
   }
 
+  /// 성장 기록 1건 삭제.
+  Future<void> deleteGrowth(String id) async {
+    await _client.from('growths').delete().eq('id', id);
+  }
+
   /// 성장 기록은 차트로도 보여줘야 해서 시간 순서가 중요.
   /// asc로 가져오면 그래프에 그대로 사용 가능.
   Future<List<Growth>> listAll(String childId) async {

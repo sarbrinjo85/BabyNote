@@ -110,6 +110,11 @@ class FeedingRepository {
         .limit(limit);
     return rows.map((r) => Feeding.fromMap(r)).toList();
   }
+
+  /// 수유 기록 1건 삭제. RLS는 caregiver만 통과시킴.
+  Future<void> deleteFeeding(String id) async {
+    await _client.from('feedings').delete().eq('id', id);
+  }
 }
 
 final feedingRepositoryProvider = Provider<FeedingRepository>((ref) {

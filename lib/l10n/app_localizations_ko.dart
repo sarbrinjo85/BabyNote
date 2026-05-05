@@ -1027,4 +1027,14 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get childDeleted => '자녀를 삭제했어요';
+
+  @override
+  String get recordDeleteTitle => '이 기록을 삭제할까요?';
+
+  @override
+  String get recordDeleteBody =>
+      '이 작업은 되돌릴 수 없어요. 길게 눌러 삭제할 수 있는 건 가장 최근 1건이에요.';
+
+  @override
+  String get recordDeleted => '기록을 삭제했어요';
 }

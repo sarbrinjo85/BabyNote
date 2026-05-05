@@ -372,5 +372,9 @@
   "childDeleteTitle": "자녀를 삭제할까요?",
   "childDeleteWarning": "{name} 자녀와 모든 기록(수유·수면·기저귀·성장·재고·접종)이 영구 삭제돼요. 되돌릴 수 없어요.",
   "@childDeleteWarning": { "placeholders": { "name": { "type": "String" } } },
-  "childDeleted": "자녀를 삭제했어요"
+  "childDeleted": "자녀를 삭제했어요",
+
+  "recordDeleteTitle": "이 기록을 삭제할까요?",
+  "recordDeleteBody": "이 작업은 되돌릴 수 없어요. 길게 눌러 삭제할 수 있는 건 가장 최근 1건이에요.",
+  "recordDeleted": "기록을 삭제했어요"
 }

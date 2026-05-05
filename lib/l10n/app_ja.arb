@@ -336,5 +336,9 @@
   "childDeleteAction": "お子さまを削除",
   "childDeleteTitle": "お子さまを削除しますか?",
   "childDeleteWarning": "{name} と全記録(授乳・睡眠・おむつ・成長・在庫・接種)が永久に削除されます。取り消せません。",
-  "childDeleted": "お子さまを削除しました"
+  "childDeleted": "お子さまを削除しました",
+
+  "recordDeleteTitle": "この記録を削除しますか?",
+  "recordDeleteBody": "この操作は取り消せません。長押しで削除できるのは最新の1件です。",
+  "recordDeleted": "記録を削除しました"
 }
