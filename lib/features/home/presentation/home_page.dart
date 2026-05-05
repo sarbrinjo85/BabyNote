@@ -43,7 +43,13 @@ class HomePage extends ConsumerWidget {
           ? QuickFeedingFab(child: selectedChild)
           : null,
       appBar: AppBar(
-        title: Text(l10n.appTitle),
+        title: Text(
+          'Baby Note',
+          style: TextStyle(
+            color: BrandColors.seed, // 파스텔 코랄 핑크
+            fontWeight: FontWeight.w700,
+          ),
+        ),
         actions: [
           IconButton(
             tooltip: l10n.homeAddChild,
