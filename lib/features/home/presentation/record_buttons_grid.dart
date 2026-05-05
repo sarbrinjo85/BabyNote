@@ -120,8 +120,6 @@ class RecordButtonsGrid extends ConsumerWidget {
                   '${_summarizeSleep(l10n, lastSleep)}',
           time: null,
           info: sleepInProgress, // 진행 중 표시 (urgent X, info O)
-          // 수면중일 때 이전 수면 정보가 길어질 수 있어 2줄 허용
-          summaryMaxLines: sleepInProgress ? 2 : 1,
           onTap: () => context.push('/sleep/new'),
         ),
         _Tile(
@@ -205,7 +203,7 @@ class _Tile extends StatelessWidget {
     required this.onTap,
     this.alert = false,
     this.info = false,
-    this.summaryMaxLines = 1,
+    this.summaryMaxLines = 2,
   });
   final String emoji;
   final String label;
