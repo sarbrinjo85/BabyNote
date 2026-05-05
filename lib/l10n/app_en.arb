@@ -324,5 +324,10 @@
   "statsNotEnoughData": "Not enough data. Please add at least 2 growth records.",
   "statsLegendChild": "Your child",
   "statsLegendP50": "WHO median (P50)",
-  "statsLegendP3P97": "WHO normal range (P3~P97)"
+  "statsLegendP3P97": "WHO normal range (P3~P97)",
+
+  "notifFormulaLowTitle": "Formula running low",
+  "notifFormulaLowBody": "{product} has 1 day left. Please prepare a new container.",
+  "notifVaccineUpcomingTitle": "Upcoming vaccination",
+  "notifVaccineUpcomingBody": "{vaccine} is recommended tomorrow."
 }

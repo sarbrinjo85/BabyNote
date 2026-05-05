@@ -11,6 +11,7 @@ import '../../child/presentation/selected_child_provider.dart';
 import 'diaper_size_up_card.dart';
 import 'formula_status_card.dart';
 import 'last_activity_section.dart';
+import 'notification_scheduler.dart';
 import 'todays_summary_section.dart';
 import 'upcoming_vaccine_card.dart';
 
@@ -126,6 +127,8 @@ class HomePage extends ConsumerWidget {
 
           // ── 분유 잔량 + 오늘의 요약 + 마지막 활동 (선택된 자녀 기준) ──
           if (selectedChild != null) ...[
+            // 무음 위젯 — 자녀 데이터 watch + 조건 만족 시 로컬 알림 자동 스케줄
+            NotificationScheduler(child: selectedChild),
             const SizedBox(height: Spacing.lg),
             FormulaStatusCard(childId: selectedChild.id),
             const SizedBox(height: Spacing.xs),

@@ -1935,6 +1935,30 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'WHO 정상 범위 (P3~P97)'**
   String get statsLegendP3P97;
+
+  /// No description provided for @notifFormulaLowTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'분유 곧 소진'**
+  String get notifFormulaLowTitle;
+
+  /// No description provided for @notifFormulaLowBody.
+  ///
+  /// In ko, this message translates to:
+  /// **'{product} 1일분 남았어요. 새 통 준비해주세요.'**
+  String notifFormulaLowBody(String product);
+
+  /// No description provided for @notifVaccineUpcomingTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'예방접종 임박'**
+  String get notifVaccineUpcomingTitle;
+
+  /// No description provided for @notifVaccineUpcomingBody.
+  ///
+  /// In ko, this message translates to:
+  /// **'내일 {vaccine} 권장일이에요.'**
+  String notifVaccineUpcomingBody(String vaccine);
 }
 
 class _AppLocalizationsDelegate

@@ -1000,4 +1000,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get statsLegendP3P97 => 'WHO normal range (P3~P97)';
+
+  @override
+  String get notifFormulaLowTitle => 'Formula running low';
+
+  @override
+  String notifFormulaLowBody(String product) {
+    return '$product has 1 day left. Please prepare a new container.';
+  }
+
+  @override
+  String get notifVaccineUpcomingTitle => 'Upcoming vaccination';
+
+  @override
+  String notifVaccineUpcomingBody(String vaccine) {
+    return '$vaccine is recommended tomorrow.';
+  }
 }

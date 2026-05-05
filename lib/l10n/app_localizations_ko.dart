@@ -991,4 +991,20 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get statsLegendP3P97 => 'WHO 정상 범위 (P3~P97)';
+
+  @override
+  String get notifFormulaLowTitle => '분유 곧 소진';
+
+  @override
+  String notifFormulaLowBody(String product) {
+    return '$product 1일분 남았어요. 새 통 준비해주세요.';
+  }
+
+  @override
+  String get notifVaccineUpcomingTitle => '예방접종 임박';
+
+  @override
+  String notifVaccineUpcomingBody(String vaccine) {
+    return '내일 $vaccine 권장일이에요.';
+  }
 }

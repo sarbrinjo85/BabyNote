@@ -991,4 +991,20 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get statsLegendP3P97 => 'WHO 正常範囲 (P3~P97)';
+
+  @override
+  String get notifFormulaLowTitle => 'ミルク残量わずか';
+
+  @override
+  String notifFormulaLowBody(String product) {
+    return '$product 残り1日分。新しい缶を準備してください。';
+  }
+
+  @override
+  String get notifVaccineUpcomingTitle => '予防接種が近づいています';
+
+  @override
+  String notifVaccineUpcomingBody(String vaccine) {
+    return '明日は $vaccine の推奨日です。';
+  }
 }

@@ -357,5 +357,12 @@
   "statsNotEnoughData": "데이터가 부족해요. 성장 기록을 2건 이상 등록해주세요.",
   "statsLegendChild": "내 자녀",
   "statsLegendP50": "WHO 평균 (P50)",
-  "statsLegendP3P97": "WHO 정상 범위 (P3~P97)"
+  "statsLegendP3P97": "WHO 정상 범위 (P3~P97)",
+
+  "notifFormulaLowTitle": "분유 곧 소진",
+  "notifFormulaLowBody": "{product} 1일분 남았어요. 새 통 준비해주세요.",
+  "@notifFormulaLowBody": { "placeholders": { "product": { "type": "String" } } },
+  "notifVaccineUpcomingTitle": "예방접종 임박",
+  "notifVaccineUpcomingBody": "내일 {vaccine} 권장일이에요.",
+  "@notifVaccineUpcomingBody": { "placeholders": { "vaccine": { "type": "String" } } }
 }
