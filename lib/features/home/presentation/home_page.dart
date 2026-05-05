@@ -100,6 +100,7 @@ class HomePage extends ConsumerWidget {
                     const SizedBox(height: Spacing.sm),
                   ],
                   // 선택된 자녀 1명 정보 카드 (선택된 거 또는 1명뿐이면 그것)
+                  // 탭하면 편집 화면으로 (이름/생년월일 오타 등 수정 + 삭제 가능)
                   Card(
                     child: ListTile(
                       leading: const Icon(Icons.child_care),
@@ -111,6 +112,11 @@ class HomePage extends ConsumerWidget {
                           (selectedChild ?? children.first)
                               .ageInDays(DateTime.now()),
                         ),
+                      ),
+                      trailing: const Icon(Icons.edit_outlined),
+                      onTap: () => context.push(
+                        '/child/edit',
+                        extra: selectedChild ?? children.first,
                       ),
                     ),
                   ),

@@ -1007,4 +1007,24 @@ class AppLocalizationsKo extends AppLocalizations {
   String notifVaccineUpcomingBody(String vaccine) {
     return '내일 $vaccine 권장일이에요.';
   }
+
+  @override
+  String get childEditTitle => '자녀 정보 편집';
+
+  @override
+  String get childEditSaved => '자녀 정보를 저장했어요';
+
+  @override
+  String get childDeleteAction => '자녀 삭제';
+
+  @override
+  String get childDeleteTitle => '자녀를 삭제할까요?';
+
+  @override
+  String childDeleteWarning(String name) {
+    return '$name 자녀와 모든 기록(수유·수면·기저귀·성장·재고·접종)이 영구 삭제돼요. 되돌릴 수 없어요.';
+  }
+
+  @override
+  String get childDeleted => '자녀를 삭제했어요';
 }

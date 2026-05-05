@@ -1959,6 +1959,42 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'내일 {vaccine} 권장일이에요.'**
   String notifVaccineUpcomingBody(String vaccine);
+
+  /// No description provided for @childEditTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'자녀 정보 편집'**
+  String get childEditTitle;
+
+  /// No description provided for @childEditSaved.
+  ///
+  /// In ko, this message translates to:
+  /// **'자녀 정보를 저장했어요'**
+  String get childEditSaved;
+
+  /// No description provided for @childDeleteAction.
+  ///
+  /// In ko, this message translates to:
+  /// **'자녀 삭제'**
+  String get childDeleteAction;
+
+  /// No description provided for @childDeleteTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'자녀를 삭제할까요?'**
+  String get childDeleteTitle;
+
+  /// No description provided for @childDeleteWarning.
+  ///
+  /// In ko, this message translates to:
+  /// **'{name} 자녀와 모든 기록(수유·수면·기저귀·성장·재고·접종)이 영구 삭제돼요. 되돌릴 수 없어요.'**
+  String childDeleteWarning(String name);
+
+  /// No description provided for @childDeleted.
+  ///
+  /// In ko, this message translates to:
+  /// **'자녀를 삭제했어요'**
+  String get childDeleted;
 }
 
 class _AppLocalizationsDelegate

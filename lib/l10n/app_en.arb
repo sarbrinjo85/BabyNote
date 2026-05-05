@@ -329,5 +329,12 @@
   "notifFormulaLowTitle": "Formula running low",
   "notifFormulaLowBody": "{product} has 1 day left. Please prepare a new container.",
   "notifVaccineUpcomingTitle": "Upcoming vaccination",
-  "notifVaccineUpcomingBody": "{vaccine} is recommended tomorrow."
+  "notifVaccineUpcomingBody": "{vaccine} is recommended tomorrow.",
+
+  "childEditTitle": "Edit child",
+  "childEditSaved": "Child saved",
+  "childDeleteAction": "Delete child",
+  "childDeleteTitle": "Delete this child?",
+  "childDeleteWarning": "{name} and all records (feedings, sleep, diapers, growth, inventory, vaccinations) will be permanently deleted. This cannot be undone.",
+  "childDeleted": "Child deleted"
 }

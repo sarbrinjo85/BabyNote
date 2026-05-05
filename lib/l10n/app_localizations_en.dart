@@ -1016,4 +1016,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String notifVaccineUpcomingBody(String vaccine) {
     return '$vaccine is recommended tomorrow.';
   }
+
+  @override
+  String get childEditTitle => 'Edit child';
+
+  @override
+  String get childEditSaved => 'Child saved';
+
+  @override
+  String get childDeleteAction => 'Delete child';
+
+  @override
+  String get childDeleteTitle => 'Delete this child?';
+
+  @override
+  String childDeleteWarning(String name) {
+    return '$name and all records (feedings, sleep, diapers, growth, inventory, vaccinations) will be permanently deleted. This cannot be undone.';
+  }
+
+  @override
+  String get childDeleted => 'Child deleted';
 }

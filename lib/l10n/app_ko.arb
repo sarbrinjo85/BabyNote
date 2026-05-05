@@ -364,5 +364,13 @@
   "@notifFormulaLowBody": { "placeholders": { "product": { "type": "String" } } },
   "notifVaccineUpcomingTitle": "예방접종 임박",
   "notifVaccineUpcomingBody": "내일 {vaccine} 권장일이에요.",
-  "@notifVaccineUpcomingBody": { "placeholders": { "vaccine": { "type": "String" } } }
+  "@notifVaccineUpcomingBody": { "placeholders": { "vaccine": { "type": "String" } } },
+
+  "childEditTitle": "자녀 정보 편집",
+  "childEditSaved": "자녀 정보를 저장했어요",
+  "childDeleteAction": "자녀 삭제",
+  "childDeleteTitle": "자녀를 삭제할까요?",
+  "childDeleteWarning": "{name} 자녀와 모든 기록(수유·수면·기저귀·성장·재고·접종)이 영구 삭제돼요. 되돌릴 수 없어요.",
+  "@childDeleteWarning": { "placeholders": { "name": { "type": "String" } } },
+  "childDeleted": "자녀를 삭제했어요"
 }

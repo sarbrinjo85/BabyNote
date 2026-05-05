@@ -62,6 +62,40 @@ class ChildRepository {
     // rows는 List<dynamic>. 각 항목을 Map으로 캐스팅 후 Child로 변환.
     return rows.map((r) => Child.fromMap(r)).toList();
   }
+
+  /// 자녀 정보 부분 수정 — 모든 필드 nullable, 명시 안 한 필드는 그대로.
+  ///
+  /// gender는 null 의도 표현 못 함(DB에서 null 허용이라 충돌). 일단 string으로 강제.
+  Future<Child> updateChild({
+    required String id,
+    required String name,
+    required DateTime birthDate,
+    String? gender,
+    int? birthWeightG,
+    int? birthHeightMm,
+  }) async {
+    final patch = <String, dynamic>{
+      'name': name,
+      'birth_date':
+          '${birthDate.year}-${birthDate.month.toString().padLeft(2, '0')}-${birthDate.day.toString().padLeft(2, '0')}',
+      'gender': gender,
+      'birth_weight_g': birthWeightG,
+      'birth_height_mm': birthHeightMm,
+    };
+    final updated = await _client
+        .from('children')
+        .update(patch)
+        .eq('id', id)
+        .select()
+        .single();
+    return Child.fromMap(updated);
+  }
+
+  /// 자녀 삭제. children에 cascade FK가 걸린 records/inventories/caregivers 등도
+  /// 함께 삭제됨. 호출 측에서 confirm dialog로 신중히 처리할 것.
+  Future<void> deleteChild(String id) async {
+    await _client.from('children').delete().eq('id', id);
+  }
 }
 
 /// ChildRepository의 인스턴스를 만들고 SupabaseClient를 주입.

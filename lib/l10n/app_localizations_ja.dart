@@ -1007,4 +1007,24 @@ class AppLocalizationsJa extends AppLocalizations {
   String notifVaccineUpcomingBody(String vaccine) {
     return '明日は $vaccine の推奨日です。';
   }
+
+  @override
+  String get childEditTitle => 'お子さま情報の編集';
+
+  @override
+  String get childEditSaved => 'お子さま情報を保存しました';
+
+  @override
+  String get childDeleteAction => 'お子さまを削除';
+
+  @override
+  String get childDeleteTitle => 'お子さまを削除しますか?';
+
+  @override
+  String childDeleteWarning(String name) {
+    return '$name と全記録(授乳・睡眠・おむつ・成長・在庫・接種)が永久に削除されます。取り消せません。';
+  }
+
+  @override
+  String get childDeleted => 'お子さまを削除しました';
 }

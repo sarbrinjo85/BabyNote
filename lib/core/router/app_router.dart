@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/auth_gate.dart';
+import '../../features/child/domain/child.dart';
+import '../../features/child/presentation/child_edit_page.dart';
 import '../../features/child/presentation/child_register_page.dart';
 import '../../features/diaper/presentation/diaper_register_page.dart';
 import '../../features/family/presentation/family_join_page.dart';
@@ -44,6 +46,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'childNew',
         builder: (context, state) =>
             const AuthGate(child: ChildRegisterPage()),
+      ),
+      GoRoute(
+        // /child/edit — 기존 자녀 정보 편집/삭제. extra에 Child 객체 필수.
+        path: '/child/edit',
+        name: 'childEdit',
+        builder: (context, state) {
+          final child = state.extra as Child;
+          return AuthGate(child: ChildEditPage(child: child));
+        },
       ),
       GoRoute(
         // /feeding/new — 수유 기록 등록 (3 탭: 모유/분유/이유식)

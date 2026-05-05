@@ -329,5 +329,12 @@
   "notifFormulaLowTitle": "ミルク残量わずか",
   "notifFormulaLowBody": "{product} 残り1日分。新しい缶を準備してください。",
   "notifVaccineUpcomingTitle": "予防接種が近づいています",
-  "notifVaccineUpcomingBody": "明日は {vaccine} の推奨日です。"
+  "notifVaccineUpcomingBody": "明日は {vaccine} の推奨日です。",
+
+  "childEditTitle": "お子さま情報の編集",
+  "childEditSaved": "お子さま情報を保存しました",
+  "childDeleteAction": "お子さまを削除",
+  "childDeleteTitle": "お子さまを削除しますか?",
+  "childDeleteWarning": "{name} と全記録(授乳・睡眠・おむつ・成長・在庫・接種)が永久に削除されます。取り消せません。",
+  "childDeleted": "お子さまを削除しました"
 }

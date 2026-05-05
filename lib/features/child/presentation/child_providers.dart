@@ -69,3 +69,44 @@ class ChildCreationController extends AsyncNotifier<void> {
 final childCreationControllerProvider =
     AsyncNotifierProvider<ChildCreationController, void>(
         ChildCreationController.new);
+
+/// 자녀 정보 수정/삭제 컨트롤러.
+class ChildEditController extends AsyncNotifier<void> {
+  @override
+  Future<void> build() async {}
+
+  Future<void> save({
+    required String id,
+    required String name,
+    required DateTime birthDate,
+    String? gender,
+    int? birthWeightG,
+    int? birthHeightMm,
+  }) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      final repo = ref.read(childRepositoryProvider);
+      await repo.updateChild(
+        id: id,
+        name: name,
+        birthDate: birthDate,
+        gender: gender,
+        birthWeightG: birthWeightG,
+        birthHeightMm: birthHeightMm,
+      );
+      ref.invalidate(myChildrenProvider);
+    });
+  }
+
+  Future<void> delete(String id) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      final repo = ref.read(childRepositoryProvider);
+      await repo.deleteChild(id);
+      ref.invalidate(myChildrenProvider);
+    });
+  }
+}
+
+final childEditControllerProvider =
+    AsyncNotifierProvider<ChildEditController, void>(ChildEditController.new);
