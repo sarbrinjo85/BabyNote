@@ -228,6 +228,14 @@ class _Tile extends StatelessWidget {
           : info
               ? theme.colorScheme.secondaryContainer
               : null,
+      // 코랄핑크 톤의 옅은 테두리 — 자녀/그리드 카드와 시각적 일관성
+      shape: RoundedRectangleBorder(
+        borderRadius: Radii.brMd,
+        side: BorderSide(
+          color: BrandColors.seed.withValues(alpha: 0.6),
+          width: 1.2,
+        ),
+      ),
       child: InkWell(
         onTap: onTap,
         borderRadius: Radii.brMd,
