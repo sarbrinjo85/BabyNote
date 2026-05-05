@@ -126,6 +126,7 @@
   "sleepMemoHint": "e.g., held to sleep, watched mobile",
   "sleepNapInProgress": "Napping",
   "sleepNightInProgress": "Sleeping at night",
+  "summarySleeping": "Sleeping",
   "sleepDurationMinutes": "{minutes} min",
 
   "diaperTitle": "Diaper record",

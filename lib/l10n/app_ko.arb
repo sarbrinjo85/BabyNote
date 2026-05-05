@@ -139,6 +139,7 @@
   "sleepMemoHint": "예: 안고 재움, 모빌 보다가 잠듦",
   "sleepNapInProgress": "낮잠 진행 중",
   "sleepNightInProgress": "밤잠 진행 중",
+  "summarySleeping": "수면중",
   "sleepDurationMinutes": "{minutes}분",
   "@sleepDurationMinutes": { "placeholders": { "minutes": { "type": "int" } } },
 

@@ -126,6 +126,7 @@
   "sleepMemoHint": "例: 抱っこで寝かしつけ、モビールを見て就寝",
   "sleepNapInProgress": "お昼寝中",
   "sleepNightInProgress": "夜の睡眠中",
+  "summarySleeping": "睡眠中",
   "sleepDurationMinutes": "{minutes}分",
 
   "diaperTitle": "おむつ記録",

@@ -386,6 +386,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get sleepNightInProgress => '夜の睡眠中';
 
   @override
+  String get summarySleeping => '睡眠中';
+
+  @override
   String sleepDurationMinutes(int minutes) {
     return '$minutes分';
   }

@@ -802,6 +802,12 @@ abstract class AppLocalizations {
   /// **'밤잠 진행 중'**
   String get sleepNightInProgress;
 
+  /// No description provided for @summarySleeping.
+  ///
+  /// In ko, this message translates to:
+  /// **'수면중'**
+  String get summarySleeping;
+
   /// No description provided for @sleepDurationMinutes.
   ///
   /// In ko, this message translates to:

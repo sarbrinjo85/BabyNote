@@ -112,7 +112,8 @@ class RecordButtonsGrid extends ConsumerWidget {
         ),
         _Tile(
           emoji: '💤',
-          label: l10n.summarySleep,
+          // 수면 진행 중일 때 라벨을 "수면중"으로 변경
+          label: sleepInProgress ? l10n.summarySleeping : l10n.summarySleep,
           summary: lastSleep == null
               ? null
               : '${TimeAgo.format(l10n, lastSleep.startedAt)} '
