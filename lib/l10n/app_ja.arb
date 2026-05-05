@@ -343,5 +343,10 @@
 
   "recordDeleteTitle": "この記録を削除しますか?",
   "recordDeleteBody": "この操作は取り消せません。長押しで削除できるのは最新の1件です。",
-  "recordDeleted": "記録を削除しました"
+  "recordDeleted": "記録を削除しました",
+
+  "recordsTitle": "全記録",
+  "recordsEntryHome": "全記録を見る",
+  "recordsEmpty": "まだ記録がありません。ホームから新しい記録を追加してください。",
+  "recordsDeleteBody": "この操作は取り消せません。カードを長押しで1件ずつ削除できます。"
 }

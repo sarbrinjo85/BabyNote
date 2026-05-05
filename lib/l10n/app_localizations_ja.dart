@@ -1045,4 +1045,16 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get recordDeleted => '記録を削除しました';
+
+  @override
+  String get recordsTitle => '全記録';
+
+  @override
+  String get recordsEntryHome => '全記録を見る';
+
+  @override
+  String get recordsEmpty => 'まだ記録がありません。ホームから新しい記録を追加してください。';
+
+  @override
+  String get recordsDeleteBody => 'この操作は取り消せません。カードを長押しで1件ずつ削除できます。';
 }

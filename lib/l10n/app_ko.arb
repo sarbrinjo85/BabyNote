@@ -379,5 +379,10 @@
 
   "recordDeleteTitle": "이 기록을 삭제할까요?",
   "recordDeleteBody": "이 작업은 되돌릴 수 없어요. 길게 눌러 삭제할 수 있는 건 가장 최근 1건이에요.",
-  "recordDeleted": "기록을 삭제했어요"
+  "recordDeleted": "기록을 삭제했어요",
+
+  "recordsTitle": "전체 기록",
+  "recordsEntryHome": "전체 기록 보기",
+  "recordsEmpty": "아직 기록이 없어요. 홈에서 새 기록을 추가해보세요.",
+  "recordsDeleteBody": "이 작업은 되돌릴 수 없어요. 카드를 길게 눌러서 한 건씩 삭제할 수 있어요."
 }

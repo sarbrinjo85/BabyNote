@@ -1046,4 +1046,16 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get recordDeleted => '기록을 삭제했어요';
+
+  @override
+  String get recordsTitle => '전체 기록';
+
+  @override
+  String get recordsEntryHome => '전체 기록 보기';
+
+  @override
+  String get recordsEmpty => '아직 기록이 없어요. 홈에서 새 기록을 추가해보세요.';
+
+  @override
+  String get recordsDeleteBody => '이 작업은 되돌릴 수 없어요. 카드를 길게 눌러서 한 건씩 삭제할 수 있어요.';
 }

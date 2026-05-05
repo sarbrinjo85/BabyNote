@@ -1056,4 +1056,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recordDeleted => 'Record deleted';
+
+  @override
+  String get recordsTitle => 'All records';
+
+  @override
+  String get recordsEntryHome => 'View all records';
+
+  @override
+  String get recordsEmpty =>
+      'No records yet. Add new entries from the home screen.';
+
+  @override
+  String get recordsDeleteBody =>
+      'This action cannot be undone. Long-press a card to delete one entry.';
 }

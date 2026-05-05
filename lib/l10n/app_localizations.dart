@@ -2031,6 +2031,30 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'기록을 삭제했어요'**
   String get recordDeleted;
+
+  /// No description provided for @recordsTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'전체 기록'**
+  String get recordsTitle;
+
+  /// No description provided for @recordsEntryHome.
+  ///
+  /// In ko, this message translates to:
+  /// **'전체 기록 보기'**
+  String get recordsEntryHome;
+
+  /// No description provided for @recordsEmpty.
+  ///
+  /// In ko, this message translates to:
+  /// **'아직 기록이 없어요. 홈에서 새 기록을 추가해보세요.'**
+  String get recordsEmpty;
+
+  /// No description provided for @recordsDeleteBody.
+  ///
+  /// In ko, this message translates to:
+  /// **'이 작업은 되돌릴 수 없어요. 카드를 길게 눌러서 한 건씩 삭제할 수 있어요.'**
+  String get recordsDeleteBody;
 }
 
 class _AppLocalizationsDelegate
