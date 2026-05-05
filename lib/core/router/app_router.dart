@@ -38,6 +38,22 @@ import '../../features/sleep/presentation/sleep_register_page.dart';
 /// GoRouter는 URL-기반 선언형 라우팅. 화면 간 이동은 `context.go('/path')`
 /// (히스토리 교체) 또는 `context.push('/path')` (새 화면 push). 뒤로가기는
 /// `context.pop()`. 자식 화면에서 데이터 가지고 돌아오려면 `await context.push`로 받기.
+/// /widget/:type → /{type}/new 매핑 헬퍼.
+String _widgetTypeRedirect(String? type) {
+  switch (type) {
+    case 'feeding':
+      return '/feeding/new';
+    case 'sleep':
+      return '/sleep/new';
+    case 'diaper':
+      return '/diaper/new';
+    case 'growth':
+      return '/growth/new';
+    default:
+      return '/';
+  }
+}
+
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/',
@@ -48,6 +64,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         // AuthGate로 감쌌으니 비로그인이면 자동으로 AuthPage가 떠. 로그인 후 HomePage.
         builder: (context, state) => const AuthGate(child: HomePage()),
       ),
+      GoRoute(
+        // Android 홈 위젯에서 보낸 babynote://widget/{type} deep link 처리.
+        // GoRouter가 path '/widget/{type}'으로 해석되는 경우.
+        path: '/widget/:type',
+        redirect: (context, state) {
+          final type = state.pathParameters['type'];
+          return _widgetTypeRedirect(type);
+        },
+      ),
+      // GoRouter는 URI host를 무시하고 path만 사용 — babynote://widget/feeding의
+      // path는 '/feeding'으로 들어옴. 4개 short-path도 등록해서 register 페이지로 redirect.
+      GoRoute(path: '/feeding', redirect: (_, _) => '/feeding/new'),
+      GoRoute(path: '/sleep', redirect: (_, _) => '/sleep/new'),
+      GoRoute(path: '/diaper', redirect: (_, _) => '/diaper/new'),
+      GoRoute(path: '/growth', redirect: (_, _) => '/growth/new'),
       GoRoute(
         // /child/new — 새 자녀 등록 폼. 인증된 사용자만 접근 가능 (RLS가 막아주지만
         // UX를 위해 게이트도 한 번 더). AuthGate로 감싸도 됨.

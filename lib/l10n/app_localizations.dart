@@ -2235,6 +2235,30 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'준비 중…'**
   String get settingsExportInProgress;
+
+  /// No description provided for @fabQuickFeed.
+  ///
+  /// In ko, this message translates to:
+  /// **'수유 빠른 기록'**
+  String get fabQuickFeed;
+
+  /// No description provided for @fabQuickFeedTooltip.
+  ///
+  /// In ko, this message translates to:
+  /// **'마지막 패턴 그대로 1탭 기록. 길게 누르면 직접 입력.'**
+  String get fabQuickFeedTooltip;
+
+  /// No description provided for @fabSaved.
+  ///
+  /// In ko, this message translates to:
+  /// **'{summary} 저장됨'**
+  String fabSaved(String summary);
+
+  /// No description provided for @fabUndo.
+  ///
+  /// In ko, this message translates to:
+  /// **'취소'**
+  String get fabUndo;
 }
 
 class _AppLocalizationsDelegate

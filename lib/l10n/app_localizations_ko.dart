@@ -1151,4 +1151,18 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get settingsExportInProgress => '준비 중…';
+
+  @override
+  String get fabQuickFeed => '수유 빠른 기록';
+
+  @override
+  String get fabQuickFeedTooltip => '마지막 패턴 그대로 1탭 기록. 길게 누르면 직접 입력.';
+
+  @override
+  String fabSaved(String summary) {
+    return '$summary 저장됨';
+  }
+
+  @override
+  String get fabUndo => '취소';
 }

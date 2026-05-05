@@ -1165,4 +1165,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsExportInProgress => 'Preparing…';
+
+  @override
+  String get fabQuickFeed => 'Quick feed';
+
+  @override
+  String get fabQuickFeedTooltip =>
+      '1-tap with last pattern. Long-press to enter manually.';
+
+  @override
+  String fabSaved(String summary) {
+    return '$summary saved';
+  }
+
+  @override
+  String get fabUndo => 'Undo';
 }

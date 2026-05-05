@@ -385,5 +385,10 @@
   "settingsExport": "Export data",
   "settingsExportHelp": "Export the selected child's records (feeding, sleep, diapers, growth) as CSV. Useful for doctor visits or backup.",
   "settingsExportCsv": "Share as CSV",
-  "settingsExportInProgress": "Preparing…"
+  "settingsExportInProgress": "Preparing…",
+
+  "fabQuickFeed": "Quick feed",
+  "fabQuickFeedTooltip": "1-tap with last pattern. Long-press to enter manually.",
+  "fabSaved": "{summary} saved",
+  "fabUndo": "Undo"
 }

@@ -385,5 +385,10 @@
   "settingsExport": "データのエクスポート",
   "settingsExportHelp": "現在のお子さまの全記録(授乳・睡眠・おむつ・成長)をCSVで書き出します。診察やバックアップに使えます。",
   "settingsExportCsv": "CSVで共有",
-  "settingsExportInProgress": "準備中…"
+  "settingsExportInProgress": "準備中…",
+
+  "fabQuickFeed": "授乳クイック記録",
+  "fabQuickFeedTooltip": "前回と同じパターンで1タップ記録。長押しで直接入力。",
+  "fabSaved": "{summary} 保存しました",
+  "fabUndo": "取消"
 }

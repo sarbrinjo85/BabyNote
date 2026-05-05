@@ -422,5 +422,11 @@
   "settingsExport": "데이터 내보내기",
   "settingsExportHelp": "현재 자녀의 모든 기록(수유·수면·기저귀·성장)을 CSV로 내보내요. 의사 진료나 백업에 사용할 수 있어요.",
   "settingsExportCsv": "CSV로 공유",
-  "settingsExportInProgress": "준비 중…"
+  "settingsExportInProgress": "준비 중…",
+
+  "fabQuickFeed": "수유 빠른 기록",
+  "fabQuickFeedTooltip": "마지막 패턴 그대로 1탭 기록. 길게 누르면 직접 입력.",
+  "fabSaved": "{summary} 저장됨",
+  "@fabSaved": { "placeholders": { "summary": { "type": "String" } } },
+  "fabUndo": "취소"
 }

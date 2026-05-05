@@ -1150,4 +1150,18 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get settingsExportInProgress => '準備中…';
+
+  @override
+  String get fabQuickFeed => '授乳クイック記録';
+
+  @override
+  String get fabQuickFeedTooltip => '前回と同じパターンで1タップ記録。長押しで直接入力。';
+
+  @override
+  String fabSaved(String summary) {
+    return '$summary 保存しました';
+  }
+
+  @override
+  String get fabUndo => '取消';
 }

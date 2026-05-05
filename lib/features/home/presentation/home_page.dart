@@ -13,6 +13,7 @@ import 'formula_status_card.dart';
 import 'last_activity_section.dart';
 import 'notification_bell.dart';
 import 'notification_scheduler.dart';
+import 'quick_feeding_fab.dart';
 import 'todays_summary_section.dart';
 import 'upcoming_vaccine_card.dart';
 
@@ -37,6 +38,11 @@ class HomePage extends ConsumerWidget {
     final selectedChildId = ref.watch(selectedChildIdProvider);
 
     return Scaffold(
+      // 마지막 수유 패턴 그대로 1탭 빠른 기록 — 신생아는 하루 6~10번 수유.
+      // 자녀 선택돼있을 때만 노출. 길게 누르면 일반 등록 페이지.
+      floatingActionButton: selectedChild != null
+          ? QuickFeedingFab(child: selectedChild)
+          : null,
       appBar: AppBar(
         title: Text(l10n.appTitle),
         actions: [
