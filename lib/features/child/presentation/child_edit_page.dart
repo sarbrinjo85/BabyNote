@@ -48,12 +48,20 @@ class _ChildEditPageState extends ConsumerState<ChildEditPage> {
   Future<void> _pickBirthDate() async {
     final l10n = AppLocalizations.of(context);
     final now = DateTime.now();
+    // 직접 입력 모드의 형식 오류 회피 —
+    // Korean MaterialLocalizations 기본 포맷이 "yyyy. M. d." 라서
+    // 사용자가 "2026-05-05" 등 다른 형식으로 치면 파싱 실패함.
+    // fieldHintText/errorFormatText로 정확한 형식을 제시해 직접 입력 가능.
     final picked = await showDatePicker(
       context: context,
       initialDate: _birthDate,
       firstDate: DateTime(now.year - 5),
       lastDate: now,
       helpText: l10n.childBirthDateHelp,
+      fieldHintText: '2026. 5. 5.',
+      fieldLabelText: l10n.childBirthDateHelp,
+      errorFormatText: '형식: yyyy. m. d.',
+      errorInvalidText: '범위 밖 날짜입니다',
     );
     if (picked != null) {
       setState(() => _birthDate = picked);

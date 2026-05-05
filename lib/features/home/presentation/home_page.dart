@@ -45,6 +45,11 @@ class HomePage extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.appTitle),
         actions: [
+          IconButton(
+            tooltip: l10n.homeAddChild,
+            icon: const Icon(Icons.person_add_alt_1_outlined),
+            onPressed: () => context.push('/child/new'),
+          ),
           const NotificationBellAction(),
           IconButton(
             tooltip: l10n.settingsTitle,

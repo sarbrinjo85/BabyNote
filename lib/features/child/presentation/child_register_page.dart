@@ -39,12 +39,19 @@ class _ChildRegisterPageState extends ConsumerState<ChildRegisterPage> {
   /// 날짜 선택기 띄우기 → 결과 받아서 _birthDate에 저장.
   Future<void> _pickBirthDate() async {
     final now = DateTime.now();
+    final l10n = AppLocalizations.of(context);
+    // 직접 입력 시 Korean locale 포맷 "yyyy. M. d." 만 허용되어 사용자가
+    // 다른 형식으로 치면 파싱 실패 → fieldHintText/errorFormatText로 명시.
     final picked = await showDatePicker(
       context: context,
       initialDate: _birthDate ?? now,
       firstDate: DateTime(now.year - 5), // 5년 전까지만 (너무 큰 아이는 앱 타겟 외)
       lastDate: now, // 미래 날짜 차단
-      helpText: AppLocalizations.of(context).childBirthDateHelp,
+      helpText: l10n.childBirthDateHelp,
+      fieldHintText: '2026. 5. 5.',
+      fieldLabelText: l10n.childBirthDateHelp,
+      errorFormatText: '형식: yyyy. m. d.',
+      errorInvalidText: '범위 밖 날짜입니다',
     );
     if (picked != null) {
       setState(() => _birthDate = picked);
