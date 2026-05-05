@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_description">BabyNote quick record</string>
+    <string name="widget_feeding">Feed</string>
+    <string name="widget_sleep">Sleep</string>
+    <string name="widget_diaper">Diaper</string>
+    <string name="widget_growth">Growth</string>
+</resources>

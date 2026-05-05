@@ -43,7 +43,25 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="com.kjfamily.babynote" android:host="auth-callback" />
             </intent-filter>
+
+            <!-- BabyNote 홈 위젯에서 보낸 deep link (babynote://widget/*).
+                 BROWSABLE 카테고리 X — 외부 브라우저에서 못 열게(앱 내부 전용). -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="babynote" android:host="widget" />
+            </intent-filter>
         </activity>
+        <!-- BabyNote 홈 위젯 (Android) — 잠금 화면 1탭 빠른 기록 -->
+        <receiver android:name=".BabyNoteWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/baby_note_widget_info" />
+        </receiver>
+
         <!-- flutter_local_notifications: 부팅 후 예약된 알림 재등록 + 액션 처리 -->
         <receiver android:exported="false"
             android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />

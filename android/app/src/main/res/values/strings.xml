@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 홈 위젯 라벨 (한국어 default). 일본어/영어는 values-ja, values-en 폴더에서 override -->
+    <string name="widget_description">베이비노트 빠른 기록</string>
+    <string name="widget_feeding">수유</string>
+    <string name="widget_sleep">수면</string>
+    <string name="widget_diaper">기저귀</string>
+    <string name="widget_growth">성장</string>
+</resources>

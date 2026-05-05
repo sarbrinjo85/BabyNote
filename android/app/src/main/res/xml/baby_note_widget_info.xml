@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  BabyNote 홈 위젯 메타데이터.
+
+  ── 사이즈 ─────────────────────────────────────────────────────────
+  4x1 셀 (가로 4 × 세로 1) — 4개 큰 버튼이 한 줄에 들어가게.
+  minWidth/minHeight는 Android 가이드: cells = (width + 30) / 70.
+    4 cells = 250dp / 1 cell = 40dp
+
+  ── updatePeriodMillis ────────────────────────────────────────────
+  0 = OS 자동 update 안 함. 우리는 Flutter 앱에서 home_widget.updateWidget()
+  호출로 명시적으로 갱신하므로 OS가 polling할 필요 없음.
+
+  ── widgetCategory ────────────────────────────────────────────────
+  home_screen: 일반 홈 화면 위젯. keyguard 추가하면 잠금 화면에도 표시 가능
+  (Android 4.2+; 폰 제조사가 막는 경우 있음).
+-->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="250dp"
+    android:minHeight="40dp"
+    android:targetCellWidth="4"
+    android:targetCellHeight="1"
+    android:updatePeriodMillis="0"
+    android:initialLayout="@layout/baby_note_widget"
+    android:resizeMode="horizontal"
+    android:widgetCategory="home_screen"
+    android:previewLayout="@layout/baby_note_widget"
+    android:description="@string/widget_description" />

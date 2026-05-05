@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_description">ベビーノート クイック記録</string>
+    <string name="widget_feeding">授乳</string>
+    <string name="widget_sleep">睡眠</string>
+    <string name="widget_diaper">おむつ</string>
+    <string name="widget_growth">成長</string>
+</resources>
