@@ -113,32 +113,33 @@ class RecordButtonsGrid extends ConsumerWidget {
         _Tile(
           emoji: '💤',
           label: l10n.summarySleep,
-          summary:
-              lastSleep == null ? null : _summarizeSleep(l10n, lastSleep),
-          time: lastSleep == null
+          summary: lastSleep == null
               ? null
-              : TimeAgo.format(l10n, lastSleep.startedAt),
+              : '${TimeAgo.format(l10n, lastSleep.startedAt)} '
+                  '${_summarizeSleep(l10n, lastSleep)}',
+          time: null,
           info: sleepInProgress, // 진행 중 표시 (urgent X, info O)
           onTap: () => context.push('/sleep/new'),
         ),
         _Tile(
           emoji: '💩',
           label: l10n.summaryDiaper,
-          summary:
-              lastDiaper == null ? null : _summarizeDiaper(l10n, lastDiaper),
-          time: lastDiaper == null
+          summary: lastDiaper == null
               ? null
-              : TimeAgo.format(l10n, lastDiaper.recordedAt),
+              : '${TimeAgo.format(l10n, lastDiaper.recordedAt)} '
+                  '${_summarizeDiaper(l10n, lastDiaper)}',
+          time: null,
           alert: diaperAlert,
           onTap: () => context.push('/diaper/new'),
         ),
         _Tile(
           emoji: '📏',
           label: l10n.summaryGrowth,
-          summary: lastGrowth == null ? null : _summarizeGrowth(lastGrowth),
-          time: lastGrowth == null
+          summary: lastGrowth == null
               ? null
-              : TimeAgo.format(l10n, lastGrowth.measuredAt),
+              : '${TimeAgo.format(l10n, lastGrowth.measuredAt)} '
+                  '${_summarizeGrowth(lastGrowth)}',
+          time: null,
           alert: growthAlert,
           onTap: () => context.push('/growth/new'),
         ),
