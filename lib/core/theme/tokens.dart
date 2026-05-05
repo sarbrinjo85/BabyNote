@@ -80,11 +80,12 @@ class TouchTarget {
 class BrandColors {
   const BrandColors._();
 
-  /// 코랄. ColorScheme.fromSeed의 primary seed.
-  static const Color seed = Color(0xFFF0958F);
+  /// 파스텔 코랄 핑크. ColorScheme.fromSeed의 primary seed.
+  /// (이전 0xFFF0958F → 한 단계 더 부드럽게)
+  static const Color seed = Color(0xFFFFB5A7);
 
-  /// 민트. ColorScheme.fromSeed의 tertiarySeed로 전달 — 의료/성장 영역 강조.
-  static const Color tertiarySeed = Color(0xFF7CC2A0);
+  /// 파스텔 민트. tertiarySeed — 코랄과 무게 비슷하게 맞춤.
+  static const Color tertiarySeed = Color(0xFFB6E3C9);
 }
 
 /// 애니메이션 지속 시간 (Material Motion 권장 기반).
