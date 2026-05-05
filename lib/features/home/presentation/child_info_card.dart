@@ -30,6 +30,14 @@ class ChildInfoCard extends ConsumerWidget {
     final ageDays = child.ageInDays(DateTime.now());
 
     return Card(
+      // 코랄핑크 톤의 옅은 테두리로 자녀 섹션 강조.
+      shape: RoundedRectangleBorder(
+        borderRadius: Radii.brMd,
+        side: BorderSide(
+          color: BrandColors.seed.withValues(alpha: 0.6),
+          width: 1.2,
+        ),
+      ),
       child: InkWell(
         onTap: () => context.push('/child/edit', extra: child),
         borderRadius: Radii.brMd,
