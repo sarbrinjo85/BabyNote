@@ -2115,6 +2115,48 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'재고를 삭제했어요'**
   String get inventoryDeleted;
+
+  /// No description provided for @hospitalEdit.
+  ///
+  /// In ko, this message translates to:
+  /// **'편집'**
+  String get hospitalEdit;
+
+  /// No description provided for @hospitalEditTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'병원 정보 편집'**
+  String get hospitalEditTitle;
+
+  /// No description provided for @bellTooltip.
+  ///
+  /// In ko, this message translates to:
+  /// **'다가오는 일정'**
+  String get bellTooltip;
+
+  /// No description provided for @bellSheetTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'다가오는 일정'**
+  String get bellSheetTitle;
+
+  /// No description provided for @bellEmpty.
+  ///
+  /// In ko, this message translates to:
+  /// **'다가오는 일정이 없어요. 한가해요 🎉'**
+  String get bellEmpty;
+
+  /// No description provided for @bellFormulaLowTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'분유 곧 소진'**
+  String get bellFormulaLowTitle;
+
+  /// No description provided for @bellSizeUpTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'기저귀 사이즈업'**
+  String get bellSizeUpTitle;
 }
 
 class _AppLocalizationsDelegate

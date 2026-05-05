@@ -65,6 +65,36 @@ class HospitalController extends AsyncNotifier<void> {
       ref.invalidate(myHospitalsProvider);
     });
   }
+
+  /// 병원 정보 수정. isDefault가 true면 setDefault 후속 호출 (다른 병원 default 해제).
+  Future<void> saveEdit({
+    required String id,
+    required String name,
+    String? specialty,
+    String? phone,
+    String? address,
+    String? note,
+    required bool isDefault,
+  }) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      final repo = ref.read(hospitalRepositoryProvider);
+      await repo.update(
+        id: id,
+        name: name,
+        specialty: specialty,
+        phone: phone,
+        address: address,
+        note: note,
+        isDefault: isDefault,
+      );
+      // isDefault가 true면 다른 병원도 false로 만들기 (단일 default 보장)
+      if (isDefault) {
+        await repo.setDefault(id);
+      }
+      ref.invalidate(myHospitalsProvider);
+    });
+  }
 }
 
 final hospitalControllerProvider =

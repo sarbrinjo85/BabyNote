@@ -11,6 +11,7 @@ import '../../child/presentation/selected_child_provider.dart';
 import 'diaper_size_up_card.dart';
 import 'formula_status_card.dart';
 import 'last_activity_section.dart';
+import 'notification_bell.dart';
 import 'notification_scheduler.dart';
 import 'todays_summary_section.dart';
 import 'upcoming_vaccine_card.dart';
@@ -39,6 +40,8 @@ class HomePage extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.appTitle),
         actions: [
+          // 다가오는 일정 종 — 분유/사이즈업/접종 임박 한눈에
+          const NotificationBellAction(),
           IconButton(
             tooltip: l10n.homeLogout,
             icon: const Icon(Icons.logout),

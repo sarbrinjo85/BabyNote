@@ -41,6 +41,34 @@ class HospitalRepository {
   Future<void> delete(String hospitalId) async {
     await _client.from('hospitals').delete().eq('id', hospitalId);
   }
+
+  /// 병원 정보 부분 수정 (이름/진료과/전화/주소/메모/기본여부).
+  /// is_default가 true로 바뀌면 호출 측이 setDefault로 처리하는 게 깔끔.
+  Future<Hospital> update({
+    required String id,
+    required String name,
+    String? specialty,
+    String? phone,
+    String? address,
+    String? note,
+    required bool isDefault,
+  }) async {
+    final patch = <String, dynamic>{
+      'name': name,
+      'specialty': specialty,
+      'phone': phone,
+      'address': address,
+      'note': note,
+      'is_default': isDefault,
+    };
+    final updated = await _client
+        .from('hospitals')
+        .update(patch)
+        .eq('id', id)
+        .select()
+        .single();
+    return Hospital.fromMap(updated);
+  }
 }
 
 final hospitalRepositoryProvider = Provider<HospitalRepository>((ref) {

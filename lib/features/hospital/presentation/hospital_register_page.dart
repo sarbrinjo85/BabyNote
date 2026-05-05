@@ -4,10 +4,13 @@ import 'package:go_router/go_router.dart';
 
 import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/theme/tokens.dart';
+import '../domain/hospital.dart';
 import 'hospital_providers.dart';
 
 class HospitalRegisterPage extends ConsumerStatefulWidget {
-  const HospitalRegisterPage({super.key});
+  const HospitalRegisterPage({super.key, this.editing});
+
+  final Hospital? editing;
 
   @override
   ConsumerState<HospitalRegisterPage> createState() =>
@@ -17,12 +20,26 @@ class HospitalRegisterPage extends ConsumerStatefulWidget {
 class _HospitalRegisterPageState extends ConsumerState<HospitalRegisterPage> {
   final _formKey = GlobalKey<FormState>();
 
-  String _name = '';
-  String _specialty = 'pediatrics';
-  String _phone = '';
-  String _address = '';
-  String _note = '';
-  bool _isDefault = true;
+  late String _name;
+  late String _specialty;
+  late String _phone;
+  late String _address;
+  late String _note;
+  late bool _isDefault;
+
+  bool get _isEdit => widget.editing != null;
+
+  @override
+  void initState() {
+    super.initState();
+    final e = widget.editing;
+    _name = e?.name ?? '';
+    _specialty = e?.specialty ?? 'pediatrics';
+    _phone = e?.phone ?? '';
+    _address = e?.address ?? '';
+    _note = e?.note ?? '';
+    _isDefault = e?.isDefault ?? true;
+  }
 
   Future<void> _submit() async {
     final l10n = AppLocalizations.of(context);
@@ -30,20 +47,32 @@ class _HospitalRegisterPageState extends ConsumerState<HospitalRegisterPage> {
     if (form == null || !form.validate()) return;
     form.save();
 
-    await ref.read(hospitalControllerProvider.notifier).create(
-          name: _name.trim(),
-          specialty: _specialty,
-          phone: _phone.trim().isEmpty ? null : _phone.trim(),
-          address: _address.trim().isEmpty ? null : _address.trim(),
-          note: _note.trim().isEmpty ? null : _note.trim(),
-          isDefault: _isDefault,
-        );
+    if (_isEdit) {
+      await ref.read(hospitalControllerProvider.notifier).saveEdit(
+            id: widget.editing!.id,
+            name: _name.trim(),
+            specialty: _specialty,
+            phone: _phone.trim().isEmpty ? null : _phone.trim(),
+            address: _address.trim().isEmpty ? null : _address.trim(),
+            note: _note.trim().isEmpty ? null : _note.trim(),
+            isDefault: _isDefault,
+          );
+    } else {
+      await ref.read(hospitalControllerProvider.notifier).create(
+            name: _name.trim(),
+            specialty: _specialty,
+            phone: _phone.trim().isEmpty ? null : _phone.trim(),
+            address: _address.trim().isEmpty ? null : _address.trim(),
+            note: _note.trim().isEmpty ? null : _note.trim(),
+            isDefault: _isDefault,
+          );
+    }
     if (!mounted) return;
     final state = ref.read(hospitalControllerProvider);
     state.when(
       data: (_) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.hospitalSavedToast)),
+          SnackBar(content: Text(_isEdit ? l10n.recordEditSaved : l10n.hospitalSavedToast)),
         );
         context.pop();
       },
@@ -62,7 +91,9 @@ class _HospitalRegisterPageState extends ConsumerState<HospitalRegisterPage> {
     final isLoading = asyncCtrl.isLoading;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.hospitalRegisterTitle)),
+      appBar: AppBar(
+        title: Text(_isEdit ? l10n.hospitalEditTitle : l10n.hospitalRegisterTitle),
+      ),
       body: SafeArea(
         top: false,
         child: Form(
@@ -71,11 +102,12 @@ class _HospitalRegisterPageState extends ConsumerState<HospitalRegisterPage> {
             padding: const EdgeInsets.all(Spacing.md),
             children: [
               TextFormField(
+                initialValue: _name,
                 decoration: InputDecoration(
                   labelText: l10n.hospitalNameLabel,
                   hintText: l10n.hospitalNameHint,
                 ),
-                autofocus: true,
+                autofocus: !_isEdit,
                 validator: (v) =>
                     (v == null || v.trim().isEmpty) ? l10n.hospitalNameRequired : null,
                 onSaved: (v) => _name = v ?? '',
@@ -98,6 +130,7 @@ class _HospitalRegisterPageState extends ConsumerState<HospitalRegisterPage> {
               const SizedBox(height: Spacing.lg),
 
               TextFormField(
+                initialValue: _phone,
                 decoration: InputDecoration(
                   labelText: l10n.hospitalPhone,
                   hintText: l10n.hospitalPhoneHint,
@@ -108,6 +141,7 @@ class _HospitalRegisterPageState extends ConsumerState<HospitalRegisterPage> {
               const SizedBox(height: Spacing.md),
 
               TextFormField(
+                initialValue: _address,
                 decoration: InputDecoration(
                   labelText: l10n.hospitalAddress,
                   hintText: l10n.hospitalAddressHint,
@@ -117,6 +151,7 @@ class _HospitalRegisterPageState extends ConsumerState<HospitalRegisterPage> {
               const SizedBox(height: Spacing.md),
 
               TextFormField(
+                initialValue: _note,
                 decoration: InputDecoration(
                   labelText: l10n.commonMemoOptional,
                   hintText: l10n.hospitalMemoHint,
@@ -144,7 +179,9 @@ class _HospitalRegisterPageState extends ConsumerState<HospitalRegisterPage> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.check),
-                label: Text(isLoading ? l10n.commonSaving : l10n.commonRegister),
+                label: Text(isLoading
+                    ? l10n.commonSaving
+                    : (_isEdit ? l10n.commonSave : l10n.commonRegister)),
                 style: FilledButton.styleFrom(
                   minimumSize: const Size.fromHeight(TouchTarget.huge),
                 ),

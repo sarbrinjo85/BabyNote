@@ -360,5 +360,14 @@
   "diaperInventoryEditTitle": "Edit diaper pack",
   "inventoryDeleteTitle": "Delete this inventory?",
   "inventoryDeleteBody": "{name} will be permanently deleted. This cannot be undone.",
-  "inventoryDeleted": "Inventory deleted"
+  "inventoryDeleted": "Inventory deleted",
+
+  "hospitalEdit": "Edit",
+  "hospitalEditTitle": "Edit hospital",
+
+  "bellTooltip": "Upcoming",
+  "bellSheetTitle": "Upcoming",
+  "bellEmpty": "No upcoming alerts. Enjoy the calm 🎉",
+  "bellFormulaLowTitle": "Formula running low",
+  "bellSizeUpTitle": "Diaper size-up"
 }

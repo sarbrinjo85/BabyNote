@@ -16,6 +16,7 @@ import '../../features/feeding/presentation/feeding_register_page.dart';
 import '../../features/growth/domain/growth.dart';
 import '../../features/growth/presentation/growth_register_page.dart';
 import '../../features/home/presentation/home_page.dart';
+import '../../features/hospital/domain/hospital.dart';
 import '../../features/hospital/presentation/hospital_list_page.dart';
 import '../../features/hospital/presentation/hospital_register_page.dart';
 import '../../features/inventory/domain/diaper_inventory.dart';
@@ -140,10 +141,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             const AuthGate(child: HospitalListPage()),
       ),
       GoRoute(
+        // /hospital/new — 등록 또는 편집(extra=Hospital)
         path: '/hospital/new',
         name: 'hospitalNew',
-        builder: (context, state) =>
-            const AuthGate(child: HospitalRegisterPage()),
+        builder: (context, state) {
+          final editing = state.extra as Hospital?;
+          return AuthGate(child: HospitalRegisterPage(editing: editing));
+        },
       ),
       GoRoute(
         // /records — 전체 기록 (수유/수면/기저귀/성장 4탭, long-press 삭제)

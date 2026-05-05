@@ -106,7 +106,9 @@ class _HospitalCard extends ConsumerWidget {
                 ),
                 PopupMenuButton<String>(
                   onSelected: (v) async {
-                    if (v == 'default') {
+                    if (v == 'edit') {
+                      context.push('/hospital/new', extra: h);
+                    } else if (v == 'default') {
                       await ref
                           .read(hospitalControllerProvider.notifier)
                           .setDefault(h.id);
@@ -120,6 +122,10 @@ class _HospitalCard extends ConsumerWidget {
                     }
                   },
                   itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: 'edit',
+                      child: Text(l10n.hospitalEdit),
+                    ),
                     if (!h.isDefault)
                       PopupMenuItem(
                         value: 'default',

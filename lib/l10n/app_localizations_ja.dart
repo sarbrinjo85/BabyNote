@@ -1089,4 +1089,25 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get inventoryDeleted => '在庫を削除しました';
+
+  @override
+  String get hospitalEdit => '編集';
+
+  @override
+  String get hospitalEditTitle => '病院情報の編集';
+
+  @override
+  String get bellTooltip => '近日の予定';
+
+  @override
+  String get bellSheetTitle => '近日の予定';
+
+  @override
+  String get bellEmpty => '近日の予定はありません。ゆっくりどうぞ 🎉';
+
+  @override
+  String get bellFormulaLowTitle => 'ミルクまもなく切れ';
+
+  @override
+  String get bellSizeUpTitle => 'おむつサイズアップ';
 }

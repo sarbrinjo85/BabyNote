@@ -1090,4 +1090,25 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get inventoryDeleted => '재고를 삭제했어요';
+
+  @override
+  String get hospitalEdit => '편집';
+
+  @override
+  String get hospitalEditTitle => '병원 정보 편집';
+
+  @override
+  String get bellTooltip => '다가오는 일정';
+
+  @override
+  String get bellSheetTitle => '다가오는 일정';
+
+  @override
+  String get bellEmpty => '다가오는 일정이 없어요. 한가해요 🎉';
+
+  @override
+  String get bellFormulaLowTitle => '분유 곧 소진';
+
+  @override
+  String get bellSizeUpTitle => '기저귀 사이즈업';
 }

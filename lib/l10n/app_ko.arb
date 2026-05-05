@@ -397,5 +397,14 @@
   "inventoryDeleteTitle": "이 재고를 삭제할까요?",
   "inventoryDeleteBody": "{name} 정보가 영구 삭제돼요. 되돌릴 수 없어요.",
   "@inventoryDeleteBody": { "placeholders": { "name": { "type": "String" } } },
-  "inventoryDeleted": "재고를 삭제했어요"
+  "inventoryDeleted": "재고를 삭제했어요",
+
+  "hospitalEdit": "편집",
+  "hospitalEditTitle": "병원 정보 편집",
+
+  "bellTooltip": "다가오는 일정",
+  "bellSheetTitle": "다가오는 일정",
+  "bellEmpty": "다가오는 일정이 없어요. 한가해요 🎉",
+  "bellFormulaLowTitle": "분유 곧 소진",
+  "bellSizeUpTitle": "기저귀 사이즈업"
 }

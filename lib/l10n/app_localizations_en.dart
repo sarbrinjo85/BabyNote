@@ -1102,4 +1102,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get inventoryDeleted => 'Inventory deleted';
+
+  @override
+  String get hospitalEdit => 'Edit';
+
+  @override
+  String get hospitalEditTitle => 'Edit hospital';
+
+  @override
+  String get bellTooltip => 'Upcoming';
+
+  @override
+  String get bellSheetTitle => 'Upcoming';
+
+  @override
+  String get bellEmpty => 'No upcoming alerts. Enjoy the calm 🎉';
+
+  @override
+  String get bellFormulaLowTitle => 'Formula running low';
+
+  @override
+  String get bellSizeUpTitle => 'Diaper size-up';
 }

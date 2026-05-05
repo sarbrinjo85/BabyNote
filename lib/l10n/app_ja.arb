@@ -360,5 +360,14 @@
   "diaperInventoryEditTitle": "おむつ情報の編集",
   "inventoryDeleteTitle": "この在庫を削除しますか?",
   "inventoryDeleteBody": "{name} の情報が永久に削除されます。取り消せません。",
-  "inventoryDeleted": "在庫を削除しました"
+  "inventoryDeleted": "在庫を削除しました",
+
+  "hospitalEdit": "編集",
+  "hospitalEditTitle": "病院情報の編集",
+
+  "bellTooltip": "近日の予定",
+  "bellSheetTitle": "近日の予定",
+  "bellEmpty": "近日の予定はありません。ゆっくりどうぞ 🎉",
+  "bellFormulaLowTitle": "ミルクまもなく切れ",
+  "bellSizeUpTitle": "おむつサイズアップ"
 }
