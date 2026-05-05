@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/theme/tokens.dart';
 import '../../child/presentation/child_providers.dart';
+import '../../child/presentation/selected_child_provider.dart';
 import '../domain/sleep.dart';
 import 'sleep_providers.dart';
 
@@ -95,7 +96,7 @@ class _SleepRegisterPageState extends ConsumerState<SleepRegisterPage> {
         error: (err, _) => Center(child: Text(l10n.errorChildrenLoadFailed(err))),
         data: (children) {
           if (children.isEmpty) return _NoChildPlaceholder();
-          final child = children.first;
+          final child = ref.watch(selectedChildProvider) ?? children.first;
 
           // 진행 중 수면 watch — 시작/종료 시점에 invalidate되어 자동 갱신
           final asyncOngoing = ref.watch(ongoingSleepProvider(child.id));

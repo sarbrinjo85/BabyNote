@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/theme/tokens.dart';
 import '../../child/presentation/child_providers.dart';
+import '../../child/presentation/selected_child_provider.dart';
 import '../domain/formula_inventory.dart';
 import 'formula_inventory_providers.dart';
 
@@ -33,7 +34,8 @@ class FormulaInventoryListPage extends ConsumerWidget {
         error: (err, _) => Center(child: Text(l10n.errorChildLoadFailed(err))),
         data: (children) {
           if (children.isEmpty) return _NoChildPlaceholder();
-          final childId = children.first.id;
+          final childId =
+              (ref.watch(selectedChildProvider) ?? children.first).id;
           final asyncList = ref.watch(formulaInventoriesProvider(childId));
 
           return asyncList.when(

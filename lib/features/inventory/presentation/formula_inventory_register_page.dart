@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/theme/tokens.dart';
 import '../../child/presentation/child_providers.dart';
+import '../../child/presentation/selected_child_provider.dart';
 import 'formula_inventory_providers.dart';
 
 class FormulaInventoryRegisterPage extends ConsumerStatefulWidget {
@@ -94,7 +95,7 @@ class _FormulaInventoryRegisterPageState
         error: (err, _) => Center(child: Text(l10n.errorChildrenLoadFailed(err))),
         data: (children) {
           if (children.isEmpty) return _NoChildPlaceholder();
-          final child = children.first;
+          final child = ref.watch(selectedChildProvider) ?? children.first;
 
           return SafeArea(
             top: false,

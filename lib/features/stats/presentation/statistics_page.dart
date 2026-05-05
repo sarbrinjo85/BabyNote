@@ -7,6 +7,7 @@ import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/theme/tokens.dart';
 import '../../child/domain/child.dart';
 import '../../child/presentation/child_providers.dart';
+import '../../child/presentation/selected_child_provider.dart';
 import '../../growth/domain/growth.dart';
 import '../../growth/domain/who_percentiles.dart';
 import 'stats_providers.dart';
@@ -38,8 +39,9 @@ class StatisticsPage extends ConsumerWidget {
           if (children.isEmpty) {
             return _NoChildPlaceholder();
           }
-          // Phase 단순화: 첫 자녀. 자녀 picker는 후속.
-          final childId = children.first.id;
+          final selected =
+              ref.watch(selectedChildProvider) ?? children.first;
+          final childId = selected.id;
 
           return ListView(
             padding: const EdgeInsets.all(Spacing.md),
@@ -65,7 +67,7 @@ class StatisticsPage extends ConsumerWidget {
               _ChartCard(
                 title: l10n.statsGrowthCurve,
                 subtitle: l10n.statsAllRecords,
-                child: _GrowthLineChart(child: children.first),
+                child: _GrowthLineChart(child: selected),
               ),
               const SizedBox(height: Spacing.xs),
               const Padding(

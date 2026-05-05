@@ -6,6 +6,7 @@ import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/theme/tokens.dart';
 import '../../child/domain/child.dart';
 import '../../child/presentation/child_providers.dart';
+import '../../child/presentation/selected_child_provider.dart';
 import '../domain/vaccination.dart';
 import '../domain/vaccine_schedule.dart';
 import 'vaccination_providers.dart';
@@ -36,7 +37,7 @@ class VaccineListPage extends ConsumerWidget {
         error: (err, _) => Center(child: Text(l10n.errorChildLoadFailed(err))),
         data: (children) {
           if (children.isEmpty) return _NoChildPlaceholder();
-          final child = children.first;
+          final child = ref.watch(selectedChildProvider) ?? children.first;
 
           // 일단 KR 하드코드 — user_profiles.country watch는 후속 작업
           final asyncSchedules = ref.watch(vaccineSchedulesProvider('KR'));

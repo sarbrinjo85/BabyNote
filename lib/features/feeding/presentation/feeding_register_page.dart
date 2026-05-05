@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/theme/tokens.dart';
 import '../../child/presentation/child_providers.dart';
+import '../../child/presentation/selected_child_provider.dart';
 import '../../inventory/presentation/formula_inventory_providers.dart';
 import 'feeding_providers.dart';
 
@@ -208,8 +209,8 @@ class _FeedingRegisterPageState extends ConsumerState<FeedingRegisterPage>
             // 자녀 0명 — 등록 화면 전에 자녀 등록 안내
             return _NoChildPlaceholder();
           }
-          // Phase 2 단순화: 첫 자녀 사용. 자녀 여러 명 대응은 후반에.
-          final child = children.first;
+          // selectedChild는 myChildrenProvider 결과 안에서 매칭된 1명 (없으면 첫 자녀).
+          final child = ref.watch(selectedChildProvider) ?? children.first;
 
           return Column(
             children: [

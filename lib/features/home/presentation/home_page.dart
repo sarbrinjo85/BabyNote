@@ -8,6 +8,7 @@ import '../../../core/widgets/big_action_button.dart';
 import '../../auth/data/auth_repository.dart';
 import '../../auth/presentation/auth_providers.dart';
 import '../../child/presentation/child_providers.dart';
+import '../../child/presentation/selected_child_provider.dart';
 import 'diaper_size_up_card.dart';
 import 'formula_status_card.dart';
 import 'last_activity_section.dart';
@@ -32,6 +33,8 @@ class HomePage extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final currentUser = ref.watch(currentUserProvider);
     final asyncChildren = ref.watch(myChildrenProvider);
+    final selectedChild = ref.watch(selectedChildProvider);
+    final selectedChildId = ref.watch(selectedChildIdProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -84,18 +87,44 @@ class HomePage extends ConsumerWidget {
               }
               return Column(
                 children: [
-                  ...children.map((c) => Card(
-                        child: ListTile(
-                          leading: const Icon(Icons.child_care),
-                          title: Text(c.name),
-                          subtitle: Text(
-                            l10n.homeChildSubtitle(
-                              _genderLabel(context, c.gender),
-                              c.ageInDays(DateTime.now()),
-                            ),
-                          ),
+                  // ── 자녀 picker (2명 이상일 때만 ChoiceChip 그룹) ────────
+                  if (children.length >= 2) ...[
+                    Wrap(
+                      spacing: Spacing.xs,
+                      runSpacing: Spacing.xs,
+                      children: children.map((c) {
+                        final isSel = (selectedChildId ?? children.first.id) == c.id;
+                        return ChoiceChip(
+                          label: Text(c.name),
+                          avatar: const Icon(Icons.child_care, size: 18),
+                          selected: isSel,
+                          onSelected: (sel) {
+                            if (sel) {
+                              ref
+                                  .read(selectedChildIdProvider.notifier)
+                                  .state = c.id;
+                            }
+                          },
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: Spacing.sm),
+                  ],
+                  // 선택된 자녀 1명 정보 카드 (선택된 거 또는 1명뿐이면 그것)
+                  Card(
+                    child: ListTile(
+                      leading: const Icon(Icons.child_care),
+                      title: Text((selectedChild ?? children.first).name),
+                      subtitle: Text(
+                        l10n.homeChildSubtitle(
+                          _genderLabel(
+                              context, (selectedChild ?? children.first).gender),
+                          (selectedChild ?? children.first)
+                              .ageInDays(DateTime.now()),
                         ),
-                      )),
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: Spacing.xs),
                   OutlinedButton.icon(
                     onPressed: () => context.push('/child/new'),
@@ -107,26 +136,21 @@ class HomePage extends ConsumerWidget {
             },
           ),
 
-          // ── 분유 잔량 + 오늘의 요약 + 마지막 활동 (자녀 1명 이상일 때만) ──
-          ...asyncChildren.maybeWhen(
-            data: (cs) => cs.isEmpty
-                ? const <Widget>[]
-                : [
-                    const SizedBox(height: Spacing.lg),
-                    FormulaStatusCard(childId: cs.first.id),
-                    const SizedBox(height: Spacing.xs),
-                    DiaperSizeUpCard(childId: cs.first.id),
-                    const SizedBox(height: Spacing.xs),
-                    UpcomingVaccineCard(child: cs.first),
-                    const SizedBox(height: Spacing.md),
-                    TodaysSummarySection(childId: cs.first.id),
-                    const SizedBox(height: Spacing.lg),
-                    _SectionTitle(l10n.homeLastActivity),
-                    const SizedBox(height: Spacing.xs),
-                    LastActivitySection(childId: cs.first.id),
-                  ],
-            orElse: () => const <Widget>[],
-          ),
+          // ── 분유 잔량 + 오늘의 요약 + 마지막 활동 (선택된 자녀 기준) ──
+          if (selectedChild != null) ...[
+            const SizedBox(height: Spacing.lg),
+            FormulaStatusCard(childId: selectedChild.id),
+            const SizedBox(height: Spacing.xs),
+            DiaperSizeUpCard(childId: selectedChild.id),
+            const SizedBox(height: Spacing.xs),
+            UpcomingVaccineCard(child: selectedChild),
+            const SizedBox(height: Spacing.md),
+            TodaysSummarySection(childId: selectedChild.id),
+            const SizedBox(height: Spacing.lg),
+            _SectionTitle(l10n.homeLastActivity),
+            const SizedBox(height: Spacing.xs),
+            LastActivitySection(childId: selectedChild.id),
+          ],
 
           const SizedBox(height: Spacing.xl),
 
