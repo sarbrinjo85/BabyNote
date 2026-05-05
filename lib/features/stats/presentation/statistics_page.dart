@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/child_picker_action.dart';
 import '../../child/domain/child.dart';
 import '../../child/presentation/child_providers.dart';
 import '../../child/presentation/selected_child_provider.dart';
@@ -30,7 +31,10 @@ class StatisticsPage extends ConsumerWidget {
     final asyncChildren = ref.watch(myChildrenProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.statsTitle)),
+      appBar: AppBar(
+        title: Text(l10n.statsTitle),
+        actions: const [ChildPickerAction()],
+      ),
       body: SafeArea(top: false, child: asyncChildren.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) =>

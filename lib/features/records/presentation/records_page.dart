@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/utils/time_ago.dart';
+import '../../../core/widgets/child_picker_action.dart';
 import '../../child/presentation/child_providers.dart';
 import '../../child/presentation/selected_child_provider.dart';
 import '../../diaper/data/diaper_repository.dart';
@@ -40,6 +41,7 @@ class RecordsPage extends ConsumerWidget {
       child: Scaffold(
         appBar: AppBar(
           title: Text(l10n.recordsTitle),
+          actions: const [ChildPickerAction()],
           bottom: TabBar(
             isScrollable: true,
             tabs: [

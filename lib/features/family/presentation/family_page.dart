@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/child_picker_action.dart';
 import '../../auth/presentation/auth_providers.dart';
 import '../../child/presentation/child_providers.dart';
 import 'family_providers.dart';
@@ -31,7 +32,10 @@ class _FamilyPageState extends ConsumerState<FamilyPage> {
     final asyncChildren = ref.watch(myChildrenProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.familyTitle)),
+      appBar: AppBar(
+        title: Text(l10n.familyTitle),
+        actions: const [ChildPickerAction()],
+      ),
       body: SafeArea(top: false, child: asyncChildren.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) =>

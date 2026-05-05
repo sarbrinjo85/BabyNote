@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/child_picker_action.dart';
 import '../../child/presentation/child_providers.dart';
 import '../../child/presentation/selected_child_provider.dart';
 import '../domain/diaper_inventory.dart';
@@ -21,6 +22,7 @@ class DiaperInventoryListPage extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.diaperInventoryTitle),
         actions: [
+          const ChildPickerAction(),
           IconButton(
             tooltip: l10n.commonAdd,
             icon: const Icon(Icons.add),

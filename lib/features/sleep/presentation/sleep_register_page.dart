@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/child_picker_action.dart';
 import '../../child/presentation/child_providers.dart';
 import '../../child/presentation/selected_child_provider.dart';
 import '../domain/sleep.dart';
@@ -90,7 +91,10 @@ class _SleepRegisterPageState extends ConsumerState<SleepRegisterPage> {
     final isLoading = asyncCtrl.isLoading;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.sleepTitle)),
+      appBar: AppBar(
+        title: Text(l10n.sleepTitle),
+        actions: const [ChildPickerAction()],
+      ),
       body: asyncChildren.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => Center(child: Text(l10n.errorChildrenLoadFailed(err))),

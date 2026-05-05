@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/child_picker_action.dart';
 import '../../child/presentation/child_providers.dart';
 import '../../child/presentation/selected_child_provider.dart';
 import 'growth_providers.dart';
@@ -91,7 +92,10 @@ class _GrowthRegisterPageState extends ConsumerState<GrowthRegisterPage> {
     final isLoading = asyncCtrl.isLoading;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.growthTitle)),
+      appBar: AppBar(
+        title: Text(l10n.growthTitle),
+        actions: const [ChildPickerAction()],
+      ),
       body: asyncChildren.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => Center(child: Text(l10n.errorChildrenLoadFailed(err))),

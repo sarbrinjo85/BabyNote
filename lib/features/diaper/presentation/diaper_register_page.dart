@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/child_picker_action.dart';
 import '../../child/presentation/child_providers.dart';
 import '../../child/presentation/selected_child_provider.dart';
 import '../../inventory/presentation/diaper_inventory_providers.dart';
@@ -74,7 +75,10 @@ class _DiaperRegisterPageState extends ConsumerState<DiaperRegisterPage> {
     final isLoading = asyncCtrl.isLoading;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.diaperTitle)),
+      appBar: AppBar(
+        title: Text(l10n.diaperTitle),
+        actions: const [ChildPickerAction()],
+      ),
       body: asyncChildren.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => Center(child: Text(l10n.errorChildrenLoadFailed(err))),

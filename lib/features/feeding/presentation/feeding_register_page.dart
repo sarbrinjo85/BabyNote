@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 
 import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/child_picker_action.dart';
 import '../../child/presentation/child_providers.dart';
 import '../../child/presentation/selected_child_provider.dart';
 import '../../inventory/presentation/formula_inventory_providers.dart';
@@ -192,6 +193,7 @@ class _FeedingRegisterPageState extends ConsumerState<FeedingRegisterPage>
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.feedingTitle),
+        actions: const [ChildPickerAction()],
         bottom: TabBar(
           controller: _tabController,
           tabs: [
