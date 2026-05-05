@@ -430,11 +430,11 @@
   "settingsExportCsv": "CSV로 공유",
   "settingsExportInProgress": "준비 중…",
 
-  "fabQuickFeed": "수유 빠른 기록",
+  "fabQuickFeed": "간편수유입력",
   "fabQuickFeedTooltip": "마지막 패턴 그대로 1탭 기록. 길게 누르면 직접 입력.",
   "fabSaved": "{summary} 저장됨",
   "@fabSaved": { "placeholders": { "summary": { "type": "String" } } },
   "fabUndo": "취소",
-  "fabAmountEditTitle": "수유 양 직접 입력",
+  "fabAmountEditTitle": "간편수유양 입력",
   "fabAmountEditHint": "예: 120"
 }

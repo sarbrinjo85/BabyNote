@@ -1171,7 +1171,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsExportInProgress => '준비 중…';
 
   @override
-  String get fabQuickFeed => '수유 빠른 기록';
+  String get fabQuickFeed => '간편수유입력';
 
   @override
   String get fabQuickFeedTooltip => '마지막 패턴 그대로 1탭 기록. 길게 누르면 직접 입력.';
@@ -1185,7 +1185,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get fabUndo => '취소';
 
   @override
-  String get fabAmountEditTitle => '수유 양 직접 입력';
+  String get fabAmountEditTitle => '간편수유양 입력';
 
   @override
   String get fabAmountEditHint => '예: 120';

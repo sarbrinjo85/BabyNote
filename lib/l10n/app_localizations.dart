@@ -2275,7 +2275,7 @@ abstract class AppLocalizations {
   /// No description provided for @fabQuickFeed.
   ///
   /// In ko, this message translates to:
-  /// **'수유 빠른 기록'**
+  /// **'간편수유입력'**
   String get fabQuickFeed;
 
   /// No description provided for @fabQuickFeedTooltip.
@@ -2299,7 +2299,7 @@ abstract class AppLocalizations {
   /// No description provided for @fabAmountEditTitle.
   ///
   /// In ko, this message translates to:
-  /// **'수유 양 직접 입력'**
+  /// **'간편수유양 입력'**
   String get fabAmountEditTitle;
 
   /// No description provided for @fabAmountEditHint.
