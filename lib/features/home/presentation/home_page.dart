@@ -43,13 +43,9 @@ class HomePage extends ConsumerWidget {
           ? QuickFeedingFab(child: selectedChild)
           : null,
       appBar: AppBar(
-        title: Text(
-          'Baby Note',
-          style: TextStyle(
-            color: BrandColors.seed, // 파스텔 코랄 핑크
-            fontWeight: FontWeight.w700,
-          ),
-        ),
+        // 글자 fill + stroke 두 겹 — Stack으로 구현.
+        // Flutter의 TextStyle.foreground는 fill XOR stroke 둘 중 하나만 지원.
+        title: const _StrokedTitle('Baby Note'),
         actions: [
           IconButton(
             tooltip: l10n.homeAddChild,
@@ -284,6 +280,44 @@ class _OnboardingHero extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// AppBar 타이틀 — fill + stroke 두 겹.
+///
+/// Stack: 아래(stroke #a43f45) + 위(fill #fe7d81). Flutter TextStyle은
+/// foreground에 단일 Paint만 받기 때문에 두 Text를 쌓아 효과 구현.
+class _StrokedTitle extends StatelessWidget {
+  const _StrokedTitle(this.text);
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    const fillColor = Color(0xFFFE7D81);
+    const strokeColor = Color(0xFFA43F45);
+    final base = Theme.of(context).appBarTheme.titleTextStyle;
+    final baseStyle = TextStyle(
+      fontSize: base?.fontSize ?? 22,
+      fontWeight: FontWeight.w800,
+      letterSpacing: 0.3,
+    );
+    return Stack(
+      children: [
+        Text(
+          text,
+          style: baseStyle.copyWith(
+            foreground: Paint()
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = 2.5
+              ..color = strokeColor,
+          ),
+        ),
+        Text(
+          text,
+          style: baseStyle.copyWith(color: fillColor),
+        ),
+      ],
     );
   }
 }
