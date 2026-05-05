@@ -181,6 +181,28 @@ class HomePage extends ConsumerWidget {
           const SizedBox(height: Spacing.xl),
 
           // ── 의료/케어 ───────────────────────────────────────────
+          // ── 가족 공유 ───────────────────────────────────────────
+          _SectionTitle(l10n.familyTitle),
+          const SizedBox(height: Spacing.xs),
+          OutlinedButton.icon(
+            onPressed: () => context.push('/family'),
+            icon: const Text('👨‍👩‍👧', style: TextStyle(fontSize: 24)),
+            label: Text(l10n.familyEntryHome),
+            style: OutlinedButton.styleFrom(
+              alignment: Alignment.centerLeft,
+            ),
+          ),
+          const SizedBox(height: Spacing.xs),
+          OutlinedButton.icon(
+            onPressed: () => context.push('/family/join'),
+            icon: const Icon(Icons.group_add),
+            label: Text(l10n.familyEntryJoin),
+            style: OutlinedButton.styleFrom(
+              alignment: Alignment.centerLeft,
+            ),
+          ),
+          const SizedBox(height: Spacing.xl),
+
           _SectionTitle(l10n.homeHospital),
           const SizedBox(height: Spacing.xs),
           OutlinedButton.icon(

@@ -870,4 +870,94 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get lastActivityGrowth => 'Growth';
+
+  @override
+  String get familyTitle => 'Family sharing';
+
+  @override
+  String get familyEntryHome => 'Family sharing';
+
+  @override
+  String get familyChildPicker => 'Pick child';
+
+  @override
+  String get familyCaregivers => 'Caregivers';
+
+  @override
+  String get familyMe => 'Me';
+
+  @override
+  String get familyRoleParent => 'Parent';
+
+  @override
+  String get familyRoleGrandparent => 'Grandparent';
+
+  @override
+  String get familyRoleNanny => 'Nanny';
+
+  @override
+  String get familyRoleOther => 'Other';
+
+  @override
+  String familyAcceptedAt(String date) {
+    return 'joined $date';
+  }
+
+  @override
+  String get familyRemoveCaregiver => 'Remove';
+
+  @override
+  String get familyRemoveCaregiverConfirm =>
+      'Remove this person from the family?';
+
+  @override
+  String get familyLeave => 'Leave family';
+
+  @override
+  String get familyInvites => 'Active invites';
+
+  @override
+  String familyInviteExpiresAt(String date) {
+    return 'expires $date';
+  }
+
+  @override
+  String get familyCreateInvite => 'Create invite code';
+
+  @override
+  String get familyShareCode => 'Share';
+
+  @override
+  String get familyRevokeInvite => 'Revoke';
+
+  @override
+  String get familyJoinTitle => 'Join family';
+
+  @override
+  String get familyJoinHelp =>
+      'Enter the 6-character invite code you received.';
+
+  @override
+  String get familyCodeLabel => 'Invite code';
+
+  @override
+  String get familyCodeHint => 'e.g. A3B7K9';
+
+  @override
+  String get familyJoinButton => 'Join family';
+
+  @override
+  String get familyJoined => 'Joined the family 🎉';
+
+  @override
+  String get familyInviteCreated => 'Code created. Valid for 24 hours.';
+
+  @override
+  String get familyInviteInvalid => 'Invalid code.';
+
+  @override
+  String get familyInviteExpired => 'Code expired. Please request a new one.';
+
+  @override
+  String get familyEntryJoin => 'Join with code';
 }

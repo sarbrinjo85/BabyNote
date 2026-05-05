@@ -864,4 +864,92 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get lastActivityGrowth => '성장';
+
+  @override
+  String get familyTitle => '가족 공유';
+
+  @override
+  String get familyEntryHome => '가족 공유';
+
+  @override
+  String get familyChildPicker => '자녀 선택';
+
+  @override
+  String get familyCaregivers => '함께 돌보는 사람';
+
+  @override
+  String get familyMe => '나';
+
+  @override
+  String get familyRoleParent => '부모';
+
+  @override
+  String get familyRoleGrandparent => '조부모';
+
+  @override
+  String get familyRoleNanny => '시터';
+
+  @override
+  String get familyRoleOther => '기타';
+
+  @override
+  String familyAcceptedAt(String date) {
+    return '$date 합류';
+  }
+
+  @override
+  String get familyRemoveCaregiver => '내보내기';
+
+  @override
+  String get familyRemoveCaregiverConfirm => '이 사람을 가족에서 제외할까요?';
+
+  @override
+  String get familyLeave => '가족에서 나가기';
+
+  @override
+  String get familyInvites => '활성 초대 코드';
+
+  @override
+  String familyInviteExpiresAt(String date) {
+    return '만료: $date';
+  }
+
+  @override
+  String get familyCreateInvite => '초대 코드 만들기';
+
+  @override
+  String get familyShareCode => '코드 공유';
+
+  @override
+  String get familyRevokeInvite => '코드 회수';
+
+  @override
+  String get familyJoinTitle => '가족 참여';
+
+  @override
+  String get familyJoinHelp => '받은 6자리 초대 코드를 입력하세요.';
+
+  @override
+  String get familyCodeLabel => '초대 코드';
+
+  @override
+  String get familyCodeHint => '예: A3B7K9';
+
+  @override
+  String get familyJoinButton => '가족으로 참여';
+
+  @override
+  String get familyJoined => '가족에 합류했어요 🎉';
+
+  @override
+  String get familyInviteCreated => '코드를 발급했어요. 24시간 동안 유효해요.';
+
+  @override
+  String get familyInviteInvalid => '유효하지 않은 코드예요.';
+
+  @override
+  String get familyInviteExpired => '만료된 코드예요. 새로 발급받으세요.';
+
+  @override
+  String get familyEntryJoin => '초대 코드로 참여';
 }

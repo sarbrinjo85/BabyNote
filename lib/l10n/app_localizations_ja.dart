@@ -864,4 +864,92 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get lastActivityGrowth => '成長';
+
+  @override
+  String get familyTitle => '家族共有';
+
+  @override
+  String get familyEntryHome => '家族共有';
+
+  @override
+  String get familyChildPicker => 'お子さま選択';
+
+  @override
+  String get familyCaregivers => '一緒にお世話する人';
+
+  @override
+  String get familyMe => '自分';
+
+  @override
+  String get familyRoleParent => '親';
+
+  @override
+  String get familyRoleGrandparent => '祖父母';
+
+  @override
+  String get familyRoleNanny => 'シッター';
+
+  @override
+  String get familyRoleOther => 'その他';
+
+  @override
+  String familyAcceptedAt(String date) {
+    return '$date 参加';
+  }
+
+  @override
+  String get familyRemoveCaregiver => '外す';
+
+  @override
+  String get familyRemoveCaregiverConfirm => 'この人を家族から外しますか?';
+
+  @override
+  String get familyLeave => '家族から抜ける';
+
+  @override
+  String get familyInvites => '有効な招待コード';
+
+  @override
+  String familyInviteExpiresAt(String date) {
+    return '期限: $date';
+  }
+
+  @override
+  String get familyCreateInvite => '招待コードを作成';
+
+  @override
+  String get familyShareCode => 'コードを共有';
+
+  @override
+  String get familyRevokeInvite => 'コードを取消';
+
+  @override
+  String get familyJoinTitle => '家族に参加';
+
+  @override
+  String get familyJoinHelp => '受け取った6桁の招待コードを入力してください。';
+
+  @override
+  String get familyCodeLabel => '招待コード';
+
+  @override
+  String get familyCodeHint => '例: A3B7K9';
+
+  @override
+  String get familyJoinButton => '家族に参加';
+
+  @override
+  String get familyJoined => '家族に参加しました 🎉';
+
+  @override
+  String get familyInviteCreated => 'コードを発行しました。24時間有効です。';
+
+  @override
+  String get familyInviteInvalid => '無効なコードです。';
+
+  @override
+  String get familyInviteExpired => '期限切れのコードです。新しく発行してください。';
+
+  @override
+  String get familyEntryJoin => '招待コードで参加';
 }

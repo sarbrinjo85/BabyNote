@@ -1689,6 +1689,174 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'성장'**
   String get lastActivityGrowth;
+
+  /// No description provided for @familyTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'가족 공유'**
+  String get familyTitle;
+
+  /// No description provided for @familyEntryHome.
+  ///
+  /// In ko, this message translates to:
+  /// **'가족 공유'**
+  String get familyEntryHome;
+
+  /// No description provided for @familyChildPicker.
+  ///
+  /// In ko, this message translates to:
+  /// **'자녀 선택'**
+  String get familyChildPicker;
+
+  /// No description provided for @familyCaregivers.
+  ///
+  /// In ko, this message translates to:
+  /// **'함께 돌보는 사람'**
+  String get familyCaregivers;
+
+  /// No description provided for @familyMe.
+  ///
+  /// In ko, this message translates to:
+  /// **'나'**
+  String get familyMe;
+
+  /// No description provided for @familyRoleParent.
+  ///
+  /// In ko, this message translates to:
+  /// **'부모'**
+  String get familyRoleParent;
+
+  /// No description provided for @familyRoleGrandparent.
+  ///
+  /// In ko, this message translates to:
+  /// **'조부모'**
+  String get familyRoleGrandparent;
+
+  /// No description provided for @familyRoleNanny.
+  ///
+  /// In ko, this message translates to:
+  /// **'시터'**
+  String get familyRoleNanny;
+
+  /// No description provided for @familyRoleOther.
+  ///
+  /// In ko, this message translates to:
+  /// **'기타'**
+  String get familyRoleOther;
+
+  /// No description provided for @familyAcceptedAt.
+  ///
+  /// In ko, this message translates to:
+  /// **'{date} 합류'**
+  String familyAcceptedAt(String date);
+
+  /// No description provided for @familyRemoveCaregiver.
+  ///
+  /// In ko, this message translates to:
+  /// **'내보내기'**
+  String get familyRemoveCaregiver;
+
+  /// No description provided for @familyRemoveCaregiverConfirm.
+  ///
+  /// In ko, this message translates to:
+  /// **'이 사람을 가족에서 제외할까요?'**
+  String get familyRemoveCaregiverConfirm;
+
+  /// No description provided for @familyLeave.
+  ///
+  /// In ko, this message translates to:
+  /// **'가족에서 나가기'**
+  String get familyLeave;
+
+  /// No description provided for @familyInvites.
+  ///
+  /// In ko, this message translates to:
+  /// **'활성 초대 코드'**
+  String get familyInvites;
+
+  /// No description provided for @familyInviteExpiresAt.
+  ///
+  /// In ko, this message translates to:
+  /// **'만료: {date}'**
+  String familyInviteExpiresAt(String date);
+
+  /// No description provided for @familyCreateInvite.
+  ///
+  /// In ko, this message translates to:
+  /// **'초대 코드 만들기'**
+  String get familyCreateInvite;
+
+  /// No description provided for @familyShareCode.
+  ///
+  /// In ko, this message translates to:
+  /// **'코드 공유'**
+  String get familyShareCode;
+
+  /// No description provided for @familyRevokeInvite.
+  ///
+  /// In ko, this message translates to:
+  /// **'코드 회수'**
+  String get familyRevokeInvite;
+
+  /// No description provided for @familyJoinTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'가족 참여'**
+  String get familyJoinTitle;
+
+  /// No description provided for @familyJoinHelp.
+  ///
+  /// In ko, this message translates to:
+  /// **'받은 6자리 초대 코드를 입력하세요.'**
+  String get familyJoinHelp;
+
+  /// No description provided for @familyCodeLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'초대 코드'**
+  String get familyCodeLabel;
+
+  /// No description provided for @familyCodeHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'예: A3B7K9'**
+  String get familyCodeHint;
+
+  /// No description provided for @familyJoinButton.
+  ///
+  /// In ko, this message translates to:
+  /// **'가족으로 참여'**
+  String get familyJoinButton;
+
+  /// No description provided for @familyJoined.
+  ///
+  /// In ko, this message translates to:
+  /// **'가족에 합류했어요 🎉'**
+  String get familyJoined;
+
+  /// No description provided for @familyInviteCreated.
+  ///
+  /// In ko, this message translates to:
+  /// **'코드를 발급했어요. 24시간 동안 유효해요.'**
+  String get familyInviteCreated;
+
+  /// No description provided for @familyInviteInvalid.
+  ///
+  /// In ko, this message translates to:
+  /// **'유효하지 않은 코드예요.'**
+  String get familyInviteInvalid;
+
+  /// No description provided for @familyInviteExpired.
+  ///
+  /// In ko, this message translates to:
+  /// **'만료된 코드예요. 새로 발급받으세요.'**
+  String get familyInviteExpired;
+
+  /// No description provided for @familyEntryJoin.
+  ///
+  /// In ko, this message translates to:
+  /// **'초대 코드로 참여'**
+  String get familyEntryJoin;
 }
 
 class _AppLocalizationsDelegate

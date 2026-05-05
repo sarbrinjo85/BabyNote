@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/presentation/auth_gate.dart';
 import '../../features/child/presentation/child_register_page.dart';
 import '../../features/diaper/presentation/diaper_register_page.dart';
+import '../../features/family/presentation/family_join_page.dart';
+import '../../features/family/presentation/family_page.dart';
 import '../../features/feeding/presentation/feeding_register_page.dart';
 import '../../features/growth/presentation/growth_register_page.dart';
 import '../../features/home/presentation/home_page.dart';
@@ -110,6 +112,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'hospitalNew',
         builder: (context, state) =>
             const AuthGate(child: HospitalRegisterPage()),
+      ),
+      GoRoute(
+        // /family — 가족 공유 (자녀 caregivers + 초대 코드 발급/회수)
+        path: '/family',
+        name: 'family',
+        builder: (context, state) =>
+            const AuthGate(child: FamilyPage()),
+      ),
+      GoRoute(
+        // /family/join — 다른 부모가 보낸 코드로 가족 참여
+        path: '/family/join',
+        name: 'familyJoin',
+        builder: (context, state) =>
+            const AuthGate(child: FamilyJoinPage()),
       ),
       GoRoute(
         // /vaccine — 자녀 예방접종 일정 (다가오는/미접종/완료 분류)
