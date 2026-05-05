@@ -6,10 +6,13 @@ import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/theme/tokens.dart';
 import '../../child/presentation/child_providers.dart';
 import '../../child/presentation/selected_child_provider.dart';
+import '../domain/formula_inventory.dart';
 import 'formula_inventory_providers.dart';
 
 class FormulaInventoryRegisterPage extends ConsumerStatefulWidget {
-  const FormulaInventoryRegisterPage({super.key});
+  const FormulaInventoryRegisterPage({super.key, this.editing});
+
+  final FormulaInventory? editing;
 
   @override
   ConsumerState<FormulaInventoryRegisterPage> createState() =>
@@ -20,13 +23,28 @@ class _FormulaInventoryRegisterPageState
     extends ConsumerState<FormulaInventoryRegisterPage> {
   final _formKey = GlobalKey<FormState>();
 
-  String _productName = '';
-  String _brand = '';
-  String _containerG = '';
-  String _priceWon = '';
-  String _store = '';
+  late String _productName;
+  late String _brand;
+  late String _containerG;
+  late String _priceWon;
+  late String _store;
   DateTime? _purchasedAt;
   DateTime? _openedAt;
+
+  bool get _isEdit => widget.editing != null;
+
+  @override
+  void initState() {
+    super.initState();
+    final e = widget.editing;
+    _productName = e?.productName ?? '';
+    _brand = e?.brand ?? '';
+    _containerG = e?.containerGrams.toString() ?? '';
+    _priceWon = e?.priceMinor?.toString() ?? '';
+    _store = e?.store ?? '';
+    _purchasedAt = e?.purchasedAt;
+    _openedAt = e?.openedAt;
+  }
 
   Future<void> _pickDate({
     required String label,
@@ -53,23 +71,37 @@ class _FormulaInventoryRegisterPageState
     final grams = int.tryParse(_containerG)!;
     final price = int.tryParse(_priceWon);
 
-    await ref.read(formulaInventoryControllerProvider.notifier).create(
-          childId: childId,
-          productName: _productName.trim(),
-          brand: _brand.trim().isEmpty ? null : _brand.trim(),
-          containerGrams: grams,
-          purchasedAt: _purchasedAt,
-          priceMinor: price,
-          store: _store.trim().isEmpty ? null : _store.trim(),
-          openedAt: _openedAt,
-        );
+    if (_isEdit) {
+      await ref.read(formulaInventoryControllerProvider.notifier).saveEdit(
+            childId: childId,
+            id: widget.editing!.id,
+            productName: _productName.trim(),
+            brand: _brand.trim().isEmpty ? null : _brand.trim(),
+            containerGrams: grams,
+            purchasedAt: _purchasedAt,
+            priceMinor: price,
+            store: _store.trim().isEmpty ? null : _store.trim(),
+            openedAt: _openedAt,
+          );
+    } else {
+      await ref.read(formulaInventoryControllerProvider.notifier).create(
+            childId: childId,
+            productName: _productName.trim(),
+            brand: _brand.trim().isEmpty ? null : _brand.trim(),
+            containerGrams: grams,
+            purchasedAt: _purchasedAt,
+            priceMinor: price,
+            store: _store.trim().isEmpty ? null : _store.trim(),
+            openedAt: _openedAt,
+          );
+    }
 
     if (!mounted) return;
     final state = ref.read(formulaInventoryControllerProvider);
     state.when(
       data: (_) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.formulaSavedToast)),
+          SnackBar(content: Text(_isEdit ? l10n.recordEditSaved : l10n.formulaSavedToast)),
         );
         context.pop();
       },
@@ -89,13 +121,20 @@ class _FormulaInventoryRegisterPageState
     final isLoading = asyncCtrl.isLoading;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.formulaRegisterTitle)),
+      appBar: AppBar(
+        title: Text(_isEdit ? l10n.formulaEditTitle : l10n.formulaRegisterTitle),
+      ),
       body: asyncChildren.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => Center(child: Text(l10n.errorChildrenLoadFailed(err))),
         data: (children) {
           if (children.isEmpty) return _NoChildPlaceholder();
-          final child = ref.watch(selectedChildProvider) ?? children.first;
+          final child = _isEdit
+              ? children.firstWhere(
+                  (c) => c.id == widget.editing!.childId,
+                  orElse: () => children.first,
+                )
+              : (ref.watch(selectedChildProvider) ?? children.first);
 
           return SafeArea(
             top: false,
@@ -115,17 +154,19 @@ class _FormulaInventoryRegisterPageState
                   const SizedBox(height: Spacing.lg),
 
                   TextFormField(
+                    initialValue: _productName,
                     decoration: InputDecoration(
                       labelText: l10n.formulaProductName,
                       hintText: l10n.formulaProductHint,
                     ),
-                    autofocus: true,
+                    autofocus: !_isEdit,
                     validator: (v) =>
                         (v == null || v.trim().isEmpty) ? l10n.formulaProductRequired : null,
                     onSaved: (v) => _productName = v ?? '',
                   ),
                   const SizedBox(height: Spacing.md),
                   TextFormField(
+                    initialValue: _brand,
                     decoration: InputDecoration(
                       labelText: l10n.formulaBrandLabel,
                       hintText: l10n.formulaBrandHint,
@@ -135,6 +176,7 @@ class _FormulaInventoryRegisterPageState
                   const SizedBox(height: Spacing.md),
 
                   TextFormField(
+                    initialValue: _containerG,
                     decoration: InputDecoration(
                       labelText: l10n.formulaCapacity,
                       hintText: l10n.formulaCapacityHint,
@@ -183,6 +225,7 @@ class _FormulaInventoryRegisterPageState
                   const SizedBox(height: Spacing.md),
 
                   TextFormField(
+                    initialValue: _priceWon,
                     decoration: InputDecoration(
                       labelText: l10n.formulaPriceLabel,
                       hintText: l10n.formulaPriceHint,
@@ -199,6 +242,7 @@ class _FormulaInventoryRegisterPageState
                   ),
                   const SizedBox(height: Spacing.md),
                   TextFormField(
+                    initialValue: _store,
                     decoration: InputDecoration(
                       labelText: l10n.formulaShopLabel,
                       hintText: l10n.formulaShopHint,
@@ -216,7 +260,9 @@ class _FormulaInventoryRegisterPageState
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : const Icon(Icons.check),
-                    label: Text(isLoading ? l10n.commonSaving : l10n.commonRegister),
+                    label: Text(isLoading
+                        ? l10n.commonSaving
+                        : (_isEdit ? l10n.commonSave : l10n.commonRegister)),
                     style: FilledButton.styleFrom(
                       minimumSize: const Size.fromHeight(TouchTarget.huge),
                     ),

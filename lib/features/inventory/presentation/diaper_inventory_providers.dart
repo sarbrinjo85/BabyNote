@@ -79,6 +79,52 @@ class DiaperInventoryController extends AsyncNotifier<void> {
       ref.invalidate(activeDiaperInventoriesProvider(childId));
     });
   }
+
+  Future<void> saveEdit({
+    required String childId,
+    required String id,
+    required String size,
+    required int quantity,
+    String? brand,
+    String? usageKind,
+    DateTime? purchasedAt,
+    int? priceMinor,
+    String? store,
+    DateTime? openedAt,
+  }) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      final repo = ref.read(diaperInventoryRepositoryProvider);
+      await repo.updateInventory(
+        id: id,
+        size: size,
+        quantity: quantity,
+        brand: brand,
+        usageKind: usageKind,
+        purchasedAt: purchasedAt,
+        priceMinor: priceMinor,
+        store: store,
+        openedAt: openedAt,
+      );
+      ref.invalidate(diaperInventoriesProvider(childId));
+      ref.invalidate(activeDiaperInventoriesProvider(childId));
+      ref.invalidate(diaperInventoryStatsProvider);
+    });
+  }
+
+  Future<void> deleteInventory({
+    required String childId,
+    required String id,
+  }) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      final repo = ref.read(diaperInventoryRepositoryProvider);
+      await repo.deleteInventory(id);
+      ref.invalidate(diaperInventoriesProvider(childId));
+      ref.invalidate(activeDiaperInventoriesProvider(childId));
+      ref.invalidate(diaperInventoryStatsProvider);
+    });
+  }
 }
 
 final diaperInventoryControllerProvider =

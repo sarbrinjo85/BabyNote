@@ -148,37 +148,79 @@ class _InventoryTile extends StatelessWidget {
     }
 
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-            horizontal: Spacing.md, vertical: Spacing.xs),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(i.size),
-              subtitle: Text(subtitle.toString()),
-              trailing: showOpenButton
-                  ? TextButton(
-                      onPressed: () => ref
-                          .read(diaperInventoryControllerProvider.notifier)
-                          .open(childId, i.id),
-                      child: Text(l10n.formulaActionOpen),
-                    )
-                  : showDepleteButton
-                      ? TextButton(
-                          onPressed: () => ref
-                              .read(diaperInventoryControllerProvider.notifier)
-                              .deplete(childId, i.id),
-                          child: Text(l10n.formulaActionDeplete),
-                        )
-                      : null,
-            ),
-            if (i.isActive) _StatsRow(inventory: i),
-          ],
+      child: InkWell(
+        onTap: () => context.push('/inventory/diaper/new', extra: i),
+        onLongPress: () => _confirmDelete(context, ref, i),
+        borderRadius: Radii.brMd,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+              horizontal: Spacing.md, vertical: Spacing.xs),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(i.size),
+                subtitle: Text(subtitle.toString()),
+                trailing: showOpenButton
+                    ? TextButton(
+                        onPressed: () => ref
+                            .read(diaperInventoryControllerProvider.notifier)
+                            .open(childId, i.id),
+                        child: Text(l10n.formulaActionOpen),
+                      )
+                    : showDepleteButton
+                        ? TextButton(
+                            onPressed: () => ref
+                                .read(diaperInventoryControllerProvider.notifier)
+                                .deplete(childId, i.id),
+                            child: Text(l10n.formulaActionDeplete),
+                          )
+                        : null,
+              ),
+              if (i.isActive) _StatsRow(inventory: i),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  Future<void> _confirmDelete(
+      BuildContext context, WidgetRef ref, DiaperInventory inv) async {
+    final l10n = AppLocalizations.of(context);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.inventoryDeleteTitle),
+        content: Text(l10n.inventoryDeleteBody('${inv.size} · ${inv.quantity}${l10n.diaperInventoryCountUnit}')),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(l10n.commonCancel)),
+          FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: Theme.of(ctx).colorScheme.error,
+              ),
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text(l10n.commonDelete)),
+        ],
+      ),
+    );
+    if (ok != true || !context.mounted) return;
+    try {
+      await ref
+          .read(diaperInventoryControllerProvider.notifier)
+          .deleteInventory(childId: childId, id: inv.id);
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.inventoryDeleted)),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.errorFailed(e))));
+    }
   }
 
   String _d(DateTime d) {

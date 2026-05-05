@@ -2085,6 +2085,36 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'기록을 수정했어요'**
   String get recordEditSaved;
+
+  /// No description provided for @formulaEditTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'분유 정보 편집'**
+  String get formulaEditTitle;
+
+  /// No description provided for @diaperInventoryEditTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'기저귀 정보 편집'**
+  String get diaperInventoryEditTitle;
+
+  /// No description provided for @inventoryDeleteTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'이 재고를 삭제할까요?'**
+  String get inventoryDeleteTitle;
+
+  /// No description provided for @inventoryDeleteBody.
+  ///
+  /// In ko, this message translates to:
+  /// **'{name} 정보가 영구 삭제돼요. 되돌릴 수 없어요.'**
+  String inventoryDeleteBody(String name);
+
+  /// No description provided for @inventoryDeleted.
+  ///
+  /// In ko, this message translates to:
+  /// **'재고를 삭제했어요'**
+  String get inventoryDeleted;
 }
 
 class _AppLocalizationsDelegate

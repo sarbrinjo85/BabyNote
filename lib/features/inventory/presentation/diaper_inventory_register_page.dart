@@ -6,10 +6,13 @@ import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/theme/tokens.dart';
 import '../../child/presentation/child_providers.dart';
 import '../../child/presentation/selected_child_provider.dart';
+import '../domain/diaper_inventory.dart';
 import 'diaper_inventory_providers.dart';
 
 class DiaperInventoryRegisterPage extends ConsumerStatefulWidget {
-  const DiaperInventoryRegisterPage({super.key});
+  const DiaperInventoryRegisterPage({super.key, this.editing});
+
+  final DiaperInventory? editing;
 
   @override
   ConsumerState<DiaperInventoryRegisterPage> createState() =>
@@ -20,14 +23,30 @@ class _DiaperInventoryRegisterPageState
     extends ConsumerState<DiaperInventoryRegisterPage> {
   final _formKey = GlobalKey<FormState>();
 
-  String _size = 'M';
-  String _brand = '';
-  String _quantity = '';
+  late String _size;
+  late String _brand;
+  late String _quantity;
   String? _usageKind;
-  String _priceWon = '';
-  String _store = '';
+  late String _priceWon;
+  late String _store;
   DateTime? _purchasedAt;
   DateTime? _openedAt;
+
+  bool get _isEdit => widget.editing != null;
+
+  @override
+  void initState() {
+    super.initState();
+    final e = widget.editing;
+    _size = e?.size ?? 'M';
+    _brand = e?.brand ?? '';
+    _quantity = e?.quantity.toString() ?? '';
+    _usageKind = e?.usageKind;
+    _priceWon = e?.priceMinor?.toString() ?? '';
+    _store = e?.store ?? '';
+    _purchasedAt = e?.purchasedAt;
+    _openedAt = e?.openedAt;
+  }
 
   Future<void> _pickDate({
     required String label,
@@ -54,24 +73,39 @@ class _DiaperInventoryRegisterPageState
     final qty = int.tryParse(_quantity)!;
     final price = int.tryParse(_priceWon);
 
-    await ref.read(diaperInventoryControllerProvider.notifier).create(
-          childId: childId,
-          size: _size,
-          quantity: qty,
-          brand: _brand.trim().isEmpty ? null : _brand.trim(),
-          usageKind: _usageKind,
-          purchasedAt: _purchasedAt,
-          priceMinor: price,
-          store: _store.trim().isEmpty ? null : _store.trim(),
-          openedAt: _openedAt,
-        );
+    if (_isEdit) {
+      await ref.read(diaperInventoryControllerProvider.notifier).saveEdit(
+            childId: childId,
+            id: widget.editing!.id,
+            size: _size,
+            quantity: qty,
+            brand: _brand.trim().isEmpty ? null : _brand.trim(),
+            usageKind: _usageKind,
+            purchasedAt: _purchasedAt,
+            priceMinor: price,
+            store: _store.trim().isEmpty ? null : _store.trim(),
+            openedAt: _openedAt,
+          );
+    } else {
+      await ref.read(diaperInventoryControllerProvider.notifier).create(
+            childId: childId,
+            size: _size,
+            quantity: qty,
+            brand: _brand.trim().isEmpty ? null : _brand.trim(),
+            usageKind: _usageKind,
+            purchasedAt: _purchasedAt,
+            priceMinor: price,
+            store: _store.trim().isEmpty ? null : _store.trim(),
+            openedAt: _openedAt,
+          );
+    }
 
     if (!mounted) return;
     final state = ref.read(diaperInventoryControllerProvider);
     state.when(
       data: (_) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.diaperInventorySavedToast)),
+          SnackBar(content: Text(_isEdit ? l10n.recordEditSaved : l10n.diaperInventorySavedToast)),
         );
         context.pop();
       },
@@ -91,13 +125,20 @@ class _DiaperInventoryRegisterPageState
     final isLoading = asyncCtrl.isLoading;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.diaperInventoryRegister)),
+      appBar: AppBar(
+        title: Text(_isEdit ? l10n.diaperInventoryEditTitle : l10n.diaperInventoryRegister),
+      ),
       body: asyncChildren.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => Center(child: Text(l10n.errorChildrenLoadFailed(err))),
         data: (children) {
           if (children.isEmpty) return _NoChildPlaceholder();
-          final child = ref.watch(selectedChildProvider) ?? children.first;
+          final child = _isEdit
+              ? children.firstWhere(
+                  (c) => c.id == widget.editing!.childId,
+                  orElse: () => children.first,
+                )
+              : (ref.watch(selectedChildProvider) ?? children.first);
 
           return SafeArea(
             top: false,
@@ -133,6 +174,7 @@ class _DiaperInventoryRegisterPageState
                   const SizedBox(height: Spacing.lg),
 
                   TextFormField(
+                    initialValue: _quantity,
                     decoration: InputDecoration(
                       labelText: l10n.diaperInventoryCount,
                       hintText: l10n.diaperInventoryCountHint,
@@ -151,6 +193,7 @@ class _DiaperInventoryRegisterPageState
                   const SizedBox(height: Spacing.lg),
 
                   TextFormField(
+                    initialValue: _brand,
                     decoration: InputDecoration(
                       labelText: l10n.formulaBrandLabel,
                       hintText: l10n.diaperInventoryBrandHint,
@@ -206,6 +249,7 @@ class _DiaperInventoryRegisterPageState
                   const SizedBox(height: Spacing.md),
 
                   TextFormField(
+                    initialValue: _priceWon,
                     decoration: InputDecoration(
                       labelText: l10n.formulaPriceLabel,
                       suffixText: l10n.formulaPriceUnit,
@@ -221,6 +265,7 @@ class _DiaperInventoryRegisterPageState
                   ),
                   const SizedBox(height: Spacing.md),
                   TextFormField(
+                    initialValue: _store,
                     decoration: InputDecoration(
                       labelText: l10n.formulaShopLabel,
                     ),
@@ -237,7 +282,9 @@ class _DiaperInventoryRegisterPageState
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : const Icon(Icons.check),
-                    label: Text(isLoading ? l10n.commonSaving : l10n.commonRegister),
+                    label: Text(isLoading
+                        ? l10n.commonSaving
+                        : (_isEdit ? l10n.commonSave : l10n.commonRegister)),
                     style: FilledButton.styleFrom(
                       minimumSize: const Size.fromHeight(TouchTarget.huge),
                     ),

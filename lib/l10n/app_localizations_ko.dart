@@ -1073,4 +1073,21 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get recordEditSaved => '기록을 수정했어요';
+
+  @override
+  String get formulaEditTitle => '분유 정보 편집';
+
+  @override
+  String get diaperInventoryEditTitle => '기저귀 정보 편집';
+
+  @override
+  String get inventoryDeleteTitle => '이 재고를 삭제할까요?';
+
+  @override
+  String inventoryDeleteBody(String name) {
+    return '$name 정보가 영구 삭제돼요. 되돌릴 수 없어요.';
+  }
+
+  @override
+  String get inventoryDeleted => '재고를 삭제했어요';
 }

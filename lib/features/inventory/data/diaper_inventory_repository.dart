@@ -76,6 +76,47 @@ class DiaperInventoryRepository {
     String two(int v) => v.toString().padLeft(2, '0');
     return '${d.year}-${two(d.month)}-${two(d.day)}';
   }
+
+  String _dateOrNull(DateTime? d) {
+    if (d == null) return '';
+    String two(int v) => v.toString().padLeft(2, '0');
+    return '${d.year}-${two(d.month)}-${two(d.day)}';
+  }
+
+  /// 기저귀 팩 정보 부분 수정.
+  Future<DiaperInventory> updateInventory({
+    required String id,
+    required String size,
+    required int quantity,
+    String? brand,
+    String? usageKind,
+    DateTime? purchasedAt,
+    int? priceMinor,
+    String? store,
+    DateTime? openedAt,
+  }) async {
+    final patch = <String, dynamic>{
+      'size': size,
+      'quantity': quantity,
+      'brand': brand,
+      'usage_kind': usageKind,
+      'purchased_at': purchasedAt == null ? null : _dateOrNull(purchasedAt),
+      'price_minor': priceMinor,
+      'store': store,
+      'opened_at': openedAt == null ? null : _dateOrNull(openedAt),
+    };
+    final updated = await _client
+        .from('diaper_inventories')
+        .update(patch)
+        .eq('id', id)
+        .select()
+        .single();
+    return DiaperInventory.fromMap(updated);
+  }
+
+  Future<void> deleteInventory(String id) async {
+    await _client.from('diaper_inventories').delete().eq('id', id);
+  }
 }
 
 final diaperInventoryRepositoryProvider =

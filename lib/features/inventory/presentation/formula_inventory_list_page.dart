@@ -140,38 +140,81 @@ class _InventoryTile extends StatelessWidget {
     }
 
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-            horizontal: Spacing.md, vertical: Spacing.xs),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(i.productName),
-              subtitle: Text(subtitle.toString()),
-              trailing: showOpenButton
-                  ? TextButton(
-                      onPressed: () =>
-                          ref.read(formulaInventoryControllerProvider.notifier)
-                              .open(childId, i.id),
-                      child: Text(l10n.formulaActionOpen),
-                    )
-                  : showDepleteButton
-                      ? TextButton(
-                          onPressed: () => ref
-                              .read(formulaInventoryControllerProvider.notifier)
-                              .deplete(childId, i.id),
-                          child: Text(l10n.formulaActionDeplete),
-                        )
-                      : null,
-            ),
-            // 사용 중 통: 잔량/소진 예상 표시 (P3-1c)
-            if (i.isActive) _StatsRow(inventory: i),
-          ],
+      child: InkWell(
+        // 단축 탭 → 편집, 길게 누름 → 삭제 confirm
+        onTap: () => context.push('/inventory/formula/new', extra: i),
+        onLongPress: () => _confirmDelete(context, ref, i),
+        borderRadius: Radii.brMd,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+              horizontal: Spacing.md, vertical: Spacing.xs),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(i.productName),
+                subtitle: Text(subtitle.toString()),
+                trailing: showOpenButton
+                    ? TextButton(
+                        onPressed: () =>
+                            ref.read(formulaInventoryControllerProvider.notifier)
+                                .open(childId, i.id),
+                        child: Text(l10n.formulaActionOpen),
+                      )
+                    : showDepleteButton
+                        ? TextButton(
+                            onPressed: () => ref
+                                .read(formulaInventoryControllerProvider.notifier)
+                                .deplete(childId, i.id),
+                            child: Text(l10n.formulaActionDeplete),
+                          )
+                        : null,
+              ),
+              // 사용 중 통: 잔량/소진 예상 표시 (P3-1c)
+              if (i.isActive) _StatsRow(inventory: i),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  Future<void> _confirmDelete(
+      BuildContext context, WidgetRef ref, FormulaInventory inv) async {
+    final l10n = AppLocalizations.of(context);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.inventoryDeleteTitle),
+        content: Text(l10n.inventoryDeleteBody(inv.productName)),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(l10n.commonCancel)),
+          FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: Theme.of(ctx).colorScheme.error,
+              ),
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text(l10n.commonDelete)),
+        ],
+      ),
+    );
+    if (ok != true || !context.mounted) return;
+    try {
+      await ref
+          .read(formulaInventoryControllerProvider.notifier)
+          .deleteInventory(childId: childId, id: inv.id);
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.inventoryDeleted)),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.errorFailed(e))));
+    }
   }
 
   String _d(DateTime d) {

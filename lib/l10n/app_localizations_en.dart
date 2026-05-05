@@ -1085,4 +1085,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recordEditSaved => 'Record updated';
+
+  @override
+  String get formulaEditTitle => 'Edit formula';
+
+  @override
+  String get diaperInventoryEditTitle => 'Edit diaper pack';
+
+  @override
+  String get inventoryDeleteTitle => 'Delete this inventory?';
+
+  @override
+  String inventoryDeleteBody(String name) {
+    return '$name will be permanently deleted. This cannot be undone.';
+  }
+
+  @override
+  String get inventoryDeleted => 'Inventory deleted';
 }

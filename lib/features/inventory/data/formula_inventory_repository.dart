@@ -72,6 +72,48 @@ class FormulaInventoryRepository {
     return '${d.year}-${two(d.month)}-${two(d.day)}';
   }
 
+  String _dateOrNull(DateTime? d) {
+    if (d == null) return '';
+    String two(int v) => v.toString().padLeft(2, '0');
+    return '${d.year}-${two(d.month)}-${two(d.day)}';
+  }
+
+  /// 분유 통 정보 부분 수정 — 메타데이터(제품명/브랜드/용량/구매일/가격/구매처/개봉일).
+  /// opened_at/depleted_at은 별도 액션(markOpened/markDepleted) 사용 권장.
+  Future<FormulaInventory> updateInventory({
+    required String id,
+    required String productName,
+    String? brand,
+    required int containerGrams,
+    DateTime? purchasedAt,
+    int? priceMinor,
+    String? store,
+    DateTime? openedAt,
+  }) async {
+    final patch = <String, dynamic>{
+      'product_name': productName,
+      'brand': brand,
+      'container_grams': containerGrams,
+      'purchased_at': purchasedAt == null ? null : _dateOrNull(purchasedAt),
+      'price_minor': priceMinor,
+      'store': store,
+      'opened_at': openedAt == null ? null : _dateOrNull(openedAt),
+    };
+    final updated = await _client
+        .from('formula_inventories')
+        .update(patch)
+        .eq('id', id)
+        .select()
+        .single();
+    return FormulaInventory.fromMap(updated);
+  }
+
+  /// 분유 통 삭제. 연결된 feeding 기록은 formula_inventory_id가 SET NULL되거나
+  /// CASCADE에 따라 처리됨 (DB 정의에 의존).
+  Future<void> deleteInventory(String id) async {
+    await _client.from('formula_inventories').delete().eq('id', id);
+  }
+
   /// 한 분유 통에 연결된 수유 기록의 amount_ml 합계.
   /// formula_inventory_id로 join해서 sum.
   ///

@@ -390,5 +390,12 @@
   "sleepEditTitle": "수면 기록 편집",
   "diaperEditTitle": "기저귀 기록 편집",
   "growthEditTitle": "성장 기록 편집",
-  "recordEditSaved": "기록을 수정했어요"
+  "recordEditSaved": "기록을 수정했어요",
+
+  "formulaEditTitle": "분유 정보 편집",
+  "diaperInventoryEditTitle": "기저귀 정보 편집",
+  "inventoryDeleteTitle": "이 재고를 삭제할까요?",
+  "inventoryDeleteBody": "{name} 정보가 영구 삭제돼요. 되돌릴 수 없어요.",
+  "@inventoryDeleteBody": { "placeholders": { "name": { "type": "String" } } },
+  "inventoryDeleted": "재고를 삭제했어요"
 }

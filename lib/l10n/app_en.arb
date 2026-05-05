@@ -354,5 +354,11 @@
   "sleepEditTitle": "Edit sleep",
   "diaperEditTitle": "Edit diaper",
   "growthEditTitle": "Edit growth",
-  "recordEditSaved": "Record updated"
+  "recordEditSaved": "Record updated",
+
+  "formulaEditTitle": "Edit formula",
+  "diaperInventoryEditTitle": "Edit diaper pack",
+  "inventoryDeleteTitle": "Delete this inventory?",
+  "inventoryDeleteBody": "{name} will be permanently deleted. This cannot be undone.",
+  "inventoryDeleted": "Inventory deleted"
 }

@@ -18,6 +18,8 @@ import '../../features/growth/presentation/growth_register_page.dart';
 import '../../features/home/presentation/home_page.dart';
 import '../../features/hospital/presentation/hospital_list_page.dart';
 import '../../features/hospital/presentation/hospital_register_page.dart';
+import '../../features/inventory/domain/diaper_inventory.dart';
+import '../../features/inventory/domain/formula_inventory.dart';
 import '../../features/inventory/presentation/diaper_inventory_list_page.dart';
 import '../../features/inventory/presentation/diaper_inventory_register_page.dart';
 import '../../features/inventory/presentation/formula_inventory_list_page.dart';
@@ -106,11 +108,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             const AuthGate(child: FormulaInventoryListPage()),
       ),
       GoRoute(
-        // /inventory/formula/new — 분유 한 통 등록
+        // /inventory/formula/new — 분유 한 통 등록 또는 편집(extra=FormulaInventory)
         path: '/inventory/formula/new',
         name: 'formulaInventoryNew',
-        builder: (context, state) =>
-            const AuthGate(child: FormulaInventoryRegisterPage()),
+        builder: (context, state) {
+          final editing = state.extra as FormulaInventory?;
+          return AuthGate(child: FormulaInventoryRegisterPage(editing: editing));
+        },
       ),
       GoRoute(
         // /inventory/diaper — 기저귀 재고 목록
@@ -120,11 +124,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             const AuthGate(child: DiaperInventoryListPage()),
       ),
       GoRoute(
-        // /inventory/diaper/new — 기저귀 한 팩 등록
+        // /inventory/diaper/new — 기저귀 한 팩 등록 또는 편집(extra=DiaperInventory)
         path: '/inventory/diaper/new',
         name: 'diaperInventoryNew',
-        builder: (context, state) =>
-            const AuthGate(child: DiaperInventoryRegisterPage()),
+        builder: (context, state) {
+          final editing = state.extra as DiaperInventory?;
+          return AuthGate(child: DiaperInventoryRegisterPage(editing: editing));
+        },
       ),
       GoRoute(
         // /hospital — 단골 병원 목록 (전화/길찾기 딥링크 포함)

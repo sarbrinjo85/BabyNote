@@ -1072,4 +1072,21 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get recordEditSaved => '記録を更新しました';
+
+  @override
+  String get formulaEditTitle => 'ミルク情報の編集';
+
+  @override
+  String get diaperInventoryEditTitle => 'おむつ情報の編集';
+
+  @override
+  String get inventoryDeleteTitle => 'この在庫を削除しますか?';
+
+  @override
+  String inventoryDeleteBody(String name) {
+    return '$name の情報が永久に削除されます。取り消せません。';
+  }
+
+  @override
+  String get inventoryDeleted => '在庫を削除しました';
 }

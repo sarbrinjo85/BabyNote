@@ -354,5 +354,11 @@
   "sleepEditTitle": "睡眠記録の編集",
   "diaperEditTitle": "おむつ記録の編集",
   "growthEditTitle": "成長記録の編集",
-  "recordEditSaved": "記録を更新しました"
+  "recordEditSaved": "記録を更新しました",
+
+  "formulaEditTitle": "ミルク情報の編集",
+  "diaperInventoryEditTitle": "おむつ情報の編集",
+  "inventoryDeleteTitle": "この在庫を削除しますか?",
+  "inventoryDeleteBody": "{name} の情報が永久に削除されます。取り消せません。",
+  "inventoryDeleted": "在庫を削除しました"
 }

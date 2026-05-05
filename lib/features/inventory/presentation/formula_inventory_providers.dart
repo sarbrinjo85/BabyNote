@@ -81,6 +81,52 @@ class FormulaInventoryController extends AsyncNotifier<void> {
       ref.invalidate(activeFormulaInventoriesProvider(childId));
     });
   }
+
+  /// 분유 통 정보 수정 (제품명/용량/구매일/가격/구매처/개봉일 등).
+  Future<void> saveEdit({
+    required String childId,
+    required String id,
+    required String productName,
+    String? brand,
+    required int containerGrams,
+    DateTime? purchasedAt,
+    int? priceMinor,
+    String? store,
+    DateTime? openedAt,
+  }) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      final repo = ref.read(formulaInventoryRepositoryProvider);
+      await repo.updateInventory(
+        id: id,
+        productName: productName,
+        brand: brand,
+        containerGrams: containerGrams,
+        purchasedAt: purchasedAt,
+        priceMinor: priceMinor,
+        store: store,
+        openedAt: openedAt,
+      );
+      ref.invalidate(formulaInventoriesProvider(childId));
+      ref.invalidate(activeFormulaInventoriesProvider(childId));
+      ref.invalidate(formulaInventoryStatsProvider);
+    });
+  }
+
+  /// 분유 통 삭제. 연결된 수유 기록의 formula_inventory_id는 DB에서 처리.
+  Future<void> deleteInventory({
+    required String childId,
+    required String id,
+  }) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      final repo = ref.read(formulaInventoryRepositoryProvider);
+      await repo.deleteInventory(id);
+      ref.invalidate(formulaInventoriesProvider(childId));
+      ref.invalidate(activeFormulaInventoriesProvider(childId));
+      ref.invalidate(formulaInventoryStatsProvider);
+    });
+  }
 }
 
 final formulaInventoryControllerProvider =
