@@ -2295,6 +2295,18 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'취소'**
   String get fabUndo;
+
+  /// No description provided for @fabAmountEditTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'수유 양 직접 입력'**
+  String get fabAmountEditTitle;
+
+  /// No description provided for @fabAmountEditHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'예: 120'**
+  String get fabAmountEditHint;
 }
 
 class _AppLocalizationsDelegate

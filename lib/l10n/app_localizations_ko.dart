@@ -1183,4 +1183,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get fabUndo => '취소';
+
+  @override
+  String get fabAmountEditTitle => '수유 양 직접 입력';
+
+  @override
+  String get fabAmountEditHint => '예: 120';
 }

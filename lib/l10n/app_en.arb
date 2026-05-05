@@ -396,5 +396,7 @@
   "fabQuickFeed": "Quick feed",
   "fabQuickFeedTooltip": "1-tap with last pattern. Long-press to enter manually.",
   "fabSaved": "{summary} saved",
-  "fabUndo": "Undo"
+  "fabUndo": "Undo",
+  "fabAmountEditTitle": "Enter feeding amount",
+  "fabAmountEditHint": "e.g. 120"
 }

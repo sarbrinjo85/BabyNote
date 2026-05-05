@@ -1199,4 +1199,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fabUndo => 'Undo';
+
+  @override
+  String get fabAmountEditTitle => 'Enter feeding amount';
+
+  @override
+  String get fabAmountEditHint => 'e.g. 120';
 }

@@ -33,30 +33,99 @@ class QuickFeedingFab extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     // FAB는 1탭 빠른 기록 전용. 직접 입력하려면 홈 화면의 BigActionButton(수유)
     // 또는 길게 누르지 않고 마지막 기록 없을 때 자동으로 /feeding/new 이동.
-    return FloatingActionButton.extended(
-      onPressed: () => _onTap(context, ref),
-      icon: const Text('🍼', style: TextStyle(fontSize: 22)),
-      label: Text(l10n.fabQuickFeed),
-      tooltip: l10n.fabQuickFeedTooltip,
+    // GestureDetector로 감싸서 길게 누름 제스처를 가로챔.
+    // FAB의 onPressed는 짧은 탭 전용 — 제스처 아레나에서 longPress가 우선됨.
+    return GestureDetector(
+      onLongPress: () => _onLongPress(context, ref),
+      child: FloatingActionButton.extended(
+        onPressed: () => _onTap(context, ref),
+        icon: const Text('🍼', style: TextStyle(fontSize: 22)),
+        label: Text(l10n.fabQuickFeed),
+        tooltip: l10n.fabQuickFeedTooltip,
+      ),
     );
   }
 
-  Future<void> _onTap(BuildContext context, WidgetRef ref) async {
+  /// 길게 누름 → 수유 양 직접 입력 다이얼로그 → 마지막 type 그대로 저장.
+  /// 마지막 기록 없으면 /feeding/new 페이지로 이동.
+  Future<void> _onLongPress(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context);
     final asyncRecent = ref.read(recentFeedingsProvider(child.id));
     final last = asyncRecent.maybeWhen(
       data: (list) => list.isEmpty ? null : list.first,
       orElse: () => null,
     );
+    if (last == null) {
+      context.push('/feeding/new');
+      return;
+    }
 
-    final currentUser = ref.read(currentUserProvider);
-    if (currentUser == null) return; // 로그인 안 됨
+    final controller = TextEditingController(
+      text: last.amountMl?.toString() ?? '',
+    );
+    final amount = await showDialog<int>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.fabAmountEditTitle),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            hintText: l10n.fabAmountEditHint,
+            suffixText: 'ml',
+          ),
+          onSubmitted: (v) {
+            final n = int.tryParse(v.trim());
+            Navigator.of(ctx).pop(n);
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(l10n.commonCancel),
+          ),
+          FilledButton(
+            onPressed: () {
+              final n = int.tryParse(controller.text.trim());
+              Navigator.of(ctx).pop(n);
+            },
+            child: Text(l10n.commonSave),
+          ),
+        ],
+      ),
+    );
+    if (amount == null || amount <= 0) return;
+    if (!context.mounted) return;
+    await _quickInsert(context, ref, last, overrideAmountMl: amount);
+  }
+
+  Future<void> _onTap(BuildContext context, WidgetRef ref) async {
+    final asyncRecent = ref.read(recentFeedingsProvider(child.id));
+    final last = asyncRecent.maybeWhen(
+      data: (list) => list.isEmpty ? null : list.first,
+      orElse: () => null,
+    );
 
     // 마지막 기록 없으면 새 기록 페이지로
     if (last == null) {
       context.push('/feeding/new');
       return;
     }
+    await _quickInsert(context, ref, last);
+  }
+
+  /// 마지막 수유 패턴을 그대로 복사해 INSERT.
+  /// [overrideAmountMl] — 길게 누름 다이얼로그에서 직접 입력한 양.
+  Future<void> _quickInsert(
+    BuildContext context,
+    WidgetRef ref,
+    Feeding last, {
+    int? overrideAmountMl,
+  }) async {
+    final l10n = AppLocalizations.of(context);
+    final currentUser = ref.read(currentUserProvider);
+    if (currentUser == null) return;
 
     // 분유라면 활성 통 자동 연결
     String? formulaInventoryId;
@@ -78,14 +147,12 @@ class QuickFeedingFab extends ConsumerWidget {
         type: last.type,
         startedAt: now,
         endedAt: now,
-        amountMl: last.amountMl,
+        amountMl: overrideAmountMl ?? last.amountMl,
         breastSide: last.breastSide,
         foodName: last.foodName,
         formulaBrand: last.formulaBrand,
         formulaInventoryId: formulaInventoryId,
-        // 메모는 매번 다를 가능성 ↑ — 빠른 기록은 메모 없이.
       );
-      // recent + stats invalidate
       ref.invalidate(recentFeedingsProvider(child.id));
       ref.invalidate(formulaInventoryStatsProvider);
     } catch (e) {

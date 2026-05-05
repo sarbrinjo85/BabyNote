@@ -434,5 +434,7 @@
   "fabQuickFeedTooltip": "마지막 패턴 그대로 1탭 기록. 길게 누르면 직접 입력.",
   "fabSaved": "{summary} 저장됨",
   "@fabSaved": { "placeholders": { "summary": { "type": "String" } } },
-  "fabUndo": "취소"
+  "fabUndo": "취소",
+  "fabAmountEditTitle": "수유 양 직접 입력",
+  "fabAmountEditHint": "예: 120"
 }

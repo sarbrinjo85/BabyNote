@@ -1182,4 +1182,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get fabUndo => '取消';
+
+  @override
+  String get fabAmountEditTitle => '授乳量を入力';
+
+  @override
+  String get fabAmountEditHint => '例: 120';
 }
