@@ -12,11 +12,13 @@ import 'tokens.dart';
 class AppTheme {
   const AppTheme._();
 
-  /// 라이트 테마. primary=코랄, secondary/tertiary=민트.
-  static ThemeData light() => _build(_buildScheme(Brightness.light));
+  /// 라이트 테마. primary=코랄, secondary/tertiary=민트, 배경=Coral Cream.
+  static ThemeData light() =>
+      _build(_buildScheme(Brightness.light), brightness: Brightness.light);
 
   /// 다크 테마. 새벽 모드에 그대로 사용 (시스템 다크 모드 따라감).
-  static ThemeData dark() => _build(_buildScheme(Brightness.dark));
+  static ThemeData dark() =>
+      _build(_buildScheme(Brightness.dark), brightness: Brightness.dark);
 
   /// 두 시드(코랄 + 민트)에서 각각 ColorScheme 생성 후 합성.
   ///
@@ -52,10 +54,16 @@ class AppTheme {
   /// 라이트/다크 공통 빌더.
   ///
   /// ColorScheme만 다르고 typography/component theme은 동일 → 두 테마가 일관됨.
-  static ThemeData _build(ColorScheme cs) {
+  static ThemeData _build(ColorScheme cs,
+      {required Brightness brightness}) {
+    // 라이트 테마 한정으로 Coral Cream 통일 배경 적용.
+    final isLight = brightness == Brightness.light;
+    final scaffoldBg = isLight ? BrandColors.scaffoldLight : null;
     return ThemeData(
       useMaterial3: true,
       colorScheme: cs,
+      scaffoldBackgroundColor: scaffoldBg,
+      canvasColor: scaffoldBg,
       visualDensity: VisualDensity.adaptivePlatformDensity,
 
       // ── Typography: 본문 1단계 키움 ─────────────────────────────────
@@ -121,9 +129,9 @@ class AppTheme {
         color: cs.surfaceContainerLow,
       ),
 
-      // ── AppBar: 배경 = surface, 그림자 없음 (M3 기본) ───────────────
+      // ── AppBar: 라이트는 Coral Cream과 통일, 다크는 surface ─────────
       appBarTheme: AppBarTheme(
-        backgroundColor: cs.surface,
+        backgroundColor: scaffoldBg ?? cs.surface,
         foregroundColor: cs.onSurface,
         centerTitle: false,
         elevation: 0,
