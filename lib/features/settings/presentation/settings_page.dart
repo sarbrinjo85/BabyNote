@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/theme/tokens.dart';
@@ -164,6 +166,44 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 minimumSize: const Size.fromHeight(TouchTarget.standard),
               ),
             ),
+
+            // ── Sentry 검증 (debug 빌드에서만 노출) ─────────────────
+            // production 사용자에겐 안 보임 — kDebugMode 가드.
+            if (kDebugMode) ...[
+              const SizedBox(height: Spacing.xl),
+              Text(
+                'Sentry 테스트 (debug only)',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+              ),
+              const SizedBox(height: Spacing.xs),
+              Text(
+                '버튼을 누르면 의도적 에러를 Sentry로 전송. 약 30초 뒤 sentry.io → Issues에서 확인 가능.',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+              ),
+              const SizedBox(height: Spacing.sm),
+              OutlinedButton.icon(
+                onPressed: () async {
+                  try {
+                    throw StateError(
+                        'BabyNote Sentry 검증 — ${DateTime.now()}');
+                  } catch (e, stack) {
+                    await Sentry.captureException(e, stackTrace: stack);
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text(
+                              'Sentry로 테스트 에러 전송. 30초 뒤 dashboard 확인.')),
+                    );
+                  }
+                },
+                icon: const Icon(Icons.bug_report_outlined),
+                label: const Text('테스트 에러 전송'),
+              ),
+            ],
           ],
         ),
       ),
