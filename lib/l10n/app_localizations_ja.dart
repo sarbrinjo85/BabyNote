@@ -1021,6 +1021,21 @@ class AppLocalizationsJa extends AppLocalizations {
   String get notifSleepOngoingBody => 'タップでアプリから起床を記録';
 
   @override
+  String get notifGrowthWeeklyTitle => '成長測定';
+
+  @override
+  String get notifGrowthWeeklyBody => '週1回の体重・身長記録をおすすめします 📏';
+
+  @override
+  String get inventoryHubTitle => '在庫管理';
+
+  @override
+  String get homeSectionData => 'データ/管理';
+
+  @override
+  String get homeSectionMedical => '医療';
+
+  @override
   String get childEditTitle => 'お子さま情報の編集';
 
   @override

@@ -64,6 +64,7 @@ dependencies:
   # Flutter ↔ native(Kotlin/Swift) 데이터 sync + 탭 이벤트 수신.
   # 위젯 UI 자체는 Android RemoteViews/Glance, iOS WidgetKit으로 작성.
   home_widget: ^0.7.0
+  http: ^1.6.0
 
   # NOTE — packages added in later phases (kept here for reference; uncomment when needed):
   # # Local DB (Phase 2 — records storage offline)

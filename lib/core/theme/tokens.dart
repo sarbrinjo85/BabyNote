@@ -71,12 +71,20 @@ class TouchTarget {
 
 /// 시드 컬러 (Material 3 ColorScheme.fromSeed 입력).
 ///
-/// 부드러운 살구-핑크. 한·일·미 사용자에게 모두 친숙한 따뜻한 톤.
-/// 정식 브랜딩 결정(B3 앱 이름·로고) 후 변경될 수 있음.
+/// ── 듀얼 시드 (출시용 브랜드 정체성) ──────────────────────────────
+/// primary  = 코랄  (따뜻함 + 가족 + 사랑) — 일반 액션, 상태 카드
+/// tertiary = 민트  (의료 신뢰 + 청량) — 접종/성장 차트 등 의료성 영역
+/// 이 두 색의 대비로 베이비노트 핵심 가치(따뜻함 × 신뢰성) 동시 표현.
+///
+/// 한·일·미 사용자에게 모두 친숙한 중성적 톤 — 성별 편중 없음.
 class BrandColors {
   const BrandColors._();
 
-  static const Color seed = Color(0xFFFFA8B0);
+  /// 코랄. ColorScheme.fromSeed의 primary seed.
+  static const Color seed = Color(0xFFF0958F);
+
+  /// 민트. ColorScheme.fromSeed의 tertiarySeed로 전달 — 의료/성장 영역 강조.
+  static const Color tertiarySeed = Color(0xFF7CC2A0);
 }
 
 /// 애니메이션 지속 시간 (Material Motion 권장 기반).

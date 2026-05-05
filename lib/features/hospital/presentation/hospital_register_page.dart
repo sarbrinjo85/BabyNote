@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/theme/tokens.dart';
 import '../domain/hospital.dart';
+import 'hospital_name_autocomplete.dart';
 import 'hospital_providers.dart';
 
 class HospitalRegisterPage extends ConsumerStatefulWidget {
@@ -20,12 +21,16 @@ class HospitalRegisterPage extends ConsumerStatefulWidget {
 class _HospitalRegisterPageState extends ConsumerState<HospitalRegisterPage> {
   final _formKey = GlobalKey<FormState>();
 
-  late String _name;
+  // 자동완성 후 phone/address controller에도 즉시 반영하려면 controller 패턴 필요.
+  late final TextEditingController _nameCtrl;
+  late final TextEditingController _phoneCtrl;
+  late final TextEditingController _addressCtrl;
   late String _specialty;
-  late String _phone;
-  late String _address;
   late String _note;
   late bool _isDefault;
+  // Places 선택 시 받은 좌표 (저장은 추후 — 현재 Hospital domain 사용)
+  double? _latitude;
+  double? _longitude;
 
   bool get _isEdit => widget.editing != null;
 
@@ -33,12 +38,22 @@ class _HospitalRegisterPageState extends ConsumerState<HospitalRegisterPage> {
   void initState() {
     super.initState();
     final e = widget.editing;
-    _name = e?.name ?? '';
+    _nameCtrl = TextEditingController(text: e?.name ?? '');
+    _phoneCtrl = TextEditingController(text: e?.phone ?? '');
+    _addressCtrl = TextEditingController(text: e?.address ?? '');
     _specialty = e?.specialty ?? 'pediatrics';
-    _phone = e?.phone ?? '';
-    _address = e?.address ?? '';
     _note = e?.note ?? '';
     _isDefault = e?.isDefault ?? true;
+    _latitude = e?.latitude;
+    _longitude = e?.longitude;
+  }
+
+  @override
+  void dispose() {
+    _nameCtrl.dispose();
+    _phoneCtrl.dispose();
+    _addressCtrl.dispose();
+    super.dispose();
   }
 
   Future<void> _submit() async {
@@ -47,22 +62,27 @@ class _HospitalRegisterPageState extends ConsumerState<HospitalRegisterPage> {
     if (form == null || !form.validate()) return;
     form.save();
 
+    final name = _nameCtrl.text.trim();
+    final phone = _phoneCtrl.text.trim();
+    final address = _addressCtrl.text.trim();
     if (_isEdit) {
       await ref.read(hospitalControllerProvider.notifier).saveEdit(
             id: widget.editing!.id,
-            name: _name.trim(),
+            name: name,
             specialty: _specialty,
-            phone: _phone.trim().isEmpty ? null : _phone.trim(),
-            address: _address.trim().isEmpty ? null : _address.trim(),
+            phone: phone.isEmpty ? null : phone,
+            address: address.isEmpty ? null : address,
             note: _note.trim().isEmpty ? null : _note.trim(),
             isDefault: _isDefault,
           );
     } else {
       await ref.read(hospitalControllerProvider.notifier).create(
-            name: _name.trim(),
+            name: name,
             specialty: _specialty,
-            phone: _phone.trim().isEmpty ? null : _phone.trim(),
-            address: _address.trim().isEmpty ? null : _address.trim(),
+            phone: phone.isEmpty ? null : phone,
+            address: address.isEmpty ? null : address,
+            latitude: _latitude,
+            longitude: _longitude,
             note: _note.trim().isEmpty ? null : _note.trim(),
             isDefault: _isDefault,
           );
@@ -101,16 +121,26 @@ class _HospitalRegisterPageState extends ConsumerState<HospitalRegisterPage> {
           child: ListView(
             padding: const EdgeInsets.all(Spacing.md),
             children: [
-              TextFormField(
-                initialValue: _name,
-                decoration: InputDecoration(
-                  labelText: l10n.hospitalNameLabel,
-                  hintText: l10n.hospitalNameHint,
-                ),
+              HospitalNameAutocomplete(
+                controller: _nameCtrl,
                 autofocus: !_isEdit,
                 validator: (v) =>
                     (v == null || v.trim().isEmpty) ? l10n.hospitalNameRequired : null,
-                onSaved: (v) => _name = v ?? '',
+                onPlaceSelected: (details) {
+                  // 자동완성 결과 → phone/address/lat/lng 자동 채움
+                  setState(() {
+                    if (details.phoneNumber != null &&
+                        details.phoneNumber!.isNotEmpty) {
+                      _phoneCtrl.text = details.phoneNumber!;
+                    }
+                    if (details.formattedAddress != null &&
+                        details.formattedAddress!.isNotEmpty) {
+                      _addressCtrl.text = details.formattedAddress!;
+                    }
+                    _latitude = details.latitude;
+                    _longitude = details.longitude;
+                  });
+                },
               ),
               const SizedBox(height: Spacing.lg),
 
@@ -130,23 +160,21 @@ class _HospitalRegisterPageState extends ConsumerState<HospitalRegisterPage> {
               const SizedBox(height: Spacing.lg),
 
               TextFormField(
-                initialValue: _phone,
+                controller: _phoneCtrl,
                 decoration: InputDecoration(
                   labelText: l10n.hospitalPhone,
                   hintText: l10n.hospitalPhoneHint,
                 ),
                 keyboardType: TextInputType.phone,
-                onSaved: (v) => _phone = v ?? '',
               ),
               const SizedBox(height: Spacing.md),
 
               TextFormField(
-                initialValue: _address,
+                controller: _addressCtrl,
                 decoration: InputDecoration(
                   labelText: l10n.hospitalAddress,
                   hintText: l10n.hospitalAddressHint,
                 ),
-                onSaved: (v) => _address = v ?? '',
               ),
               const SizedBox(height: Spacing.md),
 

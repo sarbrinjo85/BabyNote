@@ -1021,6 +1021,21 @@ class AppLocalizationsKo extends AppLocalizations {
   String get notifSleepOngoingBody => '탭하여 앱에서 깨움 기록';
 
   @override
+  String get notifGrowthWeeklyTitle => '성장 측정';
+
+  @override
+  String get notifGrowthWeeklyBody => '주 1회 체중·키 기록을 추천해요 📏';
+
+  @override
+  String get inventoryHubTitle => '재고 관리';
+
+  @override
+  String get homeSectionData => '데이터/관리';
+
+  @override
+  String get homeSectionMedical => '의료';
+
+  @override
   String get childEditTitle => '자녀 정보 편집';
 
   @override

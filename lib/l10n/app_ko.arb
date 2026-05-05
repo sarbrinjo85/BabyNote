@@ -369,6 +369,11 @@
   "notifVaccineUpcomingBody": "내일 {vaccine} 권장일이에요.",
   "@notifVaccineUpcomingBody": { "placeholders": { "vaccine": { "type": "String" } } },
   "notifSleepOngoingBody": "탭하여 앱에서 깨움 기록",
+  "notifGrowthWeeklyTitle": "성장 측정",
+  "notifGrowthWeeklyBody": "주 1회 체중·키 기록을 추천해요 📏",
+  "inventoryHubTitle": "재고 관리",
+  "homeSectionData": "데이터/관리",
+  "homeSectionMedical": "의료",
 
   "childEditTitle": "자녀 정보 편집",
   "childEditSaved": "자녀 정보를 저장했어요",

@@ -1984,6 +1984,36 @@ abstract class AppLocalizations {
   /// **'탭하여 앱에서 깨움 기록'**
   String get notifSleepOngoingBody;
 
+  /// No description provided for @notifGrowthWeeklyTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'성장 측정'**
+  String get notifGrowthWeeklyTitle;
+
+  /// No description provided for @notifGrowthWeeklyBody.
+  ///
+  /// In ko, this message translates to:
+  /// **'주 1회 체중·키 기록을 추천해요 📏'**
+  String get notifGrowthWeeklyBody;
+
+  /// No description provided for @inventoryHubTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'재고 관리'**
+  String get inventoryHubTitle;
+
+  /// No description provided for @homeSectionData.
+  ///
+  /// In ko, this message translates to:
+  /// **'데이터/관리'**
+  String get homeSectionData;
+
+  /// No description provided for @homeSectionMedical.
+  ///
+  /// In ko, this message translates to:
+  /// **'의료'**
+  String get homeSectionMedical;
+
   /// No description provided for @childEditTitle.
   ///
   /// In ko, this message translates to:

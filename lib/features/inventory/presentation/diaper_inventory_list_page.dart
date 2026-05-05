@@ -11,26 +11,17 @@ import '../domain/diaper_inventory.dart';
 import 'diaper_inventory_providers.dart';
 
 class DiaperInventoryListPage extends ConsumerWidget {
-  const DiaperInventoryListPage({super.key});
+  const DiaperInventoryListPage({super.key, this.embed = false});
+
+  /// embed=true면 Scaffold/AppBar 없이 body만 — Hub 내부 사용.
+  final bool embed;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final asyncChildren = ref.watch(myChildrenProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.diaperInventoryTitle),
-        actions: [
-          const ChildPickerAction(),
-          IconButton(
-            tooltip: l10n.commonAdd,
-            icon: const Icon(Icons.add),
-            onPressed: () => context.push('/inventory/diaper/new'),
-          ),
-        ],
-      ),
-      body: SafeArea(top: false, child: asyncChildren.when(
+    final body = SafeArea(top: false, child: asyncChildren.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => Center(child: Text(l10n.errorChildLoadFailed(err))),
         data: (children) {
@@ -88,7 +79,22 @@ class DiaperInventoryListPage extends ConsumerWidget {
             },
           );
         },
-      )),
+      ));
+
+    if (embed) return body;
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(l10n.diaperInventoryTitle),
+        actions: [
+          const ChildPickerAction(),
+          IconButton(
+            tooltip: l10n.commonAdd,
+            icon: const Icon(Icons.add),
+            onPressed: () => context.push('/inventory/diaper/new'),
+          ),
+        ],
+      ),
+      body: body,
     );
   }
 }

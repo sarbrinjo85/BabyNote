@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 import 'package:babynote/l10n/app_localizations.dart';
@@ -165,6 +166,30 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               style: FilledButton.styleFrom(
                 minimumSize: const Size.fromHeight(TouchTarget.standard),
               ),
+            ),
+
+            // ── 가족 공유 섹션 ────────────────────────────────────
+            const SizedBox(height: Spacing.xl),
+            Text(
+              l10n.familyTitle,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+            ),
+            const SizedBox(height: Spacing.sm),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Text('👨‍👩‍👧', style: TextStyle(fontSize: 28)),
+              title: Text(l10n.familyEntryHome),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push('/family'),
+            ),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Text('🤝', style: TextStyle(fontSize: 28)),
+              title: Text(l10n.familyEntryJoin),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push('/family/join'),
             ),
 
             // ── Sentry 검증 (debug 빌드에서만 노출) ─────────────────

@@ -26,6 +26,7 @@ import '../../features/inventory/presentation/diaper_inventory_list_page.dart';
 import '../../features/inventory/presentation/diaper_inventory_register_page.dart';
 import '../../features/inventory/presentation/formula_inventory_list_page.dart';
 import '../../features/inventory/presentation/formula_inventory_register_page.dart';
+import '../../features/inventory/presentation/inventory_hub_page.dart';
 import '../../features/vaccination/domain/vaccine_schedule.dart';
 import '../../features/vaccination/presentation/vaccine_list_page.dart';
 import '../../features/vaccination/presentation/vaccine_record_page.dart';
@@ -134,7 +135,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(
-        // /inventory/formula — 분유 재고 목록
+        // /inventory — 재고 관리 hub (분유 + 기저귀 두 탭)
+        path: '/inventory',
+        name: 'inventoryHub',
+        builder: (context, state) =>
+            const AuthGate(child: InventoryHubPage()),
+      ),
+      GoRoute(
+        // /inventory/formula — 분유 재고 목록 (단독 진입 — 알림 등에서)
         path: '/inventory/formula',
         name: 'formulaInventoryList',
         builder: (context, state) =>

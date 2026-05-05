@@ -1031,6 +1031,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notifSleepOngoingBody => 'Tap to record wake-up in the app';
 
   @override
+  String get notifGrowthWeeklyTitle => 'Growth check';
+
+  @override
+  String get notifGrowthWeeklyBody =>
+      'Weekly weight & height tracking recommended 📏';
+
+  @override
+  String get inventoryHubTitle => 'Inventory';
+
+  @override
+  String get homeSectionData => 'Data & Manage';
+
+  @override
+  String get homeSectionMedical => 'Medical';
+
+  @override
   String get childEditTitle => 'Edit child';
 
   @override

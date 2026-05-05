@@ -11,27 +11,20 @@ import '../domain/formula_inventory.dart';
 import 'formula_inventory_providers.dart';
 
 /// 분유 재고 목록 — 사용 중 / 보관 중 / 소진 그룹.
+///
+/// embed=true면 Scaffold/AppBar 없이 body만 반환 → InventoryHubPage 안에서
+/// TabBarView child로 사용. 단독 진입(`/inventory/formula`)은 embed=false.
 class FormulaInventoryListPage extends ConsumerWidget {
-  const FormulaInventoryListPage({super.key});
+  const FormulaInventoryListPage({super.key, this.embed = false});
+
+  final bool embed;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final asyncChildren = ref.watch(myChildrenProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.formulaInventoryTitle),
-        actions: [
-          const ChildPickerAction(),
-          IconButton(
-            tooltip: l10n.commonAdd,
-            icon: const Icon(Icons.add),
-            onPressed: () => context.push('/inventory/formula/new'),
-          ),
-        ],
-      ),
-      body: SafeArea(top: false, child: asyncChildren.when(
+    final body = SafeArea(top: false, child: asyncChildren.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => Center(child: Text(l10n.errorChildLoadFailed(err))),
         data: (children) {
@@ -90,7 +83,25 @@ class FormulaInventoryListPage extends ConsumerWidget {
             },
           );
         },
-      )),
+      ));
+
+    if (embed) {
+      // Hub 내부에서 호출 — Scaffold + 추가 버튼 X (Hub의 AppBar가 처리)
+      return body;
+    }
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(l10n.formulaInventoryTitle),
+        actions: [
+          const ChildPickerAction(),
+          IconButton(
+            tooltip: l10n.commonAdd,
+            icon: const Icon(Icons.add),
+            onPressed: () => context.push('/inventory/formula/new'),
+          ),
+        ],
+      ),
+      body: body,
     );
   }
 }

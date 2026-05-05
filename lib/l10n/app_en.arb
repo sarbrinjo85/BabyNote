@@ -334,6 +334,11 @@
   "notifVaccineUpcomingTitle": "Upcoming vaccination",
   "notifVaccineUpcomingBody": "{vaccine} is recommended tomorrow.",
   "notifSleepOngoingBody": "Tap to record wake-up in the app",
+  "notifGrowthWeeklyTitle": "Growth check",
+  "notifGrowthWeeklyBody": "Weekly weight & height tracking recommended 📏",
+  "inventoryHubTitle": "Inventory",
+  "homeSectionData": "Data & Manage",
+  "homeSectionMedical": "Medical",
 
   "childEditTitle": "Edit child",
   "childEditSaved": "Child saved",

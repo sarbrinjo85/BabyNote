@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/notifications/notification_service.dart';
 import '../../child/domain/child.dart';
+import '../../growth/presentation/growth_providers.dart';
 import '../../inventory/presentation/formula_inventory_providers.dart';
 import '../../vaccination/domain/vaccination.dart';
 import '../../vaccination/domain/vaccine_schedule.dart';
@@ -34,8 +35,40 @@ class NotificationScheduler extends ConsumerWidget {
     _scheduleFormulaNotifications(ref, l10n);
     // 접종 알림
     _scheduleVaccineNotifications(ref, l10n);
+    // 성장 주간 알림
+    _scheduleGrowthWeeklyReminder(ref, l10n);
 
     return const SizedBox.shrink();
+  }
+
+  /// 성장 측정 주간 알림 — 마지막 측정일 + 7일 시점에 알림.
+  ///
+  /// 측정 0건이면 자녀 등록일 + 7일에 첫 측정 권유.
+  void _scheduleGrowthWeeklyReminder(WidgetRef ref, AppLocalizations l10n) {
+    final asyncGrowths = ref.watch(growthsProvider(child.id));
+    asyncGrowths.whenData((list) {
+      final notifId = (child.id.hashCode ^ 0x47526F77) & 0x7fffffff; // 'GRow'
+
+      DateTime baseDate;
+      if (list.isEmpty) {
+        // 측정 0건 — 자녀 등록일(=birthDate) 기준 7일 후 첫 측정 알림
+        baseDate = child.birthDate;
+      } else {
+        baseDate = list.last.measuredAt; // listAll은 asc → 마지막이 최신
+      }
+
+      final scheduleAt =
+          DateTime(baseDate.year, baseDate.month, baseDate.day + 7, 9, 0);
+
+      NotificationService.instance.scheduleAt(
+        id: notifId,
+        title: l10n.notifGrowthWeeklyTitle,
+        body: l10n.notifGrowthWeeklyBody,
+        when: scheduleAt,
+        channelId: 'growth_weekly',
+        channelName: 'Growth weekly reminder',
+      );
+    });
   }
 
   /// 활성 분유 통의 expectedDaysLeft가 1일 이상이면 (잔량-1일) 시점에 알림 schedule.

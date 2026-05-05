@@ -10,6 +10,10 @@ class Env {
   static const supabaseUrl = String.fromEnvironment('SUPABASE_URL');
   static const supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
   static const sentryDsn = String.fromEnvironment('SENTRY_DSN');
+  /// Google Places API 키 — 병원/가게 등 장소 자동완성에 사용.
+  /// dart-define으로 주입. 비었으면 자동완성 비활성 (앱은 정상 동작).
+  static const googlePlacesApiKey =
+      String.fromEnvironment('GOOGLE_PLACES_API_KEY');
 
   static const flavor = String.fromEnvironment('FLAVOR', defaultValue: 'dev');
 
@@ -19,4 +23,7 @@ class Env {
   /// Sentry DSN이 dart-define으로 주입됐는지. 비었으면 init 자체를 건너뜀
   /// (개발자가 sentry 프로젝트 만들기 전이거나 로컬 디버깅 단계).
   static bool get isSentryEnabled => sentryDsn.isNotEmpty;
+
+  /// Google Places API 키가 주입됐는지.
+  static bool get isPlacesEnabled => googlePlacesApiKey.isNotEmpty;
 }

@@ -12,22 +12,41 @@ import 'tokens.dart';
 class AppTheme {
   const AppTheme._();
 
-  /// 라이트 테마.
-  static ThemeData light() {
-    final colorScheme = ColorScheme.fromSeed(
-      seedColor: BrandColors.seed,
-      brightness: Brightness.light,
-    );
-    return _build(colorScheme);
-  }
+  /// 라이트 테마. primary=코랄, secondary/tertiary=민트.
+  static ThemeData light() => _build(_buildScheme(Brightness.light));
 
   /// 다크 테마. 새벽 모드에 그대로 사용 (시스템 다크 모드 따라감).
-  static ThemeData dark() {
-    final colorScheme = ColorScheme.fromSeed(
+  static ThemeData dark() => _build(_buildScheme(Brightness.dark));
+
+  /// 두 시드(코랄 + 민트)에서 각각 ColorScheme 생성 후 합성.
+  ///
+  /// Flutter 3.41 시점에는 `ColorScheme.fromSeed`가 단일 시드만 받음
+  /// (3.27+의 secondarySeed/tertiarySeed 인자 미지원). 그래서:
+  ///   1) 코랄 seed로 base scheme 생성
+  ///   2) 민트 seed로 별도 scheme 생성 (그쪽 primary 등을 추출)
+  ///   3) base.copyWith로 secondary/tertiary 묶음을 민트로 교체
+  ///
+  /// 결과적으로 primary(코랄) × tertiary(민트) 듀얼 톤 완성.
+  static ColorScheme _buildScheme(Brightness brightness) {
+    final base = ColorScheme.fromSeed(
       seedColor: BrandColors.seed,
-      brightness: Brightness.dark,
+      brightness: brightness,
     );
-    return _build(colorScheme);
+    final mint = ColorScheme.fromSeed(
+      seedColor: BrandColors.tertiarySeed,
+      brightness: brightness,
+    );
+    return base.copyWith(
+      // secondary/tertiary 둘 다 민트 — 의료/성장 영역에서 일관된 색
+      secondary: mint.primary,
+      onSecondary: mint.onPrimary,
+      secondaryContainer: mint.primaryContainer,
+      onSecondaryContainer: mint.onPrimaryContainer,
+      tertiary: mint.primary,
+      onTertiary: mint.onPrimary,
+      tertiaryContainer: mint.primaryContainer,
+      onTertiaryContainer: mint.onPrimaryContainer,
+    );
   }
 
   /// 라이트/다크 공통 빌더.
