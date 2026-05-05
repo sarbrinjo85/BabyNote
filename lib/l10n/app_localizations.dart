@@ -2211,6 +2211,30 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'다크'**
   String get themeDark;
+
+  /// No description provided for @settingsExport.
+  ///
+  /// In ko, this message translates to:
+  /// **'데이터 내보내기'**
+  String get settingsExport;
+
+  /// No description provided for @settingsExportHelp.
+  ///
+  /// In ko, this message translates to:
+  /// **'현재 자녀의 모든 기록(수유·수면·기저귀·성장)을 CSV로 내보내요. 의사 진료나 백업에 사용할 수 있어요.'**
+  String get settingsExportHelp;
+
+  /// No description provided for @settingsExportCsv.
+  ///
+  /// In ko, this message translates to:
+  /// **'CSV로 공유'**
+  String get settingsExportCsv;
+
+  /// No description provided for @settingsExportInProgress.
+  ///
+  /// In ko, this message translates to:
+  /// **'준비 중…'**
+  String get settingsExportInProgress;
 }
 
 class _AppLocalizationsDelegate

@@ -380,5 +380,10 @@
   "settingsThemeHelp": "ライト/ダークモードを直接選ぶか、システム設定に従わせることができます。",
   "themeSystem": "システム",
   "themeLight": "ライト",
-  "themeDark": "ダーク"
+  "themeDark": "ダーク",
+
+  "settingsExport": "データのエクスポート",
+  "settingsExportHelp": "現在のお子さまの全記録(授乳・睡眠・おむつ・成長)をCSVで書き出します。診察やバックアップに使えます。",
+  "settingsExportCsv": "CSVで共有",
+  "settingsExportInProgress": "準備中…"
 }

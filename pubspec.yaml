@@ -54,6 +54,12 @@ dependencies:
   # zonedSchedule 호출에 IANA timezone 필요 (Asia/Seoul 등).
   timezone: ^0.10.0
 
+  # 데이터 내보내기 — CSV 파일 생성 후 시스템 공유 시트로 전달.
+  # share_plus는 임시 파일 path를 받아 안드로이드/iOS 공유 시트(이메일/Drive 등) 표시.
+  # path_provider는 앱의 임시 디렉터리 경로 조회.
+  share_plus: ^10.1.2
+  path_provider: ^2.1.5
+
   # NOTE — packages added in later phases (kept here for reference; uncomment when needed):
   # # Local DB (Phase 2 — records storage offline)
   # drift: ^2.22.0

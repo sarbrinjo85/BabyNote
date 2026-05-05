@@ -380,5 +380,10 @@
   "settingsThemeHelp": "Choose light/dark mode explicitly or follow the system setting.",
   "themeSystem": "System",
   "themeLight": "Light",
-  "themeDark": "Dark"
+  "themeDark": "Dark",
+
+  "settingsExport": "Export data",
+  "settingsExportHelp": "Export the selected child's records (feeding, sleep, diapers, growth) as CSV. Useful for doctor visits or backup.",
+  "settingsExportCsv": "Share as CSV",
+  "settingsExportInProgress": "Preparing…"
 }

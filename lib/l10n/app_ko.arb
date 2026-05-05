@@ -417,5 +417,10 @@
   "settingsThemeHelp": "라이트/다크 모드를 직접 선택하거나 시스템 설정을 따라가게 할 수 있어요.",
   "themeSystem": "시스템",
   "themeLight": "라이트",
-  "themeDark": "다크"
+  "themeDark": "다크",
+
+  "settingsExport": "데이터 내보내기",
+  "settingsExportHelp": "현재 자녀의 모든 기록(수유·수면·기저귀·성장)을 CSV로 내보내요. 의사 진료나 백업에 사용할 수 있어요.",
+  "settingsExportCsv": "CSV로 공유",
+  "settingsExportInProgress": "준비 중…"
 }

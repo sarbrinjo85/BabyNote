@@ -1152,4 +1152,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get themeDark => 'Dark';
+
+  @override
+  String get settingsExport => 'Export data';
+
+  @override
+  String get settingsExportHelp =>
+      'Export the selected child\'s records (feeding, sleep, diapers, growth) as CSV. Useful for doctor visits or backup.';
+
+  @override
+  String get settingsExportCsv => 'Share as CSV';
+
+  @override
+  String get settingsExportInProgress => 'Preparing…';
 }

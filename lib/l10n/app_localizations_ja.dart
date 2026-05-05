@@ -1137,4 +1137,17 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get themeDark => 'ダーク';
+
+  @override
+  String get settingsExport => 'データのエクスポート';
+
+  @override
+  String get settingsExportHelp =>
+      '現在のお子さまの全記録(授乳・睡眠・おむつ・成長)をCSVで書き出します。診察やバックアップに使えます。';
+
+  @override
+  String get settingsExportCsv => 'CSVで共有';
+
+  @override
+  String get settingsExportInProgress => '準備中…';
 }
