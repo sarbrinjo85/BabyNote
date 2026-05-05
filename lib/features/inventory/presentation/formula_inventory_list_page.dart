@@ -78,6 +78,14 @@ class FormulaInventoryListPage extends ConsumerWidget {
                           showDepleteButton: false,
                         )),
                   ],
+                  // 등록된 항목이 있어도 하단에 추가 버튼 노출 — 빠른 추가 동선
+                  const SizedBox(height: Spacing.lg),
+                  OutlinedButton.icon(
+                    onPressed: () => context.push('/inventory/formula/new'),
+                    icon: const Icon(Icons.add),
+                    label: Text(l10n.formulaAdd),
+                  ),
+                  const SizedBox(height: Spacing.lg),
                 ],
               );
             },
