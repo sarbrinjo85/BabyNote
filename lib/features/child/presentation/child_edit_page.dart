@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/date_input_dialog.dart';
 import '../domain/child.dart';
 import 'child_providers.dart';
 
@@ -48,19 +49,14 @@ class _ChildEditPageState extends ConsumerState<ChildEditPage> {
   Future<void> _pickBirthDate() async {
     final l10n = AppLocalizations.of(context);
     final now = DateTime.now();
-    // 직접 입력 시 Korean locale 포맷은 "yyyy. M. d." (마침표 + 공백) 인데
-    // 안드로이드 숫자 키보드(datetime)에는 마침표가 없어 입력 불가.
-    // → DatePicker 로케일을 영어로 강제해 'mm/dd/yyyy' (슬래시) 사용.
-    //   숫자 키보드에 / 가 있어 직접 입력 가능. 라벨은 helpText로 한글 유지.
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _birthDate,
+    // 8자리 yyyymmdd 직접 입력(또는 캘린더) 다이얼로그 사용.
+    // (안드로이드 숫자 키보드 호환을 위해 구분자 없는 포맷 채택)
+    final picked = await showDateInputDialog(
+      context,
+      initial: _birthDate,
       firstDate: DateTime(now.year - 5),
       lastDate: now,
-      locale: const Locale('en'),
-      helpText: l10n.childBirthDateHelp,
-      fieldHintText: 'mm/dd/yyyy',
-      fieldLabelText: l10n.childBirthDateHelp,
+      title: l10n.childBirthDateHelp,
     );
     if (picked != null) {
       setState(() => _birthDate = picked);

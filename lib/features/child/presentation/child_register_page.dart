@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:babynote/l10n/app_localizations.dart';
+import '../../../core/widgets/date_input_dialog.dart';
 import 'child_providers.dart';
 
 /// 자녀 등록 화면.
@@ -40,17 +41,13 @@ class _ChildRegisterPageState extends ConsumerState<ChildRegisterPage> {
   Future<void> _pickBirthDate() async {
     final now = DateTime.now();
     final l10n = AppLocalizations.of(context);
-    // 한국 로케일 포맷 "yyyy. M. d." 는 마침표가 필요한데 안드로이드 숫자
-    // 키보드에 마침표가 없음 → 영어 로케일 강제 + mm/dd/yyyy(슬래시) 형식 사용.
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _birthDate ?? now,
-      firstDate: DateTime(now.year - 5), // 5년 전까지만 (너무 큰 아이는 앱 타겟 외)
+    // 8자리 yyyymmdd 직접 입력(또는 캘린더) 다이얼로그.
+    final picked = await showDateInputDialog(
+      context,
+      initial: _birthDate ?? now,
+      firstDate: DateTime(now.year - 5), // 5년 전까지만
       lastDate: now, // 미래 날짜 차단
-      locale: const Locale('en'),
-      helpText: l10n.childBirthDateHelp,
-      fieldHintText: 'mm/dd/yyyy',
-      fieldLabelText: l10n.childBirthDateHelp,
+      title: l10n.childBirthDateHelp,
     );
     if (picked != null) {
       setState(() => _birthDate = picked);
