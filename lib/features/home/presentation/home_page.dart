@@ -6,7 +6,6 @@ import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/big_action_button.dart';
 import '../../auth/data/auth_repository.dart';
-import '../../auth/presentation/auth_providers.dart';
 import '../../child/presentation/child_providers.dart';
 import '../../child/presentation/selected_child_provider.dart';
 import 'diaper_size_up_card.dart';
@@ -31,7 +30,6 @@ class HomePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final currentUser = ref.watch(currentUserProvider);
     final asyncChildren = ref.watch(myChildrenProvider);
     final selectedChild = ref.watch(selectedChildProvider);
     final selectedChildId = ref.watch(selectedChildIdProvider);
@@ -56,16 +54,6 @@ class HomePage extends ConsumerWidget {
         child: ListView(
         padding: const EdgeInsets.all(Spacing.md),
         children: [
-          Center(
-            child: Text(
-              l10n.homeWelcome,
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ),
-          const SizedBox(height: Spacing.sm),
-          Center(child: _UserChip(user: currentUser)),
-          const SizedBox(height: Spacing.lg),
-
           // ── 자녀 섹션 ──────────────────────────────────────────
           _SectionTitle(l10n.homeMyChildren),
           const SizedBox(height: Spacing.xs),
@@ -324,25 +312,3 @@ class _EmptyChildrenCard extends StatelessWidget {
   }
 }
 
-class _UserChip extends StatelessWidget {
-  const _UserChip({required this.user});
-  final dynamic user;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    if (user == null) {
-      return Chip(label: Text(l10n.homeNoLogin));
-    }
-    final id = user.id as String;
-    final isAnon = (user.isAnonymous as bool?) ?? false;
-    final email = (user.email as String?) ?? '';
-    final label = email.isNotEmpty
-        ? email
-        : '${isAnon ? l10n.homeAnonymous : l10n.homeUser}: ${id.substring(0, 8)}…';
-    return Chip(
-      avatar: Icon(isAnon ? Icons.person_outline : Icons.person),
-      label: Text(label),
-    );
-  }
-}
