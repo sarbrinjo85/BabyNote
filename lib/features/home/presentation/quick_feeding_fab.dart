@@ -166,22 +166,28 @@ class QuickFeedingFab extends ConsumerWidget {
 
     if (!context.mounted) return;
     final summary = _summary(l10n, created);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(l10n.fabSaved(summary)),
-        action: SnackBarAction(
-          label: l10n.fabUndo,
-          onPressed: () async {
-            try {
-              await repo.deleteFeeding(created!.id);
-              ref.invalidate(recentFeedingsProvider(child.id));
-              ref.invalidate(formulaInventoryStatsProvider);
-            } catch (_) {/* 무시 */}
-          },
+    // 이전 SnackBar 즉시 제거 — 빠르게 여러 번 누르면 큐에 쌓이지 않도록.
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(l10n.fabSaved(summary)),
+          // 취소 버튼이 있어도 duration이 만료되면 자동 dismiss됨.
+          // 3초로 단축 (기본 4s) — 사용자가 "안 사라진다"고 느끼지 않도록.
+          duration: const Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+          action: SnackBarAction(
+            label: l10n.fabUndo,
+            onPressed: () async {
+              try {
+                await repo.deleteFeeding(created!.id);
+                ref.invalidate(recentFeedingsProvider(child.id));
+                ref.invalidate(formulaInventoryStatsProvider);
+              } catch (_) {/* 무시 */}
+            },
+          ),
         ),
-        duration: const Duration(seconds: 5),
-      ),
-    );
+      );
   }
 
   String _summary(AppLocalizations l10n, Feeding f) {
