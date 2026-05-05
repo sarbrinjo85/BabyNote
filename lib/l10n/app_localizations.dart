@@ -2175,6 +2175,42 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'첫 자녀 등록하기'**
   String get onboardingCta;
+
+  /// No description provided for @settingsTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'설정'**
+  String get settingsTitle;
+
+  /// No description provided for @settingsTheme.
+  ///
+  /// In ko, this message translates to:
+  /// **'테마'**
+  String get settingsTheme;
+
+  /// No description provided for @settingsThemeHelp.
+  ///
+  /// In ko, this message translates to:
+  /// **'라이트/다크 모드를 직접 선택하거나 시스템 설정을 따라가게 할 수 있어요.'**
+  String get settingsThemeHelp;
+
+  /// No description provided for @themeSystem.
+  ///
+  /// In ko, this message translates to:
+  /// **'시스템'**
+  String get themeSystem;
+
+  /// No description provided for @themeLight.
+  ///
+  /// In ko, this message translates to:
+  /// **'라이트'**
+  String get themeLight;
+
+  /// No description provided for @themeDark.
+  ///
+  /// In ko, this message translates to:
+  /// **'다크'**
+  String get themeDark;
 }
 
 class _AppLocalizationsDelegate

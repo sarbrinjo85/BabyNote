@@ -1119,4 +1119,22 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get onboardingCta => '最初のお子さまを登録';
+
+  @override
+  String get settingsTitle => '設定';
+
+  @override
+  String get settingsTheme => 'テーマ';
+
+  @override
+  String get settingsThemeHelp => 'ライト/ダークモードを直接選ぶか、システム設定に従わせることができます。';
+
+  @override
+  String get themeSystem => 'システム';
+
+  @override
+  String get themeLight => 'ライト';
+
+  @override
+  String get themeDark => 'ダーク';
 }

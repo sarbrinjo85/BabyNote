@@ -42,6 +42,12 @@ class HomePage extends ConsumerWidget {
         actions: [
           // 다가오는 일정 종 — 분유/사이즈업/접종 임박 한눈에
           const NotificationBellAction(),
+          // 설정 (테마/알림/언어 등)
+          IconButton(
+            tooltip: l10n.settingsTitle,
+            icon: const Icon(Icons.settings_outlined),
+            onPressed: () => context.push('/settings'),
+          ),
           IconButton(
             tooltip: l10n.homeLogout,
             icon: const Icon(Icons.logout),

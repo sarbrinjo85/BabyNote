@@ -373,5 +373,12 @@
 
   "onboardingTitle": "Welcome to BabyNote!",
   "onboardingBody": "Register your child first\nto start tracking feeding, sleep, diapers, and growth.",
-  "onboardingCta": "Register first child"
+  "onboardingCta": "Register first child",
+
+  "settingsTitle": "Settings",
+  "settingsTheme": "Theme",
+  "settingsThemeHelp": "Choose light/dark mode explicitly or follow the system setting.",
+  "themeSystem": "System",
+  "themeLight": "Light",
+  "themeDark": "Dark"
 }

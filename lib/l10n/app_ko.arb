@@ -410,5 +410,12 @@
 
   "onboardingTitle": "베이비노트에 오신 걸 환영해요!",
   "onboardingBody": "먼저 자녀를 등록하면\n수유·수면·기저귀·성장 기록을 시작할 수 있어요.",
-  "onboardingCta": "첫 자녀 등록하기"
+  "onboardingCta": "첫 자녀 등록하기",
+
+  "settingsTitle": "설정",
+  "settingsTheme": "테마",
+  "settingsThemeHelp": "라이트/다크 모드를 직접 선택하거나 시스템 설정을 따라가게 할 수 있어요.",
+  "themeSystem": "시스템",
+  "themeLight": "라이트",
+  "themeDark": "다크"
 }

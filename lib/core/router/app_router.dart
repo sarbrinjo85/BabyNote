@@ -10,6 +10,7 @@ import '../../features/diaper/presentation/diaper_register_page.dart';
 import '../../features/family/presentation/family_join_page.dart';
 import '../../features/family/presentation/family_page.dart';
 import '../../features/records/presentation/records_page.dart';
+import '../../features/settings/presentation/settings_page.dart';
 import '../../features/stats/presentation/statistics_page.dart';
 import '../../features/feeding/domain/feeding.dart';
 import '../../features/feeding/presentation/feeding_register_page.dart';
@@ -148,6 +149,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           final editing = state.extra as Hospital?;
           return AuthGate(child: HospitalRegisterPage(editing: editing));
         },
+      ),
+      GoRoute(
+        // /settings — 앱 설정 (테마/알림/언어 등)
+        path: '/settings',
+        name: 'settings',
+        builder: (context, state) =>
+            const AuthGate(child: SettingsPage()),
       ),
       GoRoute(
         // /records — 전체 기록 (수유/수면/기저귀/성장 4탭, long-press 삭제)

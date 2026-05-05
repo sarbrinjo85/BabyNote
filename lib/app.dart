@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/presentation/auth_state_reset_listener.dart';
+import 'features/settings/presentation/theme_mode_provider.dart';
 import 'l10n/app_localizations.dart';
 
 class BabyNoteApp extends ConsumerWidget {
@@ -12,11 +13,16 @@ class BabyNoteApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(appRouterProvider);
+    // 사용자 설정 테마 모드 — shared_preferences에 영구 저장. 로딩 중엔 system fallback.
+    final themeMode = ref.watch(themeModeControllerProvider).maybeWhen(
+          data: (m) => m,
+          orElse: () => ThemeMode.system,
+        );
     return MaterialApp.router(
       onGenerateTitle: (ctx) => AppLocalizations.of(ctx).appTitle,
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
-      themeMode: ThemeMode.system,
+      themeMode: themeMode,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       routerConfig: router,

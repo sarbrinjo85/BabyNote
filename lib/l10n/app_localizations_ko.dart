@@ -1120,4 +1120,22 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get onboardingCta => '첫 자녀 등록하기';
+
+  @override
+  String get settingsTitle => '설정';
+
+  @override
+  String get settingsTheme => '테마';
+
+  @override
+  String get settingsThemeHelp => '라이트/다크 모드를 직접 선택하거나 시스템 설정을 따라가게 할 수 있어요.';
+
+  @override
+  String get themeSystem => '시스템';
+
+  @override
+  String get themeLight => '라이트';
+
+  @override
+  String get themeDark => '다크';
 }

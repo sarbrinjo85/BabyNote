@@ -1133,4 +1133,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingCta => 'Register first child';
+
+  @override
+  String get settingsTitle => 'Settings';
+
+  @override
+  String get settingsTheme => 'Theme';
+
+  @override
+  String get settingsThemeHelp =>
+      'Choose light/dark mode explicitly or follow the system setting.';
+
+  @override
+  String get themeSystem => 'System';
+
+  @override
+  String get themeLight => 'Light';
+
+  @override
+  String get themeDark => 'Dark';
 }
