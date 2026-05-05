@@ -2157,6 +2157,24 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'기저귀 사이즈업'**
   String get bellSizeUpTitle;
+
+  /// No description provided for @onboardingTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'베이비노트에 오신 걸 환영해요!'**
+  String get onboardingTitle;
+
+  /// No description provided for @onboardingBody.
+  ///
+  /// In ko, this message translates to:
+  /// **'먼저 자녀를 등록하면\n수유·수면·기저귀·성장 기록을 시작할 수 있어요.'**
+  String get onboardingBody;
+
+  /// No description provided for @onboardingCta.
+  ///
+  /// In ko, this message translates to:
+  /// **'첫 자녀 등록하기'**
+  String get onboardingCta;
 }
 
 class _AppLocalizationsDelegate

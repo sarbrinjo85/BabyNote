@@ -369,5 +369,9 @@
   "bellSheetTitle": "Upcoming",
   "bellEmpty": "No upcoming alerts. Enjoy the calm 🎉",
   "bellFormulaLowTitle": "Formula running low",
-  "bellSizeUpTitle": "Diaper size-up"
+  "bellSizeUpTitle": "Diaper size-up",
+
+  "onboardingTitle": "Welcome to BabyNote!",
+  "onboardingBody": "Register your child first\nto start tracking feeding, sleep, diapers, and growth.",
+  "onboardingCta": "Register first child"
 }

@@ -55,7 +55,13 @@ class HomePage extends ConsumerWidget {
       ),
       body: SafeArea(
         top: false,
-        child: ListView(
+        // 자녀 0명이면 onboarding hero 한 화면으로 — 다른 섹션 모두 숨김 (자녀 없으면 의미 X)
+        child: asyncChildren.maybeWhen(
+              data: (cs) => cs.isEmpty,
+              orElse: () => false,
+            )
+            ? const _OnboardingHero()
+            : ListView(
         padding: const EdgeInsets.all(Spacing.md),
         children: [
           // ── 자녀 섹션 ──────────────────────────────────────────
@@ -74,8 +80,9 @@ class HomePage extends ConsumerWidget {
               ),
             ),
             data: (children) {
+              // 위에서 zero 처리 끝났으니 여기 들어오면 children.isNotEmpty.
               if (children.isEmpty) {
-                return _EmptyChildrenCard();
+                return const SizedBox.shrink();
               }
               return Column(
                 children: [
@@ -308,23 +315,59 @@ class _SectionTitle extends StatelessWidget {
   }
 }
 
-class _EmptyChildrenCard extends StatelessWidget {
+/// 자녀 0명일 때 홈을 가득 채우는 onboarding hero.
+///
+/// 큰 일러스트 + 친절한 환영 메시지 + 강조된 CTA 버튼.
+/// 다른 섹션(기록 버튼, 재고, 통계 등)은 자녀 ID가 필요해서 0명일 때 의미 없음 → 숨김.
+class _OnboardingHero extends StatelessWidget {
+  const _OnboardingHero();
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(Spacing.md),
+    final theme = Theme.of(context);
+
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(Spacing.xl),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.child_friendly, size: 40),
-            const SizedBox(height: Spacing.xs),
-            Text(l10n.homeNoChildYet),
+            // 큰 일러스트 (이모지로 단순화)
+            const Text('👶', style: TextStyle(fontSize: 96)),
+            const SizedBox(height: Spacing.lg),
+            Text(
+              l10n.onboardingTitle,
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: Spacing.sm),
+            Text(
+              l10n.onboardingBody,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: Spacing.xl),
+            // 큰 등록 버튼 (CTA)
             FilledButton.icon(
               onPressed: () => context.push('/child/new'),
               icon: const Icon(Icons.add),
-              label: Text(l10n.homeFirstChild),
+              label: Text(l10n.onboardingCta),
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(TouchTarget.huge),
+                padding: const EdgeInsets.symmetric(horizontal: Spacing.xl),
+              ),
+            ),
+            const SizedBox(height: Spacing.md),
+            // 가족 공유 — 다른 부모가 이미 자녀를 등록했다면 코드로 참여
+            TextButton.icon(
+              onPressed: () => context.push('/family/join'),
+              icon: const Icon(Icons.group_add),
+              label: Text(l10n.familyEntryJoin),
             ),
           ],
         ),

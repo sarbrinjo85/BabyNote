@@ -369,5 +369,9 @@
   "bellSheetTitle": "近日の予定",
   "bellEmpty": "近日の予定はありません。ゆっくりどうぞ 🎉",
   "bellFormulaLowTitle": "ミルクまもなく切れ",
-  "bellSizeUpTitle": "おむつサイズアップ"
+  "bellSizeUpTitle": "おむつサイズアップ",
+
+  "onboardingTitle": "ベビーノートへようこそ!",
+  "onboardingBody": "まずお子さまを登録すると\n授乳・睡眠・おむつ・成長の記録を始められます。",
+  "onboardingCta": "最初のお子さまを登録"
 }

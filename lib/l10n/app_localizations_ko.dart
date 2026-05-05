@@ -1111,4 +1111,13 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get bellSizeUpTitle => '기저귀 사이즈업';
+
+  @override
+  String get onboardingTitle => '베이비노트에 오신 걸 환영해요!';
+
+  @override
+  String get onboardingBody => '먼저 자녀를 등록하면\n수유·수면·기저귀·성장 기록을 시작할 수 있어요.';
+
+  @override
+  String get onboardingCta => '첫 자녀 등록하기';
 }

@@ -1110,4 +1110,13 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get bellSizeUpTitle => 'おむつサイズアップ';
+
+  @override
+  String get onboardingTitle => 'ベビーノートへようこそ!';
+
+  @override
+  String get onboardingBody => 'まずお子さまを登録すると\n授乳・睡眠・おむつ・成長の記録を始められます。';
+
+  @override
+  String get onboardingCta => '最初のお子さまを登録';
 }

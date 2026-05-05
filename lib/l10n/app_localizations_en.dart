@@ -1123,4 +1123,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bellSizeUpTitle => 'Diaper size-up';
+
+  @override
+  String get onboardingTitle => 'Welcome to BabyNote!';
+
+  @override
+  String get onboardingBody =>
+      'Register your child first\nto start tracking feeding, sleep, diapers, and growth.';
+
+  @override
+  String get onboardingCta => 'Register first child';
 }
