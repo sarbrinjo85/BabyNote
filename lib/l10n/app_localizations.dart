@@ -1606,6 +1606,36 @@ abstract class AppLocalizations {
   /// **'재고 로딩 실패: {error}'**
   String diaperInventoryLoadFailure(Object error);
 
+  /// No description provided for @diaperSizeUpTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'기저귀 사이즈업 예측'**
+  String get diaperSizeUpTitle;
+
+  /// No description provided for @diaperSizeUpDays.
+  ///
+  /// In ko, this message translates to:
+  /// **'약 {days}일 후 {next} 사이즈 권장'**
+  String diaperSizeUpDays(int days, String next);
+
+  /// No description provided for @diaperSizeUpUrgent.
+  ///
+  /// In ko, this message translates to:
+  /// **'{current} → {next}로 곧 변경 권장!'**
+  String diaperSizeUpUrgent(String current, String next);
+
+  /// No description provided for @diaperSizeUpOverdue.
+  ///
+  /// In ko, this message translates to:
+  /// **'{next} 사이즈 권장 시점이 지났어요'**
+  String diaperSizeUpOverdue(String next);
+
+  /// No description provided for @diaperSizeUpCurrentWeight.
+  ///
+  /// In ko, this message translates to:
+  /// **'현재 {kg}kg · {current} 적정 {max}kg까지'**
+  String diaperSizeUpCurrentWeight(String kg, String current, String max);
+
   /// No description provided for @summaryTitle.
   ///
   /// In ko, this message translates to:

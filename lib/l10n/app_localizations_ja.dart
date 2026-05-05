@@ -816,6 +816,29 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String get diaperSizeUpTitle => 'おむつサイズアップ予測';
+
+  @override
+  String diaperSizeUpDays(int days, String next) {
+    return '約 $days日後に $next サイズ推奨';
+  }
+
+  @override
+  String diaperSizeUpUrgent(String current, String next) {
+    return '$current → $next へまもなく変更推奨!';
+  }
+
+  @override
+  String diaperSizeUpOverdue(String next) {
+    return '$next サイズ推奨時期を過ぎています';
+  }
+
+  @override
+  String diaperSizeUpCurrentWeight(String kg, String current, String max) {
+    return '現在 ${kg}kg ・ $current 適正 ${max}kg まで';
+  }
+
+  @override
   String get summaryTitle => '今日のサマリー';
 
   @override

@@ -816,6 +816,29 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String get diaperSizeUpTitle => '기저귀 사이즈업 예측';
+
+  @override
+  String diaperSizeUpDays(int days, String next) {
+    return '약 $days일 후 $next 사이즈 권장';
+  }
+
+  @override
+  String diaperSizeUpUrgent(String current, String next) {
+    return '$current → $next로 곧 변경 권장!';
+  }
+
+  @override
+  String diaperSizeUpOverdue(String next) {
+    return '$next 사이즈 권장 시점이 지났어요';
+  }
+
+  @override
+  String diaperSizeUpCurrentWeight(String kg, String current, String max) {
+    return '현재 ${kg}kg · $current 적정 ${max}kg까지';
+  }
+
+  @override
   String get summaryTitle => '오늘의 요약';
 
   @override

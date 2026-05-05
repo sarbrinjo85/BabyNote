@@ -266,6 +266,11 @@
   "diaperInventoryNone": "No diapers registered",
   "diaperInventoryAdd": "Add diapers",
   "diaperInventoryLoadFailure": "Failed to load inventory: {error}",
+  "diaperSizeUpTitle": "Diaper size-up forecast",
+  "diaperSizeUpDays": "Move to {next} in ~{days} days",
+  "diaperSizeUpUrgent": "Time to size up: {current} → {next}!",
+  "diaperSizeUpOverdue": "Past {next} size-up window",
+  "diaperSizeUpCurrentWeight": "Now {kg}kg · {current} fits up to {max}kg",
 
   "summaryTitle": "Today's summary",
   "summaryFeeding": "Feeding",

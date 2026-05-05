@@ -8,6 +8,7 @@ import '../../../core/widgets/big_action_button.dart';
 import '../../auth/data/auth_repository.dart';
 import '../../auth/presentation/auth_providers.dart';
 import '../../child/presentation/child_providers.dart';
+import 'diaper_size_up_card.dart';
 import 'formula_status_card.dart';
 import 'last_activity_section.dart';
 import 'todays_summary_section.dart';
@@ -111,6 +112,8 @@ class HomePage extends ConsumerWidget {
                 : [
                     const SizedBox(height: Spacing.lg),
                     FormulaStatusCard(childId: cs.first.id),
+                    const SizedBox(height: Spacing.xs),
+                    DiaperSizeUpCard(childId: cs.first.id),
                     const SizedBox(height: Spacing.xs),
                     UpcomingVaccineCard(child: cs.first),
                     const SizedBox(height: Spacing.md),

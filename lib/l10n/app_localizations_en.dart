@@ -822,6 +822,29 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get diaperSizeUpTitle => 'Diaper size-up forecast';
+
+  @override
+  String diaperSizeUpDays(int days, String next) {
+    return 'Move to $next in ~$days days';
+  }
+
+  @override
+  String diaperSizeUpUrgent(String current, String next) {
+    return 'Time to size up: $current → $next!';
+  }
+
+  @override
+  String diaperSizeUpOverdue(String next) {
+    return 'Past $next size-up window';
+  }
+
+  @override
+  String diaperSizeUpCurrentWeight(String kg, String current, String max) {
+    return 'Now ${kg}kg · $current fits up to ${max}kg';
+  }
+
+  @override
   String get summaryTitle => 'Today\'s summary';
 
   @override
