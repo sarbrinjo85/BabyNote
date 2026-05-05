@@ -343,5 +343,16 @@
   "familyInviteCreated": "코드를 발급했어요. 24시간 동안 유효해요.",
   "familyInviteInvalid": "유효하지 않은 코드예요.",
   "familyInviteExpired": "만료된 코드예요. 새로 발급받으세요.",
-  "familyEntryJoin": "초대 코드로 참여"
+  "familyEntryJoin": "초대 코드로 참여",
+
+  "statsTitle": "통계",
+  "statsEntryHome": "통계 보기",
+  "statsFeedingDaily": "일별 수유 횟수",
+  "statsSleepDaily": "일별 수면 시간",
+  "statsDiaperDaily": "일별 기저귀 횟수",
+  "statsGrowthCurve": "성장 곡선 (체중)",
+  "statsLast7Days": "지난 7일",
+  "statsLast7DaysHours": "지난 7일 (시간)",
+  "statsAllRecords": "전체 기록",
+  "statsNotEnoughData": "데이터가 부족해요. 성장 기록을 2건 이상 등록해주세요."
 }

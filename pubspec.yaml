@@ -44,6 +44,10 @@ dependencies:
   # 단골 병원 전화/길찾기에 사용. AndroidManifest의 <queries>에 intent 선언 필요할 수도.
   url_launcher: ^6.3.0
 
+  # 통계 화면 차트 — 지난 7일 수유/수면/기저귀 + 성장 곡선.
+  # fl_chart는 가벼운 순수 Dart 라이브러리(WebView 등 무거운 의존성 없음).
+  fl_chart: ^0.69.2
+
   # NOTE — packages added in later phases (kept here for reference; uncomment when needed):
   # # Local DB (Phase 2 — records storage offline)
   # drift: ^2.22.0

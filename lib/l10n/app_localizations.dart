@@ -1857,6 +1857,66 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'초대 코드로 참여'**
   String get familyEntryJoin;
+
+  /// No description provided for @statsTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'통계'**
+  String get statsTitle;
+
+  /// No description provided for @statsEntryHome.
+  ///
+  /// In ko, this message translates to:
+  /// **'통계 보기'**
+  String get statsEntryHome;
+
+  /// No description provided for @statsFeedingDaily.
+  ///
+  /// In ko, this message translates to:
+  /// **'일별 수유 횟수'**
+  String get statsFeedingDaily;
+
+  /// No description provided for @statsSleepDaily.
+  ///
+  /// In ko, this message translates to:
+  /// **'일별 수면 시간'**
+  String get statsSleepDaily;
+
+  /// No description provided for @statsDiaperDaily.
+  ///
+  /// In ko, this message translates to:
+  /// **'일별 기저귀 횟수'**
+  String get statsDiaperDaily;
+
+  /// No description provided for @statsGrowthCurve.
+  ///
+  /// In ko, this message translates to:
+  /// **'성장 곡선 (체중)'**
+  String get statsGrowthCurve;
+
+  /// No description provided for @statsLast7Days.
+  ///
+  /// In ko, this message translates to:
+  /// **'지난 7일'**
+  String get statsLast7Days;
+
+  /// No description provided for @statsLast7DaysHours.
+  ///
+  /// In ko, this message translates to:
+  /// **'지난 7일 (시간)'**
+  String get statsLast7DaysHours;
+
+  /// No description provided for @statsAllRecords.
+  ///
+  /// In ko, this message translates to:
+  /// **'전체 기록'**
+  String get statsAllRecords;
+
+  /// No description provided for @statsNotEnoughData.
+  ///
+  /// In ko, this message translates to:
+  /// **'데이터가 부족해요. 성장 기록을 2건 이상 등록해주세요.'**
+  String get statsNotEnoughData;
 }
 
 class _AppLocalizationsDelegate

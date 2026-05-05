@@ -952,4 +952,34 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get familyEntryJoin => '초대 코드로 참여';
+
+  @override
+  String get statsTitle => '통계';
+
+  @override
+  String get statsEntryHome => '통계 보기';
+
+  @override
+  String get statsFeedingDaily => '일별 수유 횟수';
+
+  @override
+  String get statsSleepDaily => '일별 수면 시간';
+
+  @override
+  String get statsDiaperDaily => '일별 기저귀 횟수';
+
+  @override
+  String get statsGrowthCurve => '성장 곡선 (체중)';
+
+  @override
+  String get statsLast7Days => '지난 7일';
+
+  @override
+  String get statsLast7DaysHours => '지난 7일 (시간)';
+
+  @override
+  String get statsAllRecords => '전체 기록';
+
+  @override
+  String get statsNotEnoughData => '데이터가 부족해요. 성장 기록을 2건 이상 등록해주세요.';
 }

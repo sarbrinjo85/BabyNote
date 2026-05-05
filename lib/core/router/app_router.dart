@@ -6,6 +6,7 @@ import '../../features/child/presentation/child_register_page.dart';
 import '../../features/diaper/presentation/diaper_register_page.dart';
 import '../../features/family/presentation/family_join_page.dart';
 import '../../features/family/presentation/family_page.dart';
+import '../../features/stats/presentation/statistics_page.dart';
 import '../../features/feeding/presentation/feeding_register_page.dart';
 import '../../features/growth/presentation/growth_register_page.dart';
 import '../../features/home/presentation/home_page.dart';
@@ -112,6 +113,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'hospitalNew',
         builder: (context, state) =>
             const AuthGate(child: HospitalRegisterPage()),
+      ),
+      GoRoute(
+        // /stats — 통계 화면 (수유/수면/기저귀 7일치 + 성장 곡선)
+        path: '/stats',
+        name: 'stats',
+        builder: (context, state) =>
+            const AuthGate(child: StatisticsPage()),
       ),
       GoRoute(
         // /family — 가족 공유 (자녀 caregivers + 초대 코드 발급/회수)

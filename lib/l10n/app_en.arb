@@ -310,5 +310,16 @@
   "familyInviteCreated": "Code created. Valid for 24 hours.",
   "familyInviteInvalid": "Invalid code.",
   "familyInviteExpired": "Code expired. Please request a new one.",
-  "familyEntryJoin": "Join with code"
+  "familyEntryJoin": "Join with code",
+
+  "statsTitle": "Statistics",
+  "statsEntryHome": "View statistics",
+  "statsFeedingDaily": "Feedings per day",
+  "statsSleepDaily": "Sleep hours per day",
+  "statsDiaperDaily": "Diapers per day",
+  "statsGrowthCurve": "Growth curve (weight)",
+  "statsLast7Days": "Last 7 days",
+  "statsLast7DaysHours": "Last 7 days (hours)",
+  "statsAllRecords": "All records",
+  "statsNotEnoughData": "Not enough data. Please add at least 2 growth records."
 }

@@ -952,4 +952,34 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get familyEntryJoin => '招待コードで参加';
+
+  @override
+  String get statsTitle => '統計';
+
+  @override
+  String get statsEntryHome => '統計を見る';
+
+  @override
+  String get statsFeedingDaily => '日別 授乳回数';
+
+  @override
+  String get statsSleepDaily => '日別 睡眠時間';
+
+  @override
+  String get statsDiaperDaily => '日別 おむつ回数';
+
+  @override
+  String get statsGrowthCurve => '成長曲線 (体重)';
+
+  @override
+  String get statsLast7Days => '過去7日';
+
+  @override
+  String get statsLast7DaysHours => '過去7日 (時間)';
+
+  @override
+  String get statsAllRecords => '全記録';
+
+  @override
+  String get statsNotEnoughData => 'データが不足しています。成長記録を2件以上登録してください。';
 }

@@ -960,4 +960,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get familyEntryJoin => 'Join with code';
+
+  @override
+  String get statsTitle => 'Statistics';
+
+  @override
+  String get statsEntryHome => 'View statistics';
+
+  @override
+  String get statsFeedingDaily => 'Feedings per day';
+
+  @override
+  String get statsSleepDaily => 'Sleep hours per day';
+
+  @override
+  String get statsDiaperDaily => 'Diapers per day';
+
+  @override
+  String get statsGrowthCurve => 'Growth curve (weight)';
+
+  @override
+  String get statsLast7Days => 'Last 7 days';
+
+  @override
+  String get statsLast7DaysHours => 'Last 7 days (hours)';
+
+  @override
+  String get statsAllRecords => 'All records';
+
+  @override
+  String get statsNotEnoughData =>
+      'Not enough data. Please add at least 2 growth records.';
 }
