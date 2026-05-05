@@ -142,7 +142,10 @@ class _InventoryTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final i = inventory;
-    final subtitle = StringBuffer('${i.containerGrams}g');
+    // 가루는 g, 액상은 ml로 단위 라벨 분기. 형태 prefix도 표시.
+    final unit = i.isPowder ? 'g' : 'ml';
+    final formLabel = i.isPowder ? '가루' : '액상';
+    final subtitle = StringBuffer('$formLabel · ${i.containerGrams}$unit');
     if (i.brand != null && i.brand!.isNotEmpty) subtitle.write(' · ${i.brand}');
     if (i.openedAt != null) {
       subtitle.write(' · ${_d(i.openedAt!)}');
@@ -255,8 +258,10 @@ class _StatsRow extends ConsumerWidget {
       ),
       data: (stats) {
         final theme = Theme.of(context);
+        // 가루: g, 액상: ml로 잔량 단위 분기.
+        final unit = inventory.isPowder ? 'g' : 'ml';
         final remainText =
-            '${stats.remainingG.toStringAsFixed(0)}g / ${inventory.containerGrams}g';
+            '${stats.remainingG.toStringAsFixed(0)}$unit / ${inventory.containerGrams}$unit';
         final daysText = stats.expectedDaysLeft >= 999
             ? l10n.commonDataInsufficient
             : l10n.formulaExpectedDays(stats.expectedDaysLeft.toStringAsFixed(1));

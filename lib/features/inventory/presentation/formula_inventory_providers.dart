@@ -28,8 +28,11 @@ class FormulaInventoryController extends AsyncNotifier<void> {
     required String childId,
     required String productName,
     String? brand,
+    FormulaForm form = FormulaForm.liquid,
     required int containerGrams,
-    double mlPerGram = 7.0,
+    double? mlPerGram,
+    double gPerScoop = 4.4,
+    double mlPerScoop = 30.0,
     DateTime? purchasedAt,
     int? priceMinor,
     String currency = 'KRW',
@@ -40,6 +43,9 @@ class FormulaInventoryController extends AsyncNotifier<void> {
     if (user == null) {
       throw StateError('로그인되지 않았어요.');
     }
+    // ml_per_gram 자동 계산: 액상=1.0, 가루=mlPerScoop/gPerScoop
+    final mpg = mlPerGram ??
+        (form == FormulaForm.liquid ? 1.0 : (mlPerScoop / gPerScoop));
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       final repo = ref.read(formulaInventoryRepositoryProvider);
@@ -48,8 +54,11 @@ class FormulaInventoryController extends AsyncNotifier<void> {
         childId: childId,
         productName: productName,
         brand: brand,
+        form: form,
         containerGrams: containerGrams,
-        mlPerGram: mlPerGram,
+        mlPerGram: mpg,
+        gPerScoop: gPerScoop,
+        mlPerScoop: mlPerScoop,
         purchasedAt: purchasedAt,
         priceMinor: priceMinor,
         currency: currency,
@@ -88,12 +97,17 @@ class FormulaInventoryController extends AsyncNotifier<void> {
     required String id,
     required String productName,
     String? brand,
+    required FormulaForm form,
     required int containerGrams,
+    double gPerScoop = 4.4,
+    double mlPerScoop = 30.0,
     DateTime? purchasedAt,
     int? priceMinor,
     String? store,
     DateTime? openedAt,
   }) async {
+    final mpg =
+        form == FormulaForm.liquid ? 1.0 : (mlPerScoop / gPerScoop);
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       final repo = ref.read(formulaInventoryRepositoryProvider);
@@ -101,7 +115,11 @@ class FormulaInventoryController extends AsyncNotifier<void> {
         id: id,
         productName: productName,
         brand: brand,
+        form: form,
         containerGrams: containerGrams,
+        mlPerGram: mpg,
+        gPerScoop: gPerScoop,
+        mlPerScoop: mlPerScoop,
         purchasedAt: purchasedAt,
         priceMinor: priceMinor,
         store: store,

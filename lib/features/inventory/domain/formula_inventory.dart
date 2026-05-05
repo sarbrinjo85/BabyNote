@@ -13,6 +13,16 @@
 /// ── 잔량 계산 (Phase 3 후반에서 사용) ─────────────────────────────
 /// 사용 중일 때 잔량 = containerGrams - 누적 소비량(g).
 /// 누적 소비량은 feedings.amount_ml 중 이 inventory와 연결된 것들의 합 / mlPerGram.
+/// 분유 형태 — 가루(powder) vs 액상(liquid/RTF).
+enum FormulaForm {
+  powder,
+  liquid;
+
+  String get value => name; // db 저장값 그대로
+  static FormulaForm fromString(String? s) =>
+      s == 'powder' ? FormulaForm.powder : FormulaForm.liquid;
+}
+
 class FormulaInventory {
   const FormulaInventory({
     required this.id,
@@ -21,6 +31,9 @@ class FormulaInventory {
     required this.containerGrams,
     required this.mlPerGram,
     required this.currency,
+    this.form = FormulaForm.liquid,
+    this.gPerScoop = 4.4,
+    this.mlPerScoop = 30.0,
     this.brand,
     this.purchasedAt,
     this.priceMinor,
@@ -35,8 +48,16 @@ class FormulaInventory {
   final String childId;
   final String productName;
   final String? brand;
+  /// 형태(가루/액상). 기본은 액상(테스트 데이터 마이그레이션 정책과 일치).
+  final FormulaForm form;
+  /// 1통 양. 가루=g, 액상=ml. 단일 컬럼 재사용.
   final int containerGrams;
+  /// 가루: 1g당 만들어지는 ml (= mlPerScoop / gPerScoop). 액상: 1.0 고정.
   final double mlPerGram;
+  /// 가루분유 1스쿱 무게(g). 액상에서는 의미 없음.
+  final double gPerScoop;
+  /// 가루분유 1스쿱이 만드는 ml. 액상에서는 의미 없음.
+  final double mlPerScoop;
   final DateTime? purchasedAt;
   final int? priceMinor;
   final String currency;
@@ -49,6 +70,13 @@ class FormulaInventory {
   bool get isActive => openedAt != null && depletedAt == null;
   bool get isStocked => openedAt == null;
   bool get isDepleted => depletedAt != null;
+  bool get isPowder => form == FormulaForm.powder;
+  bool get isLiquid => form == FormulaForm.liquid;
+
+  /// 통의 총 ml 환산값(추정). 액상은 containerGrams 그대로, 가루는 변환.
+  double get totalMl => isLiquid
+      ? containerGrams.toDouble()
+      : containerGrams * mlPerGram;
 
   factory FormulaInventory.fromMap(Map<String, dynamic> map) {
     return FormulaInventory(
@@ -56,8 +84,11 @@ class FormulaInventory {
       childId: map['child_id'] as String,
       productName: map['product_name'] as String,
       brand: map['brand'] as String?,
+      form: FormulaForm.fromString(map['form'] as String?),
       containerGrams: map['container_grams'] as int,
       mlPerGram: (map['ml_per_gram'] as num).toDouble(),
+      gPerScoop: (map['g_per_scoop'] as num?)?.toDouble() ?? 4.4,
+      mlPerScoop: (map['ml_per_scoop'] as num?)?.toDouble() ?? 30.0,
       purchasedAt: map['purchased_at'] != null
           ? DateTime.parse(map['purchased_at'] as String)
           : null,
@@ -83,8 +114,11 @@ class FormulaInventory {
       'created_by': createdBy,
       'product_name': productName,
       if (brand != null && brand!.isNotEmpty) 'brand': brand,
+      'form': form.value,
       'container_grams': containerGrams,
       'ml_per_gram': mlPerGram,
+      'g_per_scoop': gPerScoop,
+      'ml_per_scoop': mlPerScoop,
       if (purchasedAt != null) 'purchased_at': _date(purchasedAt!),
       if (priceMinor != null) 'price_minor': priceMinor,
       'currency': currency,
@@ -125,7 +159,7 @@ class FormulaInventoryStats {
   /// 'low' = 개봉 후 7일 이내(샘플 적음), 'normal' = 그 외
   final String confidence;
 
-  /// 잔량 (그램, 음수 방지).
+  /// 잔량 (가루: g / 액상: ml — `inventory.form` 따라 해석. 음수 방지).
   double get remainingG {
     final r = inventory.containerGrams - consumedG;
     return r < 0 ? 0 : r;
@@ -135,6 +169,12 @@ class FormulaInventoryStats {
   double get remainingRatio {
     if (inventory.containerGrams == 0) return 0;
     return (remainingG / inventory.containerGrams).clamp(0.0, 1.0);
+  }
+
+  /// UI 표시용 잔량 라벨. 가루="320g", 액상="1,200ml".
+  String get remainingDisplay {
+    final n = remainingG.round();
+    return inventory.isPowder ? '${n}g' : '${n}ml';
   }
 }
 
