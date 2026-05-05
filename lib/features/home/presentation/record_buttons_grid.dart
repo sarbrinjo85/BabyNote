@@ -101,11 +101,12 @@ class RecordButtonsGrid extends ConsumerWidget {
         _Tile(
           emoji: '🍼',
           label: l10n.summaryFeeding,
-          summary:
-              lastFeeding == null ? null : _summarizeFeeding(l10n, lastFeeding),
-          time: lastFeeding == null
+          // 수유는 시간 + 양을 한 줄에 합쳐서 표시: "3시간전 120ml"
+          summary: lastFeeding == null
               ? null
-              : TimeAgo.format(l10n, lastFeeding.startedAt),
+              : '${TimeAgo.format(l10n, lastFeeding.startedAt)} '
+                  '${_summarizeFeeding(l10n, lastFeeding)}',
+          time: null,
           alert: feedingAlert,
           onTap: () => context.push('/feeding/new'),
         ),
@@ -227,15 +228,18 @@ class _Tile extends StatelessWidget {
         borderRadius: Radii.brMd,
         child: Stack(
           children: [
-            Padding(
+            Positioned.fill(
+              child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 6),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(emoji, style: const TextStyle(fontSize: 26)),
                   const SizedBox(height: 1),
                   Text(
                     label,
+                    textAlign: TextAlign.center,
                     style: theme.textTheme.labelMedium?.copyWith(
                       fontSize: 11,
                       color: alert
@@ -250,6 +254,7 @@ class _Tile extends StatelessWidget {
                   const SizedBox(height: 1),
                   Text(
                     empty ? '—' : summary!,
+                    textAlign: TextAlign.center,
                     style: theme.textTheme.bodySmall?.copyWith(
                       fontSize: 10,
                       fontWeight: FontWeight.w700,
@@ -265,6 +270,7 @@ class _Tile extends StatelessWidget {
                   if (time != null)
                     Text(
                       time!,
+                      textAlign: TextAlign.center,
                       style: theme.textTheme.bodySmall?.copyWith(
                         fontSize: 9,
                         color: alert
@@ -276,6 +282,7 @@ class _Tile extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                 ],
+              ),
               ),
             ),
             // 우상단 알림 dot — alert 또는 info 시
