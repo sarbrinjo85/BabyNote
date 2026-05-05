@@ -126,6 +126,63 @@ class NotificationService {
       await _plugin.cancelAll();
     } catch (_) {}
   }
+
+  /// 수면 진행 중 ongoing notification — 종료 잊음 방지.
+  ///
+  /// ── 동작 ─────────────────────────────────────────────────────
+  /// - ongoing: true → 사용자가 swipe로 dismiss 불가
+  /// - usesChronometer: true → 시작 시각부터 자동 카운트업 (예: 00:23 → 00:24…)
+  /// - importance/priority: low → 진동/소리 없이 알림 영역에만 조용히 노출
+  /// - 탭 시 기본 동작: 앱 열기 (사용자가 직접 종료 버튼 누름)
+  Future<void> showOngoingSleep({
+    required String childId,
+    required DateTime startedAt,
+    required String title,
+    required String body,
+  }) async {
+    if (!_initialized) await init();
+    final id = _ongoingSleepId(childId);
+
+    final details = NotificationDetails(
+      android: AndroidNotificationDetails(
+        'sleep_ongoing',
+        'Sleep ongoing',
+        channelDescription: 'Persistent notification while baby is sleeping',
+        importance: Importance.low,
+        priority: Priority.low,
+        ongoing: true,
+        autoCancel: false,
+        showWhen: true,
+        when: startedAt.millisecondsSinceEpoch,
+        usesChronometer: true,
+      ),
+      iOS: const DarwinNotificationDetails(
+        presentAlert: false,
+        presentBadge: false,
+        presentSound: false,
+      ),
+    );
+
+    try {
+      await _plugin.show(id, title, body, details);
+    } catch (e) {
+      if (kDebugMode) debugPrint('수면 ongoing notification 표시 실패: $e');
+    }
+  }
+
+  /// 수면 종료 시 ongoing notification 제거.
+  Future<void> cancelOngoingSleep(String childId) async {
+    if (!_initialized) return;
+    try {
+      await _plugin.cancel(_ongoingSleepId(childId));
+    } catch (_) {}
+  }
+
+  /// 자녀별 고유 ID. 다른 알림(분유/접종) ID 영역과 안 겹치게 음수 영역 활용
+  /// (Java int 음수 ↔ Android notification id 호환).
+  int _ongoingSleepId(String childId) {
+    return (childId.hashCode ^ 0x53704F6E /* 'SpOn' */) & 0x7fffffff;
+  }
 }
 
 /// Riverpod에서 service에 접근하기 위한 provider.

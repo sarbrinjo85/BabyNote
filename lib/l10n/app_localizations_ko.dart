@@ -1018,6 +1018,9 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String get notifSleepOngoingBody => '탭하여 앱에서 깨움 기록';
+
+  @override
   String get childEditTitle => '자녀 정보 편집';
 
   @override

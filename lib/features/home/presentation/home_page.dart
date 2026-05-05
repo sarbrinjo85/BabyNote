@@ -14,6 +14,7 @@ import 'last_activity_section.dart';
 import 'notification_bell.dart';
 import 'notification_scheduler.dart';
 import 'quick_feeding_fab.dart';
+import 'sleep_ongoing_notifier.dart';
 import 'todays_summary_section.dart';
 import 'upcoming_vaccine_card.dart';
 
@@ -157,6 +158,8 @@ class HomePage extends ConsumerWidget {
           if (selectedChild != null) ...[
             // 무음 위젯 — 자녀 데이터 watch + 조건 만족 시 로컬 알림 자동 스케줄
             NotificationScheduler(child: selectedChild),
+            // 진행 중 수면 있으면 ongoing notification 자동 표시 (앱 재시작에도 반영)
+            SleepOngoingNotifier(child: selectedChild),
             const SizedBox(height: Spacing.lg),
             FormulaStatusCard(childId: selectedChild.id),
             const SizedBox(height: Spacing.xs),

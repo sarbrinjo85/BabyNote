@@ -1978,6 +1978,12 @@ abstract class AppLocalizations {
   /// **'내일 {vaccine} 권장일이에요.'**
   String notifVaccineUpcomingBody(String vaccine);
 
+  /// No description provided for @notifSleepOngoingBody.
+  ///
+  /// In ko, this message translates to:
+  /// **'탭하여 앱에서 깨움 기록'**
+  String get notifSleepOngoingBody;
+
   /// No description provided for @childEditTitle.
   ///
   /// In ko, this message translates to:

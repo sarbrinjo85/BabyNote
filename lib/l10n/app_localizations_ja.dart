@@ -1018,6 +1018,9 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String get notifSleepOngoingBody => 'タップでアプリから起床を記録';
+
+  @override
   String get childEditTitle => 'お子さま情報の編集';
 
   @override

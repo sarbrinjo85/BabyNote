@@ -333,6 +333,7 @@
   "notifFormulaLowBody": "{product} has 1 day left. Please prepare a new container.",
   "notifVaccineUpcomingTitle": "Upcoming vaccination",
   "notifVaccineUpcomingBody": "{vaccine} is recommended tomorrow.",
+  "notifSleepOngoingBody": "Tap to record wake-up in the app",
 
   "childEditTitle": "Edit child",
   "childEditSaved": "Child saved",

@@ -333,6 +333,7 @@
   "notifFormulaLowBody": "{product} 残り1日分。新しい缶を準備してください。",
   "notifVaccineUpcomingTitle": "予防接種が近づいています",
   "notifVaccineUpcomingBody": "明日は {vaccine} の推奨日です。",
+  "notifSleepOngoingBody": "タップでアプリから起床を記録",
 
   "childEditTitle": "お子さま情報の編集",
   "childEditSaved": "お子さま情報を保存しました",

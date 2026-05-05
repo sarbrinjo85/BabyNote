@@ -368,6 +368,7 @@
   "notifVaccineUpcomingTitle": "예방접종 임박",
   "notifVaccineUpcomingBody": "내일 {vaccine} 권장일이에요.",
   "@notifVaccineUpcomingBody": { "placeholders": { "vaccine": { "type": "String" } } },
+  "notifSleepOngoingBody": "탭하여 앱에서 깨움 기록",
 
   "childEditTitle": "자녀 정보 편집",
   "childEditSaved": "자녀 정보를 저장했어요",

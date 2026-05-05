@@ -1028,6 +1028,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get notifSleepOngoingBody => 'Tap to record wake-up in the app';
+
+  @override
   String get childEditTitle => 'Edit child';
 
   @override
