@@ -354,5 +354,8 @@
   "statsLast7Days": "지난 7일",
   "statsLast7DaysHours": "지난 7일 (시간)",
   "statsAllRecords": "전체 기록",
-  "statsNotEnoughData": "데이터가 부족해요. 성장 기록을 2건 이상 등록해주세요."
+  "statsNotEnoughData": "데이터가 부족해요. 성장 기록을 2건 이상 등록해주세요.",
+  "statsLegendChild": "내 자녀",
+  "statsLegendP50": "WHO 평균 (P50)",
+  "statsLegendP3P97": "WHO 정상 범위 (P3~P97)"
 }

@@ -32,7 +32,7 @@ class _FamilyPageState extends ConsumerState<FamilyPage> {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.familyTitle)),
-      body: asyncChildren.when(
+      body: SafeArea(top: false, child: asyncChildren.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) =>
             Center(child: Text(l10n.errorChildrenLoadFailed(err))),
@@ -75,7 +75,7 @@ class _FamilyPageState extends ConsumerState<FamilyPage> {
             ],
           );
         },
-      ),
+      )),
     );
   }
 }

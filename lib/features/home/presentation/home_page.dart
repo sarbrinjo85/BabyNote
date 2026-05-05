@@ -48,7 +48,9 @@ class HomePage extends ConsumerWidget {
           ),
         ],
       ),
-      body: ListView(
+      body: SafeArea(
+        top: false,
+        child: ListView(
         padding: const EdgeInsets.all(Spacing.md),
         children: [
           Center(
@@ -237,6 +239,7 @@ class HomePage extends ConsumerWidget {
           ),
           const SizedBox(height: Spacing.xl),
         ],
+      ),
       ),
     );
   }

@@ -27,7 +27,7 @@ class DiaperInventoryListPage extends ConsumerWidget {
           ),
         ],
       ),
-      body: asyncChildren.when(
+      body: SafeArea(top: false, child: asyncChildren.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => Center(child: Text(l10n.errorChildLoadFailed(err))),
         data: (children) {
@@ -84,7 +84,7 @@ class DiaperInventoryListPage extends ConsumerWidget {
             },
           );
         },
-      ),
+      )),
     );
   }
 }

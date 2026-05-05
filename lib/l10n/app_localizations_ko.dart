@@ -982,4 +982,13 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get statsNotEnoughData => '데이터가 부족해요. 성장 기록을 2건 이상 등록해주세요.';
+
+  @override
+  String get statsLegendChild => '내 자녀';
+
+  @override
+  String get statsLegendP50 => 'WHO 평균 (P50)';
+
+  @override
+  String get statsLegendP3P97 => 'WHO 정상 범위 (P3~P97)';
 }

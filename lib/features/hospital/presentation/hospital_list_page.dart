@@ -27,7 +27,7 @@ class HospitalListPage extends ConsumerWidget {
           ),
         ],
       ),
-      body: asyncList.when(
+      body: SafeArea(top: false, child: asyncList.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => Center(child: Text(l10n.hospitalLoadFailure(err))),
         data: (list) {
@@ -37,7 +37,7 @@ class HospitalListPage extends ConsumerWidget {
             children: list.map((h) => _HospitalCard(hospital: h)).toList(),
           );
         },
-      ),
+      )),
     );
   }
 }

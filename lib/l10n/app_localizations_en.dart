@@ -991,4 +991,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get statsNotEnoughData =>
       'Not enough data. Please add at least 2 growth records.';
+
+  @override
+  String get statsLegendChild => 'Your child';
+
+  @override
+  String get statsLegendP50 => 'WHO median (P50)';
+
+  @override
+  String get statsLegendP3P97 => 'WHO normal range (P3~P97)';
 }

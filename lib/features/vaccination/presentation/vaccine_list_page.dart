@@ -31,7 +31,7 @@ class VaccineListPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.vaccineListTitle)),
-      body: asyncChildren.when(
+      body: SafeArea(top: false, child: asyncChildren.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => Center(child: Text(l10n.errorChildLoadFailed(err))),
         data: (children) {
@@ -87,7 +87,7 @@ class VaccineListPage extends ConsumerWidget {
             ],
           );
         },
-      ),
+      )),
     );
   }
 }

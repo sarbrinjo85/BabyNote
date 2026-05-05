@@ -1917,6 +1917,24 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'데이터가 부족해요. 성장 기록을 2건 이상 등록해주세요.'**
   String get statsNotEnoughData;
+
+  /// No description provided for @statsLegendChild.
+  ///
+  /// In ko, this message translates to:
+  /// **'내 자녀'**
+  String get statsLegendChild;
+
+  /// No description provided for @statsLegendP50.
+  ///
+  /// In ko, this message translates to:
+  /// **'WHO 평균 (P50)'**
+  String get statsLegendP50;
+
+  /// No description provided for @statsLegendP3P97.
+  ///
+  /// In ko, this message translates to:
+  /// **'WHO 정상 범위 (P3~P97)'**
+  String get statsLegendP3P97;
 }
 
 class _AppLocalizationsDelegate

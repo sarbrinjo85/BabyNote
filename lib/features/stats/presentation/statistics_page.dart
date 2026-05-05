@@ -5,8 +5,10 @@ import 'package:go_router/go_router.dart';
 
 import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/theme/tokens.dart';
+import '../../child/domain/child.dart';
 import '../../child/presentation/child_providers.dart';
 import '../../growth/domain/growth.dart';
+import '../../growth/domain/who_percentiles.dart';
 import 'stats_providers.dart';
 
 /// 통계 화면.
@@ -28,7 +30,7 @@ class StatisticsPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.statsTitle)),
-      body: asyncChildren.when(
+      body: SafeArea(top: false, child: asyncChildren.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) =>
             Center(child: Text(l10n.errorChildrenLoadFailed(err))),
@@ -63,12 +65,17 @@ class StatisticsPage extends ConsumerWidget {
               _ChartCard(
                 title: l10n.statsGrowthCurve,
                 subtitle: l10n.statsAllRecords,
-                child: _GrowthLineChart(childId: childId),
+                child: _GrowthLineChart(child: children.first),
+              ),
+              const SizedBox(height: Spacing.xs),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: Spacing.md),
+                child: _GrowthLegend(),
               ),
             ],
           );
         },
-      ),
+      )),
     );
   }
 }
@@ -313,13 +320,13 @@ class _BarChart extends StatelessWidget {
 }
 
 class _GrowthLineChart extends ConsumerWidget {
-  const _GrowthLineChart({required this.childId});
-  final String childId;
+  const _GrowthLineChart({required this.child});
+  final Child child;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final asyncList = ref.watch(statsGrowthsProvider(childId));
+    final asyncList = ref.watch(statsGrowthsProvider(child.id));
     return asyncList.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (err, _) => Center(child: Text('$err')),
@@ -334,24 +341,50 @@ class _GrowthLineChart extends ConsumerWidget {
         }
 
         final theme = Theme.of(context);
-        final first = withWeight.first.measuredAt;
-        // X축: 첫 측정일로부터 며칠.
+
+        // X축 = 측정 시점의 "생후 개월수"(소수점 허용).
+        // child.birthDate 기준으로 환산. WHO 표(0~24개월)와 같은 단위.
+        // 30.44 = 평균 1개월 길이(31, 28, 30 평균).
+        double monthsFromBirth(DateTime t) =>
+            t.difference(child.birthDate).inDays / 30.44;
+
+        // 자녀 측정값 spots
         final spots = withWeight.map((g) {
-          final daysFromFirst =
-              g.measuredAt.difference(first).inDays.toDouble();
-          final kg = (g.weightG! / 1000.0);
-          return FlSpot(daysFromFirst, kg);
+          return FlSpot(
+            monthsFromBirth(g.measuredAt),
+            g.weightG! / 1000.0,
+          );
         }).toList();
 
-        final maxX = spots.last.x;
-        final minY = (withWeight.map((g) => g.weightG! / 1000.0).reduce(
-                (a, b) => a < b ? a : b) -
-            1)
+        // WHO 표 — 자녀 성별 기반 (other는 boys fallback)
+        final table = WhoWeightForAge.forGender(child.gender);
+
+        // 차트 X 범위: WHO 표 마지막(24개월)까지 항상 보여줌.
+        // 자녀 측정점이 24개월 넘으면 그만큼 늘림.
+        final lastChildMonths = spots.last.x;
+        final maxX = lastChildMonths > 24 ? lastChildMonths : 24.0;
+
+        // WHO 라인용 spots — 0개월부터 maxX까지, 표의 각 데이터포인트 사용.
+        final whoP3 = <FlSpot>[];
+        final whoP50 = <FlSpot>[];
+        final whoP97 = <FlSpot>[];
+        for (final pt in table) {
+          if (pt.monthAge.toDouble() > maxX) break;
+          whoP3.add(FlSpot(pt.monthAge.toDouble(), pt.p3));
+          whoP50.add(FlSpot(pt.monthAge.toDouble(), pt.p50));
+          whoP97.add(FlSpot(pt.monthAge.toDouble(), pt.p97));
+        }
+
+        // Y 범위: WHO P3 minimum과 자녀 minimum 중 작은 쪽 - 1, P97과 자녀 max 중 큰 쪽 + 1.
+        final allYs = [
+          ...spots.map((s) => s.y),
+          ...whoP3.map((s) => s.y),
+          ...whoP97.map((s) => s.y),
+        ];
+        final minY = (allYs.reduce((a, b) => a < b ? a : b) - 1)
             .clamp(0, 100)
             .toDouble();
-        final maxY = withWeight.map((g) => g.weightG! / 1000.0).reduce(
-                (a, b) => a > b ? a : b) +
-            1;
+        final maxY = allYs.reduce((a, b) => a > b ? a : b) + 1;
 
         return LineChart(
           LineChartData(
@@ -387,12 +420,12 @@ class _GrowthLineChart extends ConsumerWidget {
                 sideTitles: SideTitles(
                   showTitles: true,
                   reservedSize: 24,
+                  interval: 6, // 6개월마다 라벨
                   getTitlesWidget: (v, _) {
-                    final d = first.add(Duration(days: v.toInt()));
                     return Padding(
                       padding: const EdgeInsets.only(top: 4),
                       child: Text(
-                        '${d.month}/${d.day}',
+                        '${v.toStringAsFixed(0)}m',
                         style: theme.textTheme.bodySmall,
                       ),
                     );
@@ -401,6 +434,33 @@ class _GrowthLineChart extends ConsumerWidget {
               ),
             ),
             lineBarsData: [
+              // ── WHO P3 (하한선, 점선 회색) ────────────────────────
+              LineChartBarData(
+                spots: whoP3,
+                isCurved: true,
+                color: theme.colorScheme.outlineVariant,
+                barWidth: 1.5,
+                dashArray: const [4, 4],
+                dotData: const FlDotData(show: false),
+              ),
+              // ── WHO P97 (상한선, 점선 회색) ────────────────────────
+              LineChartBarData(
+                spots: whoP97,
+                isCurved: true,
+                color: theme.colorScheme.outlineVariant,
+                barWidth: 1.5,
+                dashArray: const [4, 4],
+                dotData: const FlDotData(show: false),
+              ),
+              // ── WHO P50 (중간값, 실선 회색) ────────────────────────
+              LineChartBarData(
+                spots: whoP50,
+                isCurved: true,
+                color: theme.colorScheme.outline,
+                barWidth: 1.5,
+                dotData: const FlDotData(show: false),
+              ),
+              // ── 자녀 측정값 (강조 — primary 색) ─────────────────────
               LineChartBarData(
                 spots: spots,
                 isCurved: true,
@@ -409,14 +469,45 @@ class _GrowthLineChart extends ConsumerWidget {
                 dotData: const FlDotData(show: true),
                 belowBarData: BarAreaData(
                   show: true,
-                  color:
-                      theme.colorScheme.primary.withValues(alpha: 0.15),
+                  color: theme.colorScheme.primary.withValues(alpha: 0.15),
                 ),
               ),
             ],
           ),
         );
       },
+    );
+  }
+}
+
+/// 성장 차트 범례 — WHO P3/P50/P97 + 자녀 측정값.
+class _GrowthLegend extends StatelessWidget {
+  const _GrowthLegend();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    Widget item(Color color, String label, {bool dashed = false}) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(width: 16, height: 3, color: color),
+          const SizedBox(width: 4),
+          Text(label, style: theme.textTheme.bodySmall),
+        ],
+      );
+    }
+
+    return Wrap(
+      spacing: Spacing.md,
+      runSpacing: 4,
+      children: [
+        item(theme.colorScheme.primary, l10n.statsLegendChild),
+        item(theme.colorScheme.outline, l10n.statsLegendP50),
+        item(theme.colorScheme.outlineVariant, l10n.statsLegendP3P97,
+            dashed: true),
+      ],
     );
   }
 }

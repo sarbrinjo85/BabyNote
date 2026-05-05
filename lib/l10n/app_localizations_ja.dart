@@ -982,4 +982,13 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get statsNotEnoughData => 'データが不足しています。成長記録を2件以上登録してください。';
+
+  @override
+  String get statsLegendChild => 'うちの子';
+
+  @override
+  String get statsLegendP50 => 'WHO 平均 (P50)';
+
+  @override
+  String get statsLegendP3P97 => 'WHO 正常範囲 (P3~P97)';
 }

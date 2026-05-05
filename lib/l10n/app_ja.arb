@@ -321,5 +321,8 @@
   "statsLast7Days": "過去7日",
   "statsLast7DaysHours": "過去7日 (時間)",
   "statsAllRecords": "全記録",
-  "statsNotEnoughData": "データが不足しています。成長記録を2件以上登録してください。"
+  "statsNotEnoughData": "データが不足しています。成長記録を2件以上登録してください。",
+  "statsLegendChild": "うちの子",
+  "statsLegendP50": "WHO 平均 (P50)",
+  "statsLegendP3P97": "WHO 正常範囲 (P3~P97)"
 }
