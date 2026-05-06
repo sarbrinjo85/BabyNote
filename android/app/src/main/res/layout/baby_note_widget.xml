@@ -9,7 +9,7 @@
     android:layout_height="match_parent"
     android:orientation="horizontal"
     android:background="@drawable/widget_bg"
-    android:padding="6dp">
+    android:padding="3dp">
 
     <!-- 수유 -->
     <LinearLayout
@@ -19,18 +19,18 @@
         android:layout_weight="1"
         android:orientation="vertical"
         android:gravity="center"
-        android:padding="6dp"
+        android:padding="3dp"
         android:background="?android:attr/selectableItemBackground">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="🍼"
-            android:textSize="22sp" />
+            android:textSize="18sp" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/widget_feeding"
-            android:textSize="11sp"
+            android:textSize="10sp"
             android:textColor="@android:color/black"
             android:layout_marginTop="2dp" />
         <TextView
@@ -38,7 +38,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:maxLines="2"
+            android:maxLines="1"
             android:text="—"
             android:textSize="10sp"
             android:textStyle="bold"
@@ -54,19 +54,19 @@
         android:layout_weight="1"
         android:orientation="vertical"
         android:gravity="center"
-        android:padding="6dp"
+        android:padding="3dp"
         android:background="?android:attr/selectableItemBackground">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="💤"
-            android:textSize="22sp" />
+            android:textSize="18sp" />
         <TextView
             android:id="@+id/widget_sleep_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/widget_sleep"
-            android:textSize="11sp"
+            android:textSize="10sp"
             android:textColor="@android:color/black"
             android:layout_marginTop="2dp" />
         <TextView
@@ -74,7 +74,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:maxLines="2"
+            android:maxLines="1"
             android:text="—"
             android:textSize="10sp"
             android:textStyle="bold"
@@ -90,18 +90,18 @@
         android:layout_weight="1"
         android:orientation="vertical"
         android:gravity="center"
-        android:padding="6dp"
+        android:padding="3dp"
         android:background="?android:attr/selectableItemBackground">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="💩"
-            android:textSize="22sp" />
+            android:textSize="18sp" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/widget_diaper"
-            android:textSize="11sp"
+            android:textSize="10sp"
             android:textColor="@android:color/black"
             android:layout_marginTop="2dp" />
         <TextView
@@ -109,7 +109,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:maxLines="2"
+            android:maxLines="1"
             android:text="—"
             android:textSize="10sp"
             android:textStyle="bold"
@@ -125,18 +125,18 @@
         android:layout_weight="1"
         android:orientation="vertical"
         android:gravity="center"
-        android:padding="6dp"
+        android:padding="3dp"
         android:background="?android:attr/selectableItemBackground">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="📏"
-            android:textSize="22sp" />
+            android:textSize="18sp" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/widget_growth"
-            android:textSize="11sp"
+            android:textSize="10sp"
             android:textColor="@android:color/black"
             android:layout_marginTop="2dp" />
         <TextView
@@ -144,7 +144,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:maxLines="2"
+            android:maxLines="1"
             android:text="—"
             android:textSize="10sp"
             android:textStyle="bold"

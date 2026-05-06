@@ -84,7 +84,7 @@ class _HomeWidgetPublisherState extends ConsumerState<HomeWidgetPublisher> {
               : (lastFeeding.type == 'formula'
                   ? l10n.feedingTabFormula
                   : l10n.feedingTabSolid));
-      feedingText = '$time\n$amount';
+      feedingText = '$time$amount';
     }
 
     String sleepText = '—';
@@ -107,7 +107,7 @@ class _HomeWidgetPublisherState extends ConsumerState<HomeWidgetPublisher> {
           dur = m == 0 ? '${h}h' : '${h}h${m}m';
         }
       }
-      sleepText = '$time\n$dur';
+      sleepText = '$time$dur';
     }
 
     String diaperText = '—';
@@ -119,7 +119,7 @@ class _HomeWidgetPublisherState extends ConsumerState<HomeWidgetPublisher> {
         'both' => l10n.diaperBoth,
         _ => lastDiaper.type,
       };
-      diaperText = '$time\n$kind';
+      diaperText = '$time$kind';
     }
 
     String growthText = '—';
@@ -131,7 +131,7 @@ class _HomeWidgetPublisherState extends ConsumerState<HomeWidgetPublisher> {
       } else if (lastGrowth.heightMm != null) {
         v = '${(lastGrowth.heightMm! / 10).toStringAsFixed(1)}cm';
       }
-      growthText = '$time\n$v';
+      growthText = '$time$v';
     }
 
     final payload = '$feedingText|$sleepText|$diaperText|$growthText|$sleepLabel';
