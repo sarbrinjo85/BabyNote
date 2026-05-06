@@ -33,7 +33,22 @@ class _HomeWidgetPublisherState extends ConsumerState<HomeWidgetPublisher> {
 
   @override
   Widget build(BuildContext context) {
-    // 빌드 직후 동기화 시도 — 홈 화면이 떠 있는 동안 데이터가 변경될 때마다 동작.
+    // ⚠️ 핵심: provider를 watch해야 데이터가 비동기로 로드된 뒤
+    //   rebuild가 일어나고, postFrame 콜백에서 다시 _sync 가 실행됨.
+    final asyncChildren = ref.watch(myChildrenProvider);
+    final selected = ref.watch(selectedChildProvider);
+    final children =
+        asyncChildren.maybeWhen(data: (c) => c, orElse: () => const []);
+    final child = (selected != null)
+        ? selected
+        : (children.isEmpty ? null : children.first);
+    if (child != null) {
+      // value 자체는 build에서 안 쓰지만 watch로 의존성 등록 → 변경 시 rebuild
+      ref.watch(recentFeedingsProvider(child.id));
+      ref.watch(recentSleepsProvider(child.id));
+      ref.watch(recentDiapersProvider(child.id));
+      ref.watch(growthsProvider(child.id));
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) => _sync());
     return widget.child;
   }
