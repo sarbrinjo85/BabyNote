@@ -19,7 +19,18 @@ class GrowthPercentile {
   /// 'aboveAvg' (P85-P97), 'high' (P>97)
   final String band;
 
-  /// 한국어 한 줄 코멘트.
+  /// 사용자 친화 라벨.
+  ///   P50 정확히 → "또래 평균"
+  ///   P > 50    → "상위 N%"   (위로부터 몇 %)
+  ///   P < 50    → "하위 N%"   (아래로부터 몇 %)
+  String get displayLabel {
+    final r = percentile.round();
+    if (r == 50) return '또래 평균';
+    if (r > 50) return '상위 ${100 - r}%';
+    return '하위 $r%';
+  }
+
+  /// 자녀 카드용 한 줄 코멘트.
   String get comment {
     switch (band) {
       case 'low':

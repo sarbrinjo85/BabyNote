@@ -208,7 +208,7 @@ class _GrowthMetric extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
-              'P${pct!.percentile.round()}',
+              pct!.displayLabel, // 예: "상위 25%" / "하위 30%" / "또래 평균"
               style: theme.textTheme.bodySmall?.copyWith(
                 fontSize: 10,
                 fontWeight: FontWeight.w700,

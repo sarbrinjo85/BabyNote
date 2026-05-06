@@ -74,12 +74,14 @@ class _GrowthChartPageState extends ConsumerState<GrowthChartPage> {
                 children: [
                   _LegendDot(color: theme.colorScheme.primary, label: '내 아이'),
                   _LegendDot(
-                      color: theme.colorScheme.error, label: 'P3 / P97'),
+                      color: theme.colorScheme.error,
+                      label: '상·하위 3% (외곽)'),
                   _LegendDot(
-                      color: theme.colorScheme.tertiary, label: 'P15 / P85'),
+                      color: theme.colorScheme.tertiary,
+                      label: '상·하위 15%'),
                   _LegendDot(
                       color: theme.colorScheme.onSurfaceVariant,
-                      label: 'P50 (중앙)'),
+                      label: '또래 평균(중앙)'),
                 ],
               ),
               const SizedBox(height: Spacing.xs),
