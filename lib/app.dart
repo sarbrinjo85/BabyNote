@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/widgets/home_widget_listener.dart';
+import 'core/widgets/home_widget_publisher.dart';
 import 'features/auth/presentation/auth_state_reset_listener.dart';
 import 'features/settings/presentation/theme_mode_provider.dart';
 import 'l10n/app_localizations.dart';
@@ -30,7 +31,9 @@ class BabyNoteApp extends ConsumerWidget {
       // 모든 라우트를 감싸는 builder — 로그아웃 시 ephemeral state 자동 초기화 +
       // Android 홈 위젯 탭 deep link 처리.
       builder: (context, child) => HomeWidgetListener(
-        child: AuthStateResetListener(child: child ?? const SizedBox.shrink()),
+        child: HomeWidgetPublisher(
+          child: AuthStateResetListener(child: child ?? const SizedBox.shrink()),
+        ),
       ),
       debugShowCheckedModeBanner: false,
     );

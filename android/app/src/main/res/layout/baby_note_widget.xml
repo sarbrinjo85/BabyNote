@@ -1,16 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  BabyNote 홈 위젯 레이아웃 — 4개 큰 버튼 (수유/수면/기저귀/성장).
-  탭하면 Flutter 앱이 열리며 해당 register 페이지로 이동.
-
-  ── RemoteViews 제약 ──────────────────────────────────────────────
-  AppWidget RemoteViews는 일반 View 일부만 지원 (LinearLayout/ImageView/
-  TextView/Button/FrameLayout 등). RecyclerView/ConstraintLayout 등은 X.
-  복잡한 UI는 Glance 사용 권장이지만 일단 단순 LinearLayout으로.
+  BabyNote 홈 위젯 — 4×2 (가로4 × 세로2). 4개 타일 각각:
+    이모지 / 라벨 / 시간 / 요약
+  Flutter 측에서 SharedPreferences로 widget_{type}_time, _summary 키 채움.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:orientation="horizontal"
     android:background="@drawable/widget_bg"
     android:padding="6dp">
@@ -19,11 +15,11 @@
     <LinearLayout
         android:id="@+id/widget_btn_feeding"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_weight="1"
         android:orientation="vertical"
         android:gravity="center"
-        android:padding="8dp"
+        android:padding="6dp"
         android:background="?android:attr/selectableItemBackground">
         <TextView
             android:layout_width="wrap_content"
@@ -37,17 +33,28 @@
             android:textSize="11sp"
             android:textColor="@android:color/black"
             android:layout_marginTop="2dp" />
+        <TextView
+            android:id="@+id/widget_feeding_summary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:maxLines="2"
+            android:text="—"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:textColor="#FE7D81"
+            android:layout_marginTop="2dp" />
     </LinearLayout>
 
     <!-- 수면 -->
     <LinearLayout
         android:id="@+id/widget_btn_sleep"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_weight="1"
         android:orientation="vertical"
         android:gravity="center"
-        android:padding="8dp"
+        android:padding="6dp"
         android:background="?android:attr/selectableItemBackground">
         <TextView
             android:layout_width="wrap_content"
@@ -55,11 +62,23 @@
             android:text="💤"
             android:textSize="22sp" />
         <TextView
+            android:id="@+id/widget_sleep_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/widget_sleep"
             android:textSize="11sp"
             android:textColor="@android:color/black"
+            android:layout_marginTop="2dp" />
+        <TextView
+            android:id="@+id/widget_sleep_summary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:maxLines="2"
+            android:text="—"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:textColor="#FE7D81"
             android:layout_marginTop="2dp" />
     </LinearLayout>
 
@@ -67,11 +86,11 @@
     <LinearLayout
         android:id="@+id/widget_btn_diaper"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_weight="1"
         android:orientation="vertical"
         android:gravity="center"
-        android:padding="8dp"
+        android:padding="6dp"
         android:background="?android:attr/selectableItemBackground">
         <TextView
             android:layout_width="wrap_content"
@@ -85,17 +104,28 @@
             android:textSize="11sp"
             android:textColor="@android:color/black"
             android:layout_marginTop="2dp" />
+        <TextView
+            android:id="@+id/widget_diaper_summary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:maxLines="2"
+            android:text="—"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:textColor="#FE7D81"
+            android:layout_marginTop="2dp" />
     </LinearLayout>
 
     <!-- 성장 -->
     <LinearLayout
         android:id="@+id/widget_btn_growth"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_weight="1"
         android:orientation="vertical"
         android:gravity="center"
-        android:padding="8dp"
+        android:padding="6dp"
         android:background="?android:attr/selectableItemBackground">
         <TextView
             android:layout_width="wrap_content"
@@ -108,6 +138,17 @@
             android:text="@string/widget_growth"
             android:textSize="11sp"
             android:textColor="@android:color/black"
+            android:layout_marginTop="2dp" />
+        <TextView
+            android:id="@+id/widget_growth_summary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:maxLines="2"
+            android:text="—"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:textColor="#FE7D81"
             android:layout_marginTop="2dp" />
     </LinearLayout>
 

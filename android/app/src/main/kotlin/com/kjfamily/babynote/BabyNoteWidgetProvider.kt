@@ -33,6 +33,7 @@ class BabyNoteWidgetProvider : HomeWidgetProvider() {
         appWidgetIds.forEach { widgetId ->
             val views = RemoteViews(context.packageName, R.layout.baby_note_widget)
 
+            // 클릭 의도 — Flutter MainActivity로 deep link
             views.setOnClickPendingIntent(
                 R.id.widget_btn_feeding,
                 openAppIntent(context, "babynote://widget/feeding")
@@ -49,6 +50,29 @@ class BabyNoteWidgetProvider : HomeWidgetProvider() {
                 R.id.widget_btn_growth,
                 openAppIntent(context, "babynote://widget/growth")
             )
+
+            // Flutter에서 saveWidgetData로 채워둔 summary 텍스트 표시.
+            // 키 없거나 빈 문자열이면 "—" fallback.
+            views.setTextViewText(
+                R.id.widget_feeding_summary,
+                widgetData.getString("widget_feeding_summary", "—") ?: "—"
+            )
+            views.setTextViewText(
+                R.id.widget_sleep_summary,
+                widgetData.getString("widget_sleep_summary", "—") ?: "—"
+            )
+            views.setTextViewText(
+                R.id.widget_diaper_summary,
+                widgetData.getString("widget_diaper_summary", "—") ?: "—"
+            )
+            views.setTextViewText(
+                R.id.widget_growth_summary,
+                widgetData.getString("widget_growth_summary", "—") ?: "—"
+            )
+            // 수면 라벨 — 진행 중이면 "수면중"으로 동적 변경
+            widgetData.getString("widget_sleep_label", null)?.let {
+                views.setTextViewText(R.id.widget_sleep_label, it)
+            }
 
             appWidgetManager.updateAppWidget(widgetId, views)
         }
