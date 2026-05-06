@@ -296,9 +296,8 @@ class _StrokedTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     const fillColor = Color(0xFFFE7D81);
     const strokeColor = Color(0xFFA43F45);
-    final base = Theme.of(context).appBarTheme.titleTextStyle;
-    final baseStyle = TextStyle(
-      fontSize: base?.fontSize ?? 22,
+    final baseStyle = const TextStyle(
+      fontSize: 32, // 22 → 32 키움
       fontWeight: FontWeight.w800,
       letterSpacing: 0.3,
     );
@@ -309,7 +308,7 @@ class _StrokedTitle extends StatelessWidget {
           style: baseStyle.copyWith(
             foreground: Paint()
               ..style = PaintingStyle.stroke
-              ..strokeWidth = 2.5
+              ..strokeWidth = 3.0
               ..color = strokeColor,
           ),
         ),
