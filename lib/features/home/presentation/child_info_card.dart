@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/theme/tokens.dart';
 import '../../child/domain/child.dart';
+import '../../growth/data/who_growth_service.dart';
+import '../../growth/data/who_lms_data.dart';
 import '../../growth/domain/growth.dart';
 import '../../growth/presentation/growth_providers.dart';
 
@@ -28,6 +30,23 @@ class ChildInfoCard extends ConsumerWidget {
 
     final genderLabel = _genderLabel(l10n, child.gender);
     final ageDays = child.ageInDays(DateTime.now());
+    final isMale = child.gender == 'male';
+
+    GrowthPercentile? pctFor(WhoMetric m, double? value) =>
+        value == null
+            ? null
+            : WhoGrowthService.compute(
+                metric: m,
+                isMale: isMale,
+                ageInDays: ageDays,
+                value: value,
+              );
+    final pctW = pctFor(
+        WhoMetric.weight, latest?.weightG == null ? null : latest!.weightG! / 1000);
+    final pctH = pctFor(
+        WhoMetric.height, latest?.heightMm == null ? null : latest!.heightMm! / 10);
+    final pctC = pctFor(WhoMetric.headCirc,
+        latest?.headCircumferenceMm == null ? null : latest!.headCircumferenceMm! / 10);
 
     return Card(
       // 코랄핑크 톤의 옅은 테두리로 자녀 섹션 강조.
@@ -39,7 +58,9 @@ class ChildInfoCard extends ConsumerWidget {
         ),
       ),
       child: InkWell(
+        // 자녀 카드 단축 탭 → 편집, 길게 누름 → 성장 차트
         onTap: () => context.push('/child/edit', extra: child),
+        onLongPress: () => context.push('/growth/chart', extra: child),
         borderRadius: Radii.brMd,
         child: Padding(
           padding: const EdgeInsets.all(Spacing.md),
@@ -89,6 +110,7 @@ class ChildInfoCard extends ConsumerWidget {
                       value: latest?.weightG != null
                           ? '${(latest!.weightG! / 1000).toStringAsFixed(2)}kg'
                           : '—',
+                      pct: pctW,
                     ),
                     _GrowthMetric(
                       icon: '📏',
@@ -96,6 +118,7 @@ class ChildInfoCard extends ConsumerWidget {
                       value: latest?.heightMm != null
                           ? '${(latest!.heightMm! / 10).toStringAsFixed(1)}cm'
                           : '—',
+                      pct: pctH,
                     ),
                     _GrowthMetric(
                       icon: '🧢',
@@ -103,6 +126,7 @@ class ChildInfoCard extends ConsumerWidget {
                       value: latest?.headCircumferenceMm != null
                           ? '${(latest!.headCircumferenceMm! / 10).toStringAsFixed(1)}cm'
                           : '—',
+                      pct: pctC,
                     ),
                   ],
                 ),
@@ -133,14 +157,30 @@ class _GrowthMetric extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.value,
+    this.pct,
   });
   final String icon;
   final String label;
   final String value;
+  final GrowthPercentile? pct;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    Color bandColor() {
+      if (pct == null) return theme.colorScheme.onSurfaceVariant;
+      switch (pct!.band) {
+        case 'low':
+        case 'high':
+          return theme.colorScheme.error;
+        case 'belowAvg':
+        case 'aboveAvg':
+          return const Color(0xFFE89A4F); // 주의 amber
+        default:
+          return const Color(0xFF7BC9A3); // success green
+      }
+    }
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -159,6 +199,24 @@ class _GrowthMetric extends StatelessWidget {
             fontSize: 10,
           ),
         ),
+        if (pct != null) ...[
+          const SizedBox(height: 2),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+            decoration: BoxDecoration(
+              color: bandColor().withValues(alpha: 0.18),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              'P${pct!.percentile.round()}',
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                color: bandColor(),
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }

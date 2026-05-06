@@ -15,6 +15,7 @@ import '../../features/stats/presentation/statistics_page.dart';
 import '../../features/feeding/domain/feeding.dart';
 import '../../features/feeding/presentation/feeding_register_page.dart';
 import '../../features/growth/domain/growth.dart';
+import '../../features/growth/presentation/growth_chart_page.dart';
 import '../../features/growth/presentation/growth_register_page.dart';
 import '../../features/home/presentation/home_page.dart';
 import '../../features/hospital/domain/hospital.dart';
@@ -95,6 +96,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final child = state.extra as Child;
           return AuthGate(child: ChildEditPage(child: child));
+        },
+      ),
+      GoRoute(
+        // /growth/chart — 자녀의 WHO 성장 차트. extra=Child 필수.
+        path: '/growth/chart',
+        name: 'growthChart',
+        builder: (context, state) {
+          final child = state.extra as Child;
+          return AuthGate(child: GrowthChartPage(child: child));
         },
       ),
       GoRoute(
