@@ -40,7 +40,7 @@ class RecordsPage extends ConsumerWidget {
           actions: const [ChildPickerAction()],
           bottom: const TabBar(
             tabs: [
-              Tab(text: '일별 기록'),
+              Tab(text: '종합 기록'),
               Tab(text: '성장'),
             ],
           ),
@@ -231,31 +231,164 @@ class _GrowthList extends ConsumerWidget {
         if (list.isEmpty) return _EmptyTab(message: l10n.recordsEmpty);
         // 최신순으로 보여주기 — listAll은 asc라 reversed.
         final reversed = list.reversed.toList();
-        return ListView.builder(
+        return ListView(
           padding: const EdgeInsets.all(Spacing.md),
-          itemCount: reversed.length,
-          itemBuilder: (context, i) {
-            final g = reversed[i];
-            return _RecordCard(
-              icon: '📏',
-              title: _summarizeGrowth(g),
-              subtitle: TimeAgo.format(l10n, g.measuredAt),
-              onTap: () => context.push('/growth/new', extra: g),
-              onLongPress: () => _confirmAndDelete(
-                context,
-                delete: () async {
-                  await ref
-                      .read(growthRepositoryProvider)
-                      .deleteGrowth(g.id);
-                  ref.invalidate(statsGrowthsProvider(childId));
-                },
+          children: [
+            // 가상 아이 크기 시각화 (날짜순 가로 스크롤)
+            _GrowthSizeStrip(growths: list),
+            const SizedBox(height: Spacing.md),
+            // 기록 리스트 (최신 → 과거)
+            for (final g in reversed)
+              _RecordCard(
+                icon: '📏',
+                title: _summarizeGrowth(g),
+                subtitle: TimeAgo.format(l10n, g.measuredAt),
+                onTap: () => context.push('/growth/new', extra: g),
+                onLongPress: () => _confirmAndDelete(
+                  context,
+                  delete: () async {
+                    await ref
+                        .read(growthRepositoryProvider)
+                        .deleteGrowth(g.id);
+                    ref.invalidate(statsGrowthsProvider(childId));
+                  },
+                ),
               ),
-            );
-          },
+          ],
         );
       },
     );
   }
+}
+
+/// 가상 아이 크기 시각화 — 측정 일자별 baby emoji 비례 크기.
+///
+/// 이모지 폰트 크기를 키(cm)에 비례하게 매핑해 시각적으로 성장 비교 가능.
+/// (의료 진단 아닌 시각 보조용)
+class _GrowthSizeStrip extends StatelessWidget {
+  const _GrowthSizeStrip({required this.growths});
+  final List<Growth> growths; // listAll은 asc — 오래된 → 최신 순
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    // 키 정보 있는 측정만
+    final items = growths.where((g) => g.heightMm != null).toList();
+    if (items.isEmpty) {
+      return Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: Radii.brMd,
+          side: BorderSide(
+            color: theme.colorScheme.primary.withValues(alpha: 0.6),
+            width: 1.2,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(Spacing.md),
+          child: Text(
+            '키 데이터를 입력하면 성장 시각화가 보여요',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // 키 범위로 이모지 사이즈 매핑 (px). 30~110sp 사이.
+    final hMin = items
+        .map((g) => g.heightMm!)
+        .reduce((a, b) => a < b ? a : b)
+        .toDouble();
+    final hMax = items
+        .map((g) => g.heightMm!)
+        .reduce((a, b) => a > b ? a : b)
+        .toDouble();
+    double sizeFor(int heightMm) {
+      if (hMax == hMin) return 60;
+      final t = (heightMm - hMin) / (hMax - hMin);
+      return 30 + t * 80; // 30 → 110sp
+    }
+
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: Radii.brMd,
+        side: BorderSide(
+          color: theme.colorScheme.primary.withValues(alpha: 0.6),
+          width: 1.2,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+            horizontal: Spacing.md, vertical: Spacing.sm),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('아이 크기 변화',
+                style: theme.textTheme.titleSmall
+                    ?.copyWith(fontWeight: FontWeight.w700)),
+            const SizedBox(height: 2),
+            Text(
+              '키에 비례한 시각 표현 — 의료 기준 아님',
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontSize: 11,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: Spacing.sm),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  for (final g in items)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '👶',
+                            style: TextStyle(
+                                fontSize: sizeFor(g.heightMm!)),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '${(g.heightMm! / 10).toStringAsFixed(1)}cm',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 11,
+                            ),
+                          ),
+                          if (g.weightG != null)
+                            Text(
+                              '${(g.weightG! / 1000).toStringAsFixed(2)}kg',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                fontSize: 10,
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          Text(
+                            _shortDate(g.measuredAt),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              fontSize: 10,
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _shortDate(DateTime d) =>
+      '${d.year % 100}.${d.month.toString().padLeft(2, '0')}.${d.day.toString().padLeft(2, '0')}';
 }
 
 String _summarizeGrowth(Growth g) {
