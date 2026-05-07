@@ -15,19 +15,19 @@ import '../../sleep/domain/sleep.dart';
 final statsFeedingsProvider =
     FutureProvider.family<List<Feeding>, String>((ref, childId) async {
   final repo = ref.watch(feedingRepositoryProvider);
-  return repo.listRecent(childId, limit: 200);
+  return repo.listRecent(childId, limit: 1000);
 });
 
 final statsSleepsProvider =
     FutureProvider.family<List<Sleep>, String>((ref, childId) async {
   final repo = ref.watch(sleepRepositoryProvider);
-  return repo.listRecent(childId, limit: 200);
+  return repo.listRecent(childId, limit: 1000);
 });
 
 final statsDiapersProvider =
     FutureProvider.family<List<Diaper>, String>((ref, childId) async {
   final repo = ref.watch(diaperRepositoryProvider);
-  return repo.listRecent(childId, limit: 200);
+  return repo.listRecent(childId, limit: 1000);
 });
 
 /// 성장 기록 — 모든 기록 (월 단위로 보면 작아서 limit 불필요).
