@@ -37,18 +37,15 @@ class RecordsPage extends ConsumerWidget {
     final asyncChildren = ref.watch(myChildrenProvider);
 
     return DefaultTabController(
-      length: 4,
+      length: 2,
       child: Scaffold(
         appBar: AppBar(
           title: Text(l10n.recordsTitle),
           actions: const [ChildPickerAction()],
-          bottom: TabBar(
-            isScrollable: true,
+          bottom: const TabBar(
             tabs: [
-              Tab(text: l10n.summaryFeeding),
-              Tab(text: l10n.summarySleep),
-              Tab(text: l10n.summaryDiaper),
-              Tab(text: l10n.summaryGrowth),
+              Tab(text: '일별 기록'),
+              Tab(text: '성장'),
             ],
           ),
         ),
@@ -65,9 +62,7 @@ class RecordsPage extends ConsumerWidget {
               final child = ref.watch(selectedChildProvider) ?? children.first;
               return TabBarView(
                 children: [
-                  _FeedingList(childId: child.id),
-                  _SleepList(childId: child.id),
-                  _DiaperList(childId: child.id),
+                  _DailyTimelineList(childId: child.id),
                   _GrowthList(childId: child.id),
                 ],
               );
@@ -76,6 +71,154 @@ class RecordsPage extends ConsumerWidget {
         ),
       ),
     );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// 일별 통합 타임라인 — 수유 + 수면 + 기저귀를 날짜별로 묶어 시간순 표시
+// ─────────────────────────────────────────────────────────────────────────
+class _DailyEvent {
+  const _DailyEvent({
+    required this.when,
+    required this.icon,
+    required this.title,
+    required this.onLongPress,
+    this.onTap,
+  });
+  final DateTime when;
+  final String icon;
+  final String title;
+  final VoidCallback onLongPress;
+  final VoidCallback? onTap;
+}
+
+class _DailyTimelineList extends ConsumerWidget {
+  const _DailyTimelineList({required this.childId});
+  final String childId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final asyncFeedings = ref.watch(statsFeedingsProvider(childId));
+    final asyncSleeps = ref.watch(statsSleepsProvider(childId));
+    final asyncDiapers = ref.watch(statsDiapersProvider(childId));
+
+    if (asyncFeedings.isLoading ||
+        asyncSleeps.isLoading ||
+        asyncDiapers.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (asyncFeedings.hasError ||
+        asyncSleeps.hasError ||
+        asyncDiapers.hasError) {
+      final err = asyncFeedings.error ??
+          asyncSleeps.error ??
+          asyncDiapers.error;
+      return Center(child: Text(l10n.errorFailed(err!)));
+    }
+
+    final feedings = asyncFeedings.value ?? const [];
+    final sleeps = asyncSleeps.value ?? const [];
+    final diapers = asyncDiapers.value ?? const [];
+
+    final events = <_DailyEvent>[
+      ...feedings.map((f) => _DailyEvent(
+            when: f.startedAt,
+            icon: '🍼',
+            title: _summarizeFeeding(l10n, f),
+            onTap: () => context.push('/feeding/new', extra: f),
+            onLongPress: () => _confirmAndDelete(context, delete: () async {
+              await ref.read(feedingRepositoryProvider).deleteFeeding(f.id);
+              ref.invalidate(statsFeedingsProvider(childId));
+              ref.invalidate(formulaInventoryStatsProvider);
+            }),
+          )),
+      ...sleeps.map((s) => _DailyEvent(
+            when: s.startedAt,
+            icon: '💤',
+            title: _summarizeSleep(l10n, s),
+            onTap: s.isOngoing
+                ? null
+                : () => context.push('/sleep/new', extra: s),
+            onLongPress: () => _confirmAndDelete(context, delete: () async {
+              await ref.read(sleepRepositoryProvider).deleteSleep(s.id);
+              ref.invalidate(statsSleepsProvider(childId));
+            }),
+          )),
+      ...diapers.map((d) => _DailyEvent(
+            when: d.recordedAt,
+            icon: '💩',
+            title: _summarizeDiaper(l10n, d),
+            onTap: () => context.push('/diaper/new', extra: d),
+            onLongPress: () => _confirmAndDelete(context, delete: () async {
+              await ref.read(diaperRepositoryProvider).deleteDiaper(d.id);
+              ref.invalidate(statsDiapersProvider(childId));
+              ref.invalidate(diaperInventoryStatsProvider);
+            }),
+          )),
+    ];
+
+    if (events.isEmpty) return _EmptyTab(message: l10n.recordsEmpty);
+
+    // 최신 → 과거 순.
+    events.sort((a, b) => b.when.compareTo(a.when));
+
+    // 날짜별 그룹화 (yyyy-MM-dd 키).
+    final grouped = <String, List<_DailyEvent>>{};
+    for (final e in events) {
+      final key = _dateKey(e.when);
+      grouped.putIfAbsent(key, () => []).add(e);
+    }
+    final dateKeys = grouped.keys.toList(); // 이미 정렬된 events 기준이라 자연 정렬됨
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(Spacing.md),
+      itemCount: dateKeys.length,
+      itemBuilder: (context, i) {
+        final key = dateKeys[i];
+        final list = grouped[key]!;
+        final first = list.first.when;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: Spacing.sm, bottom: 4),
+              child: Text(
+                _formatDateHeader(first),
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+              ),
+            ),
+            for (final e in list)
+              _RecordCard(
+                icon: e.icon,
+                title: e.title,
+                subtitle: _hhmm(e.when),
+                onTap: e.onTap,
+                onLongPress: e.onLongPress,
+              ),
+          ],
+        );
+      },
+    );
+  }
+
+  static String _dateKey(DateTime d) =>
+      '${d.year}-${_two(d.month)}-${_two(d.day)}';
+  static String _two(int v) => v.toString().padLeft(2, '0');
+  static String _hhmm(DateTime d) =>
+      '${_two(d.hour)}:${_two(d.minute)}';
+
+  static String _formatDateHeader(DateTime d) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final that = DateTime(d.year, d.month, d.day);
+    final diff = today.difference(that).inDays;
+    if (diff == 0) return '오늘 (${d.year}.${_two(d.month)}.${_two(d.day)})';
+    if (diff == 1) return '어제 (${d.year}.${_two(d.month)}.${_two(d.day)})';
+    return '${d.year}.${_two(d.month)}.${_two(d.day)}';
   }
 }
 
@@ -120,49 +263,8 @@ Future<void> _confirmAndDelete(
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// 수유 탭
+// 요약 헬퍼 함수
 // ─────────────────────────────────────────────────────────────────────────
-class _FeedingList extends ConsumerWidget {
-  const _FeedingList({required this.childId});
-  final String childId;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
-    final asyncList = ref.watch(statsFeedingsProvider(childId));
-    return asyncList.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (err, _) => Center(child: Text(l10n.errorFailed(err))),
-      data: (list) {
-        if (list.isEmpty) return _EmptyTab(message: l10n.recordsEmpty);
-        return ListView.builder(
-          padding: const EdgeInsets.all(Spacing.md),
-          itemCount: list.length,
-          itemBuilder: (context, i) {
-            final f = list[i];
-            return _RecordCard(
-              icon: '🍼',
-              title: _summarizeFeeding(l10n, f),
-              subtitle: TimeAgo.format(l10n, f.startedAt),
-              onTap: () => context.push('/feeding/new', extra: f),
-              onLongPress: () => _confirmAndDelete(
-                context,
-                delete: () async {
-                  await ref
-                      .read(feedingRepositoryProvider)
-                      .deleteFeeding(f.id);
-                  ref.invalidate(statsFeedingsProvider(childId));
-                  ref.invalidate(formulaInventoryStatsProvider);
-                },
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-}
-
 String _summarizeFeeding(AppLocalizations l10n, Feeding f) {
   switch (f.type) {
     case 'breast':
@@ -187,52 +289,6 @@ String _summarizeFeeding(AppLocalizations l10n, Feeding f) {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────
-// 수면 탭
-// ─────────────────────────────────────────────────────────────────────────
-class _SleepList extends ConsumerWidget {
-  const _SleepList({required this.childId});
-  final String childId;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
-    final asyncList = ref.watch(statsSleepsProvider(childId));
-    return asyncList.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (err, _) => Center(child: Text(l10n.errorFailed(err))),
-      data: (list) {
-        if (list.isEmpty) return _EmptyTab(message: l10n.recordsEmpty);
-        return ListView.builder(
-          padding: const EdgeInsets.all(Spacing.md),
-          itemCount: list.length,
-          itemBuilder: (context, i) {
-            final s = list[i];
-            return _RecordCard(
-              icon: '💤',
-              title: _summarizeSleep(l10n, s),
-              subtitle: TimeAgo.format(l10n, s.startedAt),
-              // 진행 중 수면은 편집 막음 — 종료 후 편집.
-              onTap: s.isOngoing
-                  ? null
-                  : () => context.push('/sleep/new', extra: s),
-              onLongPress: () => _confirmAndDelete(
-                context,
-                delete: () async {
-                  await ref
-                      .read(sleepRepositoryProvider)
-                      .deleteSleep(s.id);
-                  ref.invalidate(statsSleepsProvider(childId));
-                },
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-}
-
 String _summarizeSleep(AppLocalizations l10n, Sleep s) {
   final kind = s.napOrNight == 'night' ? l10n.sleepNight : l10n.sleepNap;
   if (s.isOngoing) {
@@ -245,50 +301,6 @@ String _summarizeSleep(AppLocalizations l10n, Sleep s) {
   final h = minutes ~/ 60;
   final m = minutes % 60;
   return m == 0 ? '$kind ${h}h' : '$kind ${h}h ${m}m';
-}
-
-// ─────────────────────────────────────────────────────────────────────────
-// 기저귀 탭
-// ─────────────────────────────────────────────────────────────────────────
-class _DiaperList extends ConsumerWidget {
-  const _DiaperList({required this.childId});
-  final String childId;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
-    final asyncList = ref.watch(statsDiapersProvider(childId));
-    return asyncList.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (err, _) => Center(child: Text(l10n.errorFailed(err))),
-      data: (list) {
-        if (list.isEmpty) return _EmptyTab(message: l10n.recordsEmpty);
-        return ListView.builder(
-          padding: const EdgeInsets.all(Spacing.md),
-          itemCount: list.length,
-          itemBuilder: (context, i) {
-            final d = list[i];
-            return _RecordCard(
-              icon: '💩',
-              title: _summarizeDiaper(l10n, d),
-              subtitle: TimeAgo.format(l10n, d.recordedAt),
-              onTap: () => context.push('/diaper/new', extra: d),
-              onLongPress: () => _confirmAndDelete(
-                context,
-                delete: () async {
-                  await ref
-                      .read(diaperRepositoryProvider)
-                      .deleteDiaper(d.id);
-                  ref.invalidate(statsDiapersProvider(childId));
-                  ref.invalidate(diaperInventoryStatsProvider);
-                },
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
 }
 
 String _summarizeDiaper(AppLocalizations l10n, Diaper d) {
