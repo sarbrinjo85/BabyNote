@@ -553,12 +553,10 @@ class _WeeklyTrendChart extends StatelessWidget {
       if (i >= 0) diaperCount[i]++;
     }
 
+    // 날짜 라벨 — M/d 형식 (예: 5/2). 오늘만 별도 강조 표시.
     String dayLabel(int i) {
       final d = days[i];
-      if (i == 6) return '오늘';
-      if (i == 5) return '어제';
-      const wk = ['월', '화', '수', '목', '금', '토', '일'];
-      return wk[d.weekday - 1];
+      return '${d.month}/${d.day}';
     }
 
     return Card(
