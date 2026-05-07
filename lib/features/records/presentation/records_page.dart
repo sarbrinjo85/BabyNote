@@ -82,8 +82,10 @@ class _DailyTimelineList extends ConsumerStatefulWidget {
       _DailyTimelineListState();
 }
 
+enum _PeriodMode { weekly, monthly }
+
 class _DailyTimelineListState extends ConsumerState<_DailyTimelineList> {
-  int _periodDays = 7; // 7 또는 30
+  _PeriodMode _mode = _PeriodMode.weekly;
 
   @override
   Widget build(BuildContext context) {
@@ -111,10 +113,17 @@ class _DailyTimelineListState extends ConsumerState<_DailyTimelineList> {
     final sleeps = asyncSleeps.value ?? const [];
     final diapers = asyncDiapers.value ?? const [];
 
-    // ── 기간 필터링 (지난 N일 — N=_periodDays) ──────────────────────
+    // ── 기간 필터링 ────────────────────────────────────────────
+    // weekly:  지난 7일
+    // monthly: 지난 12개월 (현재 월 포함)
     final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final earliest = today.subtract(Duration(days: _periodDays - 1));
+    DateTime earliest;
+    if (_mode == _PeriodMode.weekly) {
+      final today = DateTime(now.year, now.month, now.day);
+      earliest = today.subtract(const Duration(days: 6));
+    } else {
+      earliest = DateTime(now.year, now.month - 11, 1);
+    }
 
     bool inRange(DateTime d) {
       final dd = DateTime(d.year, d.month, d.day);
@@ -130,21 +139,21 @@ class _DailyTimelineListState extends ConsumerState<_DailyTimelineList> {
       children: [
         // ── 기간 토글 ────────────────────────────────────────────
         Center(
-          child: SegmentedButton<int>(
+          child: SegmentedButton<_PeriodMode>(
             segments: const [
-              ButtonSegment(value: 7, label: Text('1주일')),
-              ButtonSegment(value: 30, label: Text('1개월')),
+              ButtonSegment(value: _PeriodMode.weekly, label: Text('1주일')),
+              ButtonSegment(value: _PeriodMode.monthly, label: Text('1개월')),
             ],
-            selected: {_periodDays},
+            selected: {_mode},
             onSelectionChanged: (s) =>
-                setState(() => _periodDays = s.first),
+                setState(() => _mode = s.first),
           ),
         ),
         const SizedBox(height: Spacing.sm),
 
-        // ── 차트 (N일 기간) ────────────────────────────────────
+        // ── 차트 ───────────────────────────────────────────────
         _PeriodTrendChart(
-          days: _periodDays,
+          mode: _mode,
           feedings: fInRange,
           sleeps: sInRange,
           diapers: dInRange,
@@ -154,7 +163,7 @@ class _DailyTimelineListState extends ConsumerState<_DailyTimelineList> {
         // ── 기간 통계 요약 ─────────────────────────────────────
         _PeriodStats(
           l10n: l10n,
-          days: _periodDays,
+          mode: _mode,
           feedings: fInRange,
           sleeps: sInRange,
           diapers: dInRange,
@@ -366,13 +375,13 @@ class _NoChildPlaceholder extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────
 class _PeriodTrendChart extends StatelessWidget {
   const _PeriodTrendChart({
-    required this.days,
+    required this.mode,
     required this.feedings,
     required this.sleeps,
     required this.diapers,
   });
 
-  final int days; // 7 or 30
+  final _PeriodMode mode;
   final List<Feeding> feedings;
   final List<Sleep> sleeps;
   final List<Diaper> diapers;
@@ -381,17 +390,35 @@ class _PeriodTrendChart extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final dayList = List.generate(
-        days, (i) => today.subtract(Duration(days: days - 1 - i)));
 
-    int idxFor(DateTime d) {
-      final key = DateTime(d.year, d.month, d.day);
-      return dayList.indexWhere((k) => k.isAtSameMomentAs(key));
+    // ── 버킷 정의 ──────────────────────────────────────────────
+    // weekly: 7개 (지난 7일, 일자별)
+    // monthly: 12개 (현재 월에서 11개월 전부터, 월별)
+    final int n;
+    final List<DateTime> buckets; // 각 버킷의 시작일 (월의 1일 또는 해당 일자)
+    if (mode == _PeriodMode.weekly) {
+      n = 7;
+      final today = DateTime(now.year, now.month, now.day);
+      buckets = List.generate(
+          n, (i) => today.subtract(Duration(days: n - 1 - i)));
+    } else {
+      n = 12;
+      buckets = List.generate(
+          n, (i) => DateTime(now.year, now.month - (n - 1 - i), 1));
     }
 
-    final feedCount = List.filled(days, 0);
-    final feedMl = List.filled(days, 0);
+    int idxFor(DateTime d) {
+      if (mode == _PeriodMode.weekly) {
+        final key = DateTime(d.year, d.month, d.day);
+        return buckets.indexWhere((k) => k.isAtSameMomentAs(key));
+      }
+      // monthly — 같은 (year, month)
+      return buckets.indexWhere(
+          (k) => k.year == d.year && k.month == d.month);
+    }
+
+    final feedCount = List.filled(n, 0);
+    final feedMl = List.filled(n, 0);
     for (final f in feedings) {
       final i = idxFor(f.startedAt);
       if (i >= 0) {
@@ -400,7 +427,7 @@ class _PeriodTrendChart extends StatelessWidget {
       }
     }
 
-    final sleepMin = List.filled(days, 0);
+    final sleepMin = List.filled(n, 0);
     for (final s in sleeps) {
       if (s.endedAt == null) continue;
       final i = idxFor(s.startedAt);
@@ -409,17 +436,17 @@ class _PeriodTrendChart extends StatelessWidget {
       }
     }
 
-    final diaperCount = List.filled(days, 0);
+    final diaperCount = List.filled(n, 0);
     for (final d in diapers) {
       final i = idxFor(d.recordedAt);
       if (i >= 0) diaperCount[i]++;
     }
 
-    // 1개월일 때는 너무 많아 5일 간격으로만 라벨 표시
-    String dayLabel(int i) {
-      if (days > 7 && i != 0 && i != days - 1 && i % 5 != 0) return '';
-      final d = dayList[i];
-      return '${d.month}/${d.day}';
+    // 라벨 — 모드별 형식
+    String bucketLabel(int i) {
+      final d = buckets[i];
+      if (mode == _PeriodMode.weekly) return '${d.month}/${d.day}';
+      return '${d.month}월';
     }
 
     return Card(
@@ -436,9 +463,11 @@ class _PeriodTrendChart extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(days == 7 ? '지난 7일' : '지난 30일',
-                style: theme.textTheme.titleSmall
-                    ?.copyWith(fontWeight: FontWeight.w700)),
+            Text(
+              mode == _PeriodMode.weekly ? '지난 7일' : '지난 12개월',
+              style: theme.textTheme.titleSmall
+                  ?.copyWith(fontWeight: FontWeight.w700),
+            ),
             const SizedBox(height: Spacing.xs),
             _MiniBarChart(
               emoji: '🍼',
@@ -446,7 +475,7 @@ class _PeriodTrendChart extends StatelessWidget {
               values: feedCount.map((v) => v.toDouble()).toList(),
               color: theme.colorScheme.primary,
               valueFormatter: (v) => v == 0 ? '' : '${v.toInt()}',
-              dayLabel: dayLabel,
+              dayLabel: bucketLabel,
             ),
             _MiniBarChart(
               emoji: '💤',
@@ -455,7 +484,7 @@ class _PeriodTrendChart extends StatelessWidget {
               color: theme.colorScheme.tertiary,
               valueFormatter: (v) =>
                   v == 0 ? '' : '${v.toStringAsFixed(1)}h',
-              dayLabel: dayLabel,
+              dayLabel: bucketLabel,
             ),
             _MiniBarChart(
               emoji: '💩',
@@ -463,7 +492,7 @@ class _PeriodTrendChart extends StatelessWidget {
               values: diaperCount.map((v) => v.toDouble()).toList(),
               color: theme.colorScheme.secondary,
               valueFormatter: (v) => v == 0 ? '' : '${v.toInt()}',
-              dayLabel: dayLabel,
+              dayLabel: bucketLabel,
             ),
           ],
         ),
@@ -600,14 +629,14 @@ class _MiniBarChart extends StatelessWidget {
 class _PeriodStats extends StatelessWidget {
   const _PeriodStats({
     required this.l10n,
-    required this.days,
+    required this.mode,
     required this.feedings,
     required this.sleeps,
     required this.diapers,
   });
 
   final AppLocalizations l10n;
-  final int days;
+  final _PeriodMode mode;
   final List<Feeding> feedings;
   final List<Sleep> sleeps;
   final List<Diaper> diapers;
@@ -671,7 +700,11 @@ class _PeriodStats extends StatelessWidget {
       return '${h}시간 ${m}분';
     }
 
-    final periodLabel = days == 7 ? '지난 7일' : '지난 30일';
+    // 평균 분모 — 일 단위(주간) vs 월 단위(연간 12개월)
+    final periodLabel =
+        mode == _PeriodMode.weekly ? '지난 7일' : '지난 12개월';
+    final divisor = mode == _PeriodMode.weekly ? 7 : 12;
+    final perUnit = mode == _PeriodMode.weekly ? '/일' : '/월';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -700,7 +733,7 @@ class _PeriodStats extends StatelessWidget {
           headline: sleepMin == 0 ? '기록 없음' : '총 ${hm(sleepMin)}',
           subItems: [
             if (sleepMin > 0)
-              '· 평균 ${hm((sleepMin / days).round())}/일',
+              '· 평균 ${hm((sleepMin / divisor).round())}$perUnit',
           ],
           color: theme.colorScheme.tertiary,
         ),
