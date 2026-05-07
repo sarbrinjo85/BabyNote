@@ -1,3 +1,4 @@
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -171,37 +172,37 @@ class _DailyTimelineList extends ConsumerWidget {
     }
     final dateKeys = grouped.keys.toList(); // 이미 정렬된 events 기준이라 자연 정렬됨
 
-    return ListView.builder(
+    return ListView(
       padding: const EdgeInsets.all(Spacing.md),
-      itemCount: dateKeys.length,
-      itemBuilder: (context, i) {
-        final key = dateKeys[i];
-        final list = grouped[key]!;
-        final first = list.first.when;
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: Spacing.sm, bottom: 4),
-              child: Text(
-                _formatDateHeader(first),
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-              ),
+      children: [
+        // 상단 1주일 추세 차트
+        _WeeklyTrendChart(
+          feedings: feedings,
+          sleeps: sleeps,
+          diapers: diapers,
+        ),
+        const SizedBox(height: Spacing.sm),
+        for (final key in dateKeys) ...[
+          Padding(
+            padding: const EdgeInsets.only(top: Spacing.sm, bottom: 4),
+            child: Text(
+              _formatDateHeader(grouped[key]!.first.when),
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
             ),
-            for (final e in list)
-              _RecordCard(
-                icon: e.icon,
-                title: e.title,
-                subtitle: _hhmm(e.when),
-                onTap: e.onTap,
-                onLongPress: e.onLongPress,
-              ),
-          ],
-        );
-      },
+          ),
+          for (final e in grouped[key]!)
+            _RecordCard(
+              icon: e.icon,
+              title: e.title,
+              subtitle: _hhmm(e.when),
+              onTap: e.onTap,
+              onLongPress: e.onLongPress,
+            ),
+        ],
+      ],
     );
   }
 
@@ -493,6 +494,234 @@ class _NoChildPlaceholder extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// 1주일 추세 미니 차트 — 수유/수면/기저귀 각 metric의 일자별 합계
+// ─────────────────────────────────────────────────────────────────────────
+class _WeeklyTrendChart extends StatelessWidget {
+  const _WeeklyTrendChart({
+    required this.feedings,
+    required this.sleeps,
+    required this.diapers,
+  });
+
+  final List<Feeding> feedings;
+  final List<Sleep> sleeps;
+  final List<Diaper> diapers;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    // 가장 오래된 → 최신 순 (왼쪽이 6일전, 오른쪽이 오늘)
+    final days = List.generate(
+        7, (i) => today.subtract(Duration(days: 6 - i)));
+
+    int idxFor(DateTime d) {
+      final key = DateTime(d.year, d.month, d.day);
+      return days.indexWhere((k) => k.isAtSameMomentAs(key));
+    }
+
+    final feedCount = List.filled(7, 0);
+    final feedMl = List.filled(7, 0);
+    for (final f in feedings) {
+      final i = idxFor(f.startedAt);
+      if (i >= 0) {
+        feedCount[i]++;
+        feedMl[i] += f.amountMl ?? 0;
+      }
+    }
+
+    final sleepMin = List.filled(7, 0);
+    for (final s in sleeps) {
+      if (s.endedAt == null) continue;
+      // startedAt 기준 — 자정 걸치는 수면은 시작일에 합산 (간이 처리).
+      final i = idxFor(s.startedAt);
+      if (i >= 0) {
+        sleepMin[i] += s.endedAt!.difference(s.startedAt).inMinutes;
+      }
+    }
+
+    final diaperCount = List.filled(7, 0);
+    for (final d in diapers) {
+      final i = idxFor(d.recordedAt);
+      if (i >= 0) diaperCount[i]++;
+    }
+
+    String dayLabel(int i) {
+      final d = days[i];
+      if (i == 6) return '오늘';
+      if (i == 5) return '어제';
+      const wk = ['월', '화', '수', '목', '금', '토', '일'];
+      return wk[d.weekday - 1];
+    }
+
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: Radii.brMd,
+        side: BorderSide(
+          color: theme.colorScheme.primary.withValues(alpha: 0.6),
+          width: 1.2,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+            horizontal: Spacing.md, vertical: Spacing.sm),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('지난 7일',
+                style: theme.textTheme.titleSmall
+                    ?.copyWith(fontWeight: FontWeight.w700)),
+            const SizedBox(height: Spacing.xs),
+            _MiniBarChart(
+              emoji: '🍼',
+              label: '수유 횟수',
+              values: feedCount.map((v) => v.toDouble()).toList(),
+              color: theme.colorScheme.primary,
+              valueFormatter: (v) => v == 0 ? '' : '${v.toInt()}',
+              dayLabel: dayLabel,
+            ),
+            _MiniBarChart(
+              emoji: '💤',
+              label: '수면 시간',
+              values: sleepMin.map((v) => v / 60.0).toList(),
+              color: theme.colorScheme.tertiary,
+              valueFormatter: (v) =>
+                  v == 0 ? '' : '${v.toStringAsFixed(1)}h',
+              dayLabel: dayLabel,
+            ),
+            _MiniBarChart(
+              emoji: '💩',
+              label: '기저귀',
+              values: diaperCount.map((v) => v.toDouble()).toList(),
+              color: theme.colorScheme.secondary,
+              valueFormatter: (v) => v == 0 ? '' : '${v.toInt()}',
+              dayLabel: dayLabel,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MiniBarChart extends StatelessWidget {
+  const _MiniBarChart({
+    required this.emoji,
+    required this.label,
+    required this.values,
+    required this.color,
+    required this.valueFormatter,
+    required this.dayLabel,
+  });
+
+  final String emoji;
+  final String label;
+  final List<double> values; // 길이 7
+  final Color color;
+  final String Function(double) valueFormatter;
+  final String Function(int) dayLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final maxV = values.fold<double>(0, (m, v) => v > m ? v : m);
+    final total = values.fold<double>(0, (s, v) => s + v);
+    final hasData = total > 0;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(emoji, style: const TextStyle(fontSize: 14)),
+              const SizedBox(width: 4),
+              Text(label,
+                  style: theme.textTheme.bodySmall?.copyWith(fontSize: 12)),
+              const Spacer(),
+              if (!hasData)
+                Text('데이터 없음',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontSize: 11,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    )),
+            ],
+          ),
+          const SizedBox(height: 2),
+          SizedBox(
+            height: 56,
+            child: BarChart(
+              BarChartData(
+                minY: 0,
+                maxY: maxV == 0 ? 1 : maxV * 1.25,
+                gridData: const FlGridData(show: false),
+                borderData: FlBorderData(show: false),
+                titlesData: FlTitlesData(
+                  leftTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
+                  topTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 14,
+                      getTitlesWidget: (v, _) {
+                        final i = v.toInt();
+                        if (i < 0 || i > 6) return const SizedBox.shrink();
+                        return Text(
+                          valueFormatter(values[i]),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w600,
+                            color: color,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 14,
+                      getTitlesWidget: (v, _) {
+                        final i = v.toInt();
+                        if (i < 0 || i > 6) return const SizedBox.shrink();
+                        return Text(
+                          dayLabel(i),
+                          style: theme.textTheme.bodySmall
+                              ?.copyWith(fontSize: 10),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                barGroups: [
+                  for (var i = 0; i < 7; i++)
+                    BarChartGroupData(
+                      x: i,
+                      barRods: [
+                        BarChartRodData(
+                          toY: values[i],
+                          color: color,
+                          width: 14,
+                          borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(3)),
+                        ),
+                      ],
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
