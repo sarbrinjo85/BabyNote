@@ -18,6 +18,10 @@ class OnboardingCoach {
 
   static const _prefKey = 'seen_home_onboarding';
 
+  /// 현재 앱 세션에서 한 번이라도 닫힌 적 있으면 더 이상 자동 표시 X.
+  /// 앱 재시작하면 false로 초기화 → seen=false라면 다시 표시.
+  static bool _dismissedThisSession = false;
+
   // 하이라이트 대상 GlobalKey들 — 홈 화면에서 부착.
   static final addChildKey = GlobalKey();
   static final bellKey = GlobalKey();
@@ -36,13 +40,25 @@ class OnboardingCoach {
     await prefs.setBool(_prefKey, true);
   }
 
+  /// 다음 앱 재실행 시 코치 마크가 다시 보이도록 — seen 플래그 해제.
+  /// 현재 세션에서는 이미 본 것으로 처리(_dismissedThisSession=true)되어
+  /// 즉시 재표시되지 않음.
+  static Future<void> markUnseenForNextLaunch() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_prefKey);
+    _dismissedThisSession = true;
+  }
+
   static Future<void> resetForTest() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_prefKey);
+    _dismissedThisSession = false;
   }
 
   /// 첫 실행이면 코치 마크 시작.
+  /// 현재 세션에서 이미 한 번 닫혔다면(_dismissedThisSession) 표시 안 함.
   static Future<void> maybeShow(BuildContext context) async {
+    if (_dismissedThisSession) return;
     if (await hasSeen()) return;
     if (!context.mounted) return;
     show(context);
@@ -174,8 +190,7 @@ class OnboardingCoach {
       opacityShadow: 0.85,
       paddingFocus: 6,
       hideSkip: false,
-      textSkip: '건너뛰기',
-      // 기본 위치(우하단)는 FAB와 겹쳐서 우상단으로 이동
+      textSkip: '다시 보지 않기',
       alignSkip: Alignment.topRight,
       textStyleSkip: TextStyle(
         color: Colors.white,
@@ -183,11 +198,14 @@ class OnboardingCoach {
         fontWeight: FontWeight.w700,
       ),
       onSkip: () {
+        // "다시 보지 않기" — seen=true 영구 저장 + 세션 dismissed 표시
         markSeen();
+        _dismissedThisSession = true;
         return true;
       },
       onFinish: () {
         markSeen();
+        _dismissedThisSession = true;
       },
       pulseEnable: true,
       focusAnimationDuration: const Duration(milliseconds: 350),

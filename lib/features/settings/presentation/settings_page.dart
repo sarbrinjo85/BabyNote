@@ -98,13 +98,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.help_outline),
               title: const Text('홈 화면 도움말 다시 보기'),
-              subtitle: const Text('처음 진입 시 안내된 코치 마크를 다시 표시'),
+              subtitle: const Text('앱을 재실행하면 코치 마크가 다시 표시돼요'),
               onTap: () async {
-                await OnboardingCoach.resetForTest();
+                await OnboardingCoach.markUnseenForNextLaunch();
                 if (!context.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('홈으로 돌아가면 도움말이 다시 표시됩니다'),
+                    content: Text('다음 앱 재실행 시 도움말이 다시 표시됩니다'),
                   ),
                 );
               },
