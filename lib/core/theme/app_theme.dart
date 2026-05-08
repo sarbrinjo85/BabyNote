@@ -138,12 +138,20 @@ class AppTheme {
             EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.sm),
       ),
 
-      // ── Card: 모서리 둥글게, elevation 낮게 (Material 3 권장) ───────
+      // ── Card: 흰 배경 + 옅은 코랄 외곽선 (배경과 명확히 구분) ─────
       cardTheme: CardThemeData(
         margin: const EdgeInsets.symmetric(vertical: Spacing.xs),
         elevation: 0,
-        shape: const RoundedRectangleBorder(borderRadius: Radii.brMd),
-        color: cs.surfaceContainerLow,
+        color: isLight ? Colors.white : cs.surfaceContainerLow,
+        shape: RoundedRectangleBorder(
+          borderRadius: Radii.brMd,
+          side: isLight
+              ? BorderSide(
+                  color: BrandColors.seed.withValues(alpha: 0.45),
+                  width: 1,
+                )
+              : BorderSide.none,
+        ),
       ),
 
       // ── AppBar: 라이트는 Coral Cream과 통일, 다크는 surface ─────────
