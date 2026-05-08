@@ -151,36 +151,12 @@ class AppTheme {
       ),
 
       // ── AppBar: 라이트는 Coral Cream과 통일, 다크는 surface ─────────
-      // 아이콘(뒤로가기/+ 등) 색은 stroke 컬러로 통일 → StrokedTitle와 시각 매칭.
-      // 하단에 코랄핑크 테두리 — 카드 테두리 스타일과 같은 톤.
       appBarTheme: AppBarTheme(
         backgroundColor: scaffoldBg ?? cs.surface,
-        foregroundColor: isLight
-            ? const Color(0xFFA43F45) // stroke 컬러
-            : cs.onSurface,
+        foregroundColor: cs.onSurface,
         centerTitle: false,
         elevation: 0,
         scrolledUnderElevation: 1,
-        iconTheme: IconThemeData(
-          color: isLight
-              ? const Color(0xFFA43F45)
-              : cs.onSurface,
-          size: 24,
-        ),
-        actionsIconTheme: IconThemeData(
-          color: isLight
-              ? const Color(0xFFA43F45)
-              : cs.onSurface,
-          size: 24,
-        ),
-        shape: isLight
-            ? const Border(
-                bottom: BorderSide(
-                  color: Color(0x99FFB5A7), // 코랄핑크 60%
-                  width: 1.2,
-                ),
-              )
-            : null,
         titleTextStyle: TextStyle(
           fontSize: 22,
           fontWeight: FontWeight.w700,

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../core/widgets/stroked_title.dart';
 import '../../../core/widgets/baby_loading.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -20,7 +19,7 @@ class HospitalListPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: StrokedTitle(l10n.hospitalListTitle, fontSize: 26),
+        title: Text(l10n.hospitalListTitle),
         actions: [
           IconButton(
             tooltip: l10n.commonAdd,

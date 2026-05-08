@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../core/widgets/stroked_title.dart';
 import '../../../core/widgets/baby_loading.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -35,7 +34,7 @@ class VaccineListPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: StrokedTitle(l10n.vaccineListTitle, fontSize: 26),
+        title: Text(l10n.vaccineListTitle),
         actions: const [ChildPickerAction()],
       ),
       body: SafeArea(top: false, child: asyncChildren.when(
