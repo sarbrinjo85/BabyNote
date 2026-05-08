@@ -12,8 +12,6 @@ import '../../diaper/data/diaper_repository.dart';
 import '../../diaper/domain/diaper.dart';
 import '../../feeding/data/feeding_repository.dart';
 import '../../feeding/domain/feeding.dart';
-import '../../growth/data/growth_repository.dart';
-import '../../growth/domain/growth.dart';
 import '../../inventory/presentation/diaper_inventory_providers.dart';
 import '../../inventory/presentation/formula_inventory_providers.dart';
 import '../../sleep/data/sleep_repository.dart';
@@ -32,36 +30,22 @@ class RecordsPage extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final asyncChildren = ref.watch(myChildrenProvider);
 
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(l10n.recordsTitle),
-          actions: const [ChildPickerAction()],
-          bottom: const TabBar(
-            tabs: [
-              Tab(text: '종합 기록'),
-              Tab(text: '성장'),
-            ],
-          ),
-        ),
-        body: SafeArea(
-          top: false,
-          child: asyncChildren.when(
-            loading: () => const Center(child: BabyLoading()),
-            error: (err, _) =>
-                Center(child: Text(l10n.errorChildrenLoadFailed(err))),
-            data: (children) {
-              if (children.isEmpty) return _NoChildPlaceholder();
-              final child = ref.watch(selectedChildProvider) ?? children.first;
-              return TabBarView(
-                children: [
-                  _DailyTimelineList(childId: child.id),
-                  _GrowthList(childId: child.id),
-                ],
-              );
-            },
-          ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(l10n.recordsTitle),
+        actions: const [ChildPickerAction()],
+      ),
+      body: SafeArea(
+        top: false,
+        child: asyncChildren.when(
+          loading: () => const Center(child: BabyLoading()),
+          error: (err, _) =>
+              Center(child: Text(l10n.errorChildrenLoadFailed(err))),
+          data: (children) {
+            if (children.isEmpty) return _NoChildPlaceholder();
+            final child = ref.watch(selectedChildProvider) ?? children.first;
+            return _DailyTimelineList(childId: child.id);
+          },
         ),
       ),
     );
@@ -324,186 +308,6 @@ String _summarizeDiaper(AppLocalizations l10n, Diaper d) {
   return parts.join(' · ');
 }
 
-// ─────────────────────────────────────────────────────────────────────────
-// 성장 탭 — 가상 아이 크기 시각화 + 측정 기록 리스트
-// ─────────────────────────────────────────────────────────────────────────
-class _GrowthList extends ConsumerWidget {
-  const _GrowthList({required this.childId});
-  final String childId;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
-    final asyncList = ref.watch(statsGrowthsProvider(childId));
-    return asyncList.when(
-      loading: () => const Center(child: BabyLoading()),
-      error: (err, _) => Center(child: Text(l10n.errorFailed(err))),
-      data: (list) {
-        if (list.isEmpty) return _EmptyTab(message: l10n.recordsEmpty);
-        final reversed = list.reversed.toList();
-        return ListView(
-          padding: const EdgeInsets.all(Spacing.md),
-          children: [
-            _GrowthSizeStrip(growths: list),
-            const SizedBox(height: Spacing.md),
-            for (final g in reversed)
-              _RecordCard(
-                icon: '📏',
-                title: _summarizeGrowth(g),
-                subtitle: _shortDate(g.measuredAt),
-                onTap: () => context.push('/growth/new', extra: g),
-                onLongPress: () => _confirmAndDelete(
-                  context,
-                  delete: () async {
-                    await ref
-                        .read(growthRepositoryProvider)
-                        .deleteGrowth(g.id);
-                    ref.invalidate(statsGrowthsProvider(childId));
-                  },
-                ),
-              ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-String _summarizeGrowth(Growth g) {
-  final parts = <String>[];
-  if (g.weightG != null) {
-    parts.add('${(g.weightG! / 1000).toStringAsFixed(2)}kg');
-  }
-  if (g.heightMm != null) {
-    parts.add('${(g.heightMm! / 10).toStringAsFixed(1)}cm');
-  }
-  if (g.headCircumferenceMm != null) {
-    parts.add('${(g.headCircumferenceMm! / 10).toStringAsFixed(1)}cm');
-  }
-  return parts.join(' / ');
-}
-
-String _shortDate(DateTime d) =>
-    '${d.year % 100}.${_two(d.month)}.${_two(d.day)}';
-
-class _GrowthSizeStrip extends StatelessWidget {
-  const _GrowthSizeStrip({required this.growths});
-  final List<Growth> growths;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final items = growths.where((g) => g.heightMm != null).toList();
-    if (items.isEmpty) {
-      return Card(
-        shape: RoundedRectangleBorder(
-          borderRadius: Radii.brMd,
-          side: BorderSide(
-            color: theme.colorScheme.primary.withValues(alpha: 0.6),
-            width: 1.2,
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(Spacing.md),
-          child: Text(
-            '키 데이터를 입력하면 성장 시각화가 보여요',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ),
-      );
-    }
-
-    final hMin = items
-        .map((g) => g.heightMm!)
-        .reduce((a, b) => a < b ? a : b)
-        .toDouble();
-    final hMax = items
-        .map((g) => g.heightMm!)
-        .reduce((a, b) => a > b ? a : b)
-        .toDouble();
-    double sizeFor(int heightMm) {
-      if (hMax == hMin) return 60;
-      final t = (heightMm - hMin) / (hMax - hMin);
-      return 30 + t * 80;
-    }
-
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: Radii.brMd,
-        side: BorderSide(
-          color: theme.colorScheme.primary.withValues(alpha: 0.6),
-          width: 1.2,
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-            horizontal: Spacing.md, vertical: Spacing.sm),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('아이 크기 변화',
-                style: theme.textTheme.titleSmall
-                    ?.copyWith(fontWeight: FontWeight.w700)),
-            const SizedBox(height: 2),
-            Text(
-              '키에 비례한 시각 표현 — 의료 기준 아님',
-              style: theme.textTheme.bodySmall?.copyWith(
-                fontSize: 11,
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: Spacing.sm),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  for (final g in items)
-                    Padding(
-                      padding: const EdgeInsets.only(right: 12),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text('👶',
-                              style: TextStyle(
-                                  fontSize: sizeFor(g.heightMm!))),
-                          const SizedBox(height: 2),
-                          Text(
-                            '${(g.heightMm! / 10).toStringAsFixed(1)}cm',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 11,
-                            ),
-                          ),
-                          if (g.weightG != null)
-                            Text(
-                              '${(g.weightG! / 1000).toStringAsFixed(2)}kg',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                fontSize: 10,
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                          Text(
-                            _shortDate(g.measuredAt),
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              fontSize: 10,
-                              color: theme.colorScheme.primary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 // ─────────────────────────────────────────────────────────────────────────
 // 공통 카드 + empty placeholder
