@@ -96,21 +96,36 @@ class AppTheme {
         headlineSmall:  TextStyle(fontSize: 24, fontWeight: FontWeight.w700, height: 1.2),
       ),
 
-      // ── 버튼: 캡슐 모양 + 큰 터치 타겟 ──────────────────────────────
+      // ── 버튼: 홈 메뉴 카드와 동일한 톤 ──────────────────────────────
+      // 홈 GridActionTile = surfaceContainerLow 배경 + 코랄핑크 60% 테두리
+      // FilledButton/OutlinedButton 모두 같은 시각 언어로 통일.
+      // (특정 버튼이 styleFrom backgroundColor 으로 오버라이드 시 그쪽 우선)
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
+          backgroundColor: cs.surfaceContainerLow,
+          foregroundColor: const Color(0xFFD97A6C), // Coral Deep
+          side: BorderSide(
+            color: BrandColors.seed.withValues(alpha: 0.6),
+            width: 1.2,
+          ),
           minimumSize: const Size.fromHeight(TouchTarget.comfortable),
           shape: const StadiumBorder(),
           padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
-          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
+          backgroundColor: cs.surfaceContainerLow,
+          foregroundColor: const Color(0xFFD97A6C),
+          side: BorderSide(
+            color: BrandColors.seed.withValues(alpha: 0.6),
+            width: 1.2,
+          ),
           minimumSize: const Size.fromHeight(TouchTarget.comfortable),
           shape: const StadiumBorder(),
           padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
-          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
