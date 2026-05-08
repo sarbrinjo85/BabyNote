@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import '../../../core/widgets/stroked_title.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -31,7 +32,7 @@ class StatisticsPage extends ConsumerWidget {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(l10n.statsTitle),
+          title: StrokedTitle(l10n.statsTitle, fontSize: 26),
           actions: const [ChildPickerAction()],
           bottom: const TabBar(
             tabs: [

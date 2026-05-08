@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/stroked_title.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -45,7 +46,7 @@ class _InventoryHubPageState extends ConsumerState<InventoryHubPage>
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.inventoryHubTitle),
+        title: StrokedTitle(l10n.inventoryHubTitle, fontSize: 26),
         actions: [
           const ChildPickerAction(),
           IconButton(
