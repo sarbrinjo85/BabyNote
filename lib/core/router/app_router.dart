@@ -18,6 +18,7 @@ import '../../features/growth/domain/growth.dart';
 import '../../features/growth/presentation/growth_chart_page.dart';
 import '../../features/growth/presentation/growth_register_page.dart';
 import '../../features/home/presentation/home_page.dart';
+import '../../features/intro/presentation/intro_page.dart';
 import '../../features/hospital/domain/hospital.dart';
 import '../../features/hospital/presentation/hospital_list_page.dart';
 import '../../features/hospital/presentation/hospital_register_page.dart';
@@ -58,8 +59,14 @@ String _widgetTypeRedirect(String? type) {
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
-    initialLocation: '/',
+    initialLocation: '/intro',
     routes: [
+      GoRoute(
+        // 5초 인트로 — 코끼리 애니메이션 확인용 스플래시
+        path: '/intro',
+        name: 'intro',
+        builder: (context, state) => const IntroPage(),
+      ),
       GoRoute(
         path: '/',
         name: 'home',
