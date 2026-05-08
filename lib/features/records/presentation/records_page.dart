@@ -6,6 +6,7 @@ import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/baby_loading.dart';
 import '../../../core/widgets/child_picker_action.dart';
+import '../../../core/widgets/stroked_title.dart';
 import '../../child/presentation/child_providers.dart';
 import '../../child/presentation/selected_child_provider.dart';
 import '../../diaper/data/diaper_repository.dart';
@@ -32,7 +33,7 @@ class RecordsPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.recordsTitle),
+        title: StrokedTitle(l10n.recordsTitle, fontSize: 26),
         actions: const [ChildPickerAction()],
       ),
       body: SafeArea(

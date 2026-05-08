@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/stroked_title.dart';
 import '../../../core/widgets/grid_action_tile.dart';
 import '../../auth/data/auth_repository.dart';
 import '../../child/presentation/child_providers.dart';
@@ -46,7 +47,7 @@ class HomePage extends ConsumerWidget {
       appBar: AppBar(
         // 글자 fill + stroke 두 겹 — Stack으로 구현.
         // Flutter의 TextStyle.foreground는 fill XOR stroke 둘 중 하나만 지원.
-        title: const _StrokedTitle('Baby Note'),
+        title: const StrokedTitle('Baby Note'),
         actions: [
           IconButton(
             tooltip: l10n.homeAddChild,
@@ -285,39 +286,3 @@ class _OnboardingHero extends StatelessWidget {
   }
 }
 
-/// AppBar 타이틀 — fill + stroke 두 겹.
-///
-/// Stack: 아래(stroke #a43f45) + 위(fill #fe7d81). Flutter TextStyle은
-/// foreground에 단일 Paint만 받기 때문에 두 Text를 쌓아 효과 구현.
-class _StrokedTitle extends StatelessWidget {
-  const _StrokedTitle(this.text);
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    const fillColor = Color(0xFFFE7D81);
-    const strokeColor = Color(0xFFA43F45);
-    final baseStyle = const TextStyle(
-      fontSize: 32, // 22 → 32 키움
-      fontWeight: FontWeight.w800,
-      letterSpacing: 0.3,
-    );
-    return Stack(
-      children: [
-        Text(
-          text,
-          style: baseStyle.copyWith(
-            foreground: Paint()
-              ..style = PaintingStyle.stroke
-              ..strokeWidth = 3.0
-              ..color = strokeColor,
-          ),
-        ),
-        Text(
-          text,
-          style: baseStyle.copyWith(color: fillColor),
-        ),
-      ],
-    );
-  }
-}
