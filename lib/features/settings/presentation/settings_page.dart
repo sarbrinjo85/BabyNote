@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../../core/widgets/baby_loading.dart';
+import '../../onboarding/presentation/onboarding_coach.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -92,6 +93,23 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         child: ListView(
           padding: const EdgeInsets.all(Spacing.md),
           children: [
+            // ── 도움말 다시 보기 ─────────────────────────────────
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.help_outline),
+              title: const Text('홈 화면 도움말 다시 보기'),
+              subtitle: const Text('처음 진입 시 안내된 코치 마크를 다시 표시'),
+              onTap: () async {
+                await OnboardingCoach.resetForTest();
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('홈으로 돌아가면 도움말이 다시 표시됩니다'),
+                  ),
+                );
+              },
+            ),
+            const Divider(),
             // ── 테마 모드 섹션 ──────────────────────────────────
             Text(
               l10n.settingsTheme,

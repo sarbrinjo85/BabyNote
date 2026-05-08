@@ -52,7 +52,14 @@ class OnboardingCoach {
   static void show(BuildContext context) {
     final theme = Theme.of(context);
 
-    TargetContent textContent(String title, String body, ContentAlign align) {
+    /// [extraOffset] — 텍스트와 포커스 사이 여백 (px). align.top일 때는 위로
+    /// 더 올리기 위해 builder 외곽에 SizedBox를 더해 자연스럽게 분리.
+    TargetContent textContent(
+      String title,
+      String body,
+      ContentAlign align, {
+      double extraOffset = 0,
+    }) {
       return TargetContent(
         align: align,
         builder: (ctx, ctrl) => Padding(
@@ -61,6 +68,8 @@ class OnboardingCoach {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              if (align == ContentAlign.bottom && extraOffset > 0)
+                SizedBox(height: extraOffset),
               Text(
                 title,
                 style: theme.textTheme.titleLarge?.copyWith(
@@ -76,6 +85,8 @@ class OnboardingCoach {
                   height: 1.5,
                 ),
               ),
+              if (align == ContentAlign.top && extraOffset > 0)
+                SizedBox(height: extraOffset),
             ],
           ),
         ),
@@ -109,10 +120,11 @@ class OnboardingCoach {
         TargetFocus(
           identify: 'records',
           keyTarget: OnboardingCoach.recordButtonsKey,
+          paddingFocus: 0, // 포커스 영역 타이트
           contents: [
             textContent('오늘의 기록',
                 '수유, 수면, 기저귀, 성장 4가지를 한 탭으로 기록해요.\n각 버튼에 마지막 활동 시간이 함께 표시돼요.',
-                ContentAlign.top),
+                ContentAlign.top, extraOffset: 56),
           ],
           radius: 14,
         ),
@@ -120,10 +132,11 @@ class OnboardingCoach {
         TargetFocus(
           identify: 'data_menu',
           keyTarget: OnboardingCoach.dataMenuKey,
+          paddingFocus: 0,
           contents: [
             textContent('데이터/관리',
                 '분유·기저귀 재고 관리, 기록 편집, 성장 통계로 진입해요.',
-                ContentAlign.top),
+                ContentAlign.top, extraOffset: 56),
           ],
           radius: 14,
         ),
@@ -161,6 +174,8 @@ class OnboardingCoach {
       paddingFocus: 6,
       hideSkip: false,
       textSkip: '건너뛰기',
+      // 기본 위치(우하단)는 FAB와 겹쳐서 우상단으로 이동
+      alignSkip: Alignment.topRight,
       textStyleSkip: TextStyle(
         color: Colors.white,
         fontSize: 14,
