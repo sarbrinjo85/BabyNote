@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../core/widgets/baby_loading.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -40,6 +41,7 @@ class HomePage extends ConsumerStatefulWidget {
 
 class _HomePageState extends ConsumerState<HomePage> {
   bool _onboardingTriggered = false;
+  DateTime? _lastBackPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +57,28 @@ class _HomePageState extends ConsumerState<HomePage> {
     final selectedChild = ref.watch(selectedChildProvider);
     final selectedChildId = ref.watch(selectedChildIdProvider);
 
-    return Scaffold(
+    return PopScope(
+      canPop: false, // 시스템이 자동으로 pop하지 않게 막고 직접 처리
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        final now = DateTime.now();
+        if (_lastBackPressed != null &&
+            now.difference(_lastBackPressed!) < const Duration(seconds: 2)) {
+          // 2초 이내 두 번째 백 → 앱 종료
+          SystemNavigator.pop();
+          return;
+        }
+        _lastBackPressed = now;
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            const SnackBar(
+              content: Text('한 번 더 누르면 종료됩니다'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+      },
+      child: Scaffold(
       floatingActionButton: selectedChild != null
           ? Container(
               key: OnboardingCoach.fabKey,
@@ -237,6 +260,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                   ),
                 ],
               ),
+      ),
       ),
     );
   }
