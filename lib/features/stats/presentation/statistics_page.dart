@@ -1,28 +1,22 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import '../../../core/widgets/baby_loading.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/baby_loading.dart';
 import '../../../core/widgets/child_picker_action.dart';
-import '../../child/domain/child.dart';
 import '../../child/presentation/child_providers.dart';
 import '../../child/presentation/selected_child_provider.dart';
-import '../../growth/domain/growth.dart';
-import '../../growth/domain/who_percentiles.dart';
+import '../../diaper/domain/diaper.dart';
+import '../../feeding/domain/feeding.dart';
+import '../../sleep/domain/sleep.dart';
 import 'stats_providers.dart';
 
-/// 통계 화면.
+/// 통계 화면 — 1주일/1개월 토글 차트 + 기간 통계 카드.
 ///
-/// ── 차트 4종 ─────────────────────────────────────────────────────────
-/// 1. 일별 수유 횟수 (지난 7일, 막대)
-/// 2. 일별 수면 총 분 (지난 7일, 막대)
-/// 3. 일별 기저귀 횟수 (지난 7일, 막대)
-/// 4. 성장 곡선 (체중 시계열, 라인) — 모든 기록
-///
-/// 신생아 활동량 기준으로 7일치 = 약 70~140건이라 statsXProvider(200건)로 충분.
+/// (기존 records 페이지에 있던 기간 차트/통계 UI를 이쪽으로 이전)
 class StatisticsPage extends ConsumerWidget {
   const StatisticsPage({super.key});
 
@@ -36,87 +30,229 @@ class StatisticsPage extends ConsumerWidget {
         title: Text(l10n.statsTitle),
         actions: const [ChildPickerAction()],
       ),
-      body: SafeArea(top: false, child: asyncChildren.when(
-        loading: () => const Center(child: BabyLoading()),
-        error: (err, _) =>
-            Center(child: Text(l10n.errorChildrenLoadFailed(err))),
-        data: (children) {
-          if (children.isEmpty) {
-            return _NoChildPlaceholder();
-          }
-          final selected =
-              ref.watch(selectedChildProvider) ?? children.first;
-          final childId = selected.id;
-
-          return ListView(
-            padding: const EdgeInsets.all(Spacing.md),
-            children: [
-              _ChartCard(
-                title: l10n.statsFeedingDaily,
-                subtitle: l10n.statsLast7Days,
-                child: _FeedingBarChart(childId: childId),
-              ),
-              const SizedBox(height: Spacing.md),
-              _ChartCard(
-                title: l10n.statsSleepDaily,
-                subtitle: l10n.statsLast7DaysHours,
-                child: _SleepBarChart(childId: childId),
-              ),
-              const SizedBox(height: Spacing.md),
-              _ChartCard(
-                title: l10n.statsDiaperDaily,
-                subtitle: l10n.statsLast7Days,
-                child: _DiaperBarChart(childId: childId),
-              ),
-              const SizedBox(height: Spacing.md),
-              _ChartCard(
-                title: l10n.statsGrowthCurve,
-                subtitle: l10n.statsAllRecords,
-                child: _GrowthLineChart(child: selected),
-              ),
-              const SizedBox(height: Spacing.xs),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: Spacing.md),
-                child: _GrowthLegend(),
-              ),
-            ],
-          );
-        },
-      )),
+      body: SafeArea(
+        top: false,
+        child: asyncChildren.when(
+          loading: () => const Center(child: BabyLoading()),
+          error: (err, _) =>
+              Center(child: Text(l10n.errorChildrenLoadFailed(err))),
+          data: (children) {
+            if (children.isEmpty) return _NoChildPlaceholder();
+            final selected = ref.watch(selectedChildProvider) ?? children.first;
+            return _PeriodView(childId: selected.id);
+          },
+        ),
+      ),
     );
   }
 }
 
-/// 차트 1개를 감싸는 카드 + 제목/부제 + 고정 높이 영역.
-class _ChartCard extends StatelessWidget {
-  const _ChartCard({
-    required this.title,
-    required this.subtitle,
-    required this.child,
-  });
+enum _PeriodMode { weekly, monthly }
 
-  final String title;
-  final String subtitle;
-  final Widget child;
+class _PeriodView extends ConsumerStatefulWidget {
+  const _PeriodView({required this.childId});
+  final String childId;
+
+  @override
+  ConsumerState<_PeriodView> createState() => _PeriodViewState();
+}
+
+class _PeriodViewState extends ConsumerState<_PeriodView> {
+  _PeriodMode _mode = _PeriodMode.weekly;
 
   @override
   Widget build(BuildContext context) {
+    final childId = widget.childId;
+    final l10n = AppLocalizations.of(context);
+    final asyncFeedings = ref.watch(statsFeedingsProvider(childId));
+    final asyncSleeps = ref.watch(statsSleepsProvider(childId));
+    final asyncDiapers = ref.watch(statsDiapersProvider(childId));
+
+    if (asyncFeedings.isLoading ||
+        asyncSleeps.isLoading ||
+        asyncDiapers.isLoading) {
+      return const Center(child: BabyLoading());
+    }
+    if (asyncFeedings.hasError ||
+        asyncSleeps.hasError ||
+        asyncDiapers.hasError) {
+      final err =
+          asyncFeedings.error ?? asyncSleeps.error ?? asyncDiapers.error;
+      return Center(child: Text(l10n.errorFailed(err!)));
+    }
+
+    final feedings = asyncFeedings.value ?? const [];
+    final sleeps = asyncSleeps.value ?? const [];
+    final diapers = asyncDiapers.value ?? const [];
+
+    // 기간 필터링
+    final now = DateTime.now();
+    DateTime earliest;
+    if (_mode == _PeriodMode.weekly) {
+      final today = DateTime(now.year, now.month, now.day);
+      earliest = today.subtract(const Duration(days: 6));
+    } else {
+      earliest = DateTime(now.year, now.month - 11, 1);
+    }
+
+    bool inRange(DateTime d) {
+      final dd = DateTime(d.year, d.month, d.day);
+      return !dd.isBefore(earliest);
+    }
+
+    final fInRange = feedings.where((f) => inRange(f.startedAt)).toList();
+    final sInRange = sleeps.where((s) => inRange(s.startedAt)).toList();
+    final dInRange = diapers.where((d) => inRange(d.recordedAt)).toList();
+
+    return ListView(
+      padding: const EdgeInsets.all(Spacing.md),
+      children: [
+        Center(
+          child: SegmentedButton<_PeriodMode>(
+            segments: const [
+              ButtonSegment(value: _PeriodMode.weekly, label: Text('1주일')),
+              ButtonSegment(value: _PeriodMode.monthly, label: Text('1개월')),
+            ],
+            selected: {_mode},
+            onSelectionChanged: (s) => setState(() => _mode = s.first),
+          ),
+        ),
+        const SizedBox(height: Spacing.sm),
+        _PeriodTrendChart(
+          mode: _mode,
+          feedings: fInRange,
+          sleeps: sInRange,
+          diapers: dInRange,
+        ),
+        const SizedBox(height: Spacing.sm),
+        _PeriodStats(
+          mode: _mode,
+          feedings: fInRange,
+          sleeps: sInRange,
+          diapers: dInRange,
+        ),
+      ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// 기간 차트
+// ─────────────────────────────────────────────────────────────────────────
+class _PeriodTrendChart extends StatelessWidget {
+  const _PeriodTrendChart({
+    required this.mode,
+    required this.feedings,
+    required this.sleeps,
+    required this.diapers,
+  });
+
+  final _PeriodMode mode;
+  final List<Feeding> feedings;
+  final List<Sleep> sleeps;
+  final List<Diaper> diapers;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final now = DateTime.now();
+
+    final int n;
+    final List<DateTime> buckets;
+    if (mode == _PeriodMode.weekly) {
+      n = 7;
+      final today = DateTime(now.year, now.month, now.day);
+      buckets =
+          List.generate(n, (i) => today.subtract(Duration(days: n - 1 - i)));
+    } else {
+      n = 12;
+      buckets = List.generate(
+          n, (i) => DateTime(now.year, now.month - (n - 1 - i), 1));
+    }
+
+    int idxFor(DateTime d) {
+      if (mode == _PeriodMode.weekly) {
+        final key = DateTime(d.year, d.month, d.day);
+        return buckets.indexWhere((k) => k.isAtSameMomentAs(key));
+      }
+      return buckets.indexWhere((k) => k.year == d.year && k.month == d.month);
+    }
+
+    final feedCount = List.filled(n, 0);
+    final feedMl = List.filled(n, 0);
+    for (final f in feedings) {
+      final i = idxFor(f.startedAt);
+      if (i >= 0) {
+        feedCount[i]++;
+        feedMl[i] += f.amountMl ?? 0;
+      }
+    }
+
+    final sleepMin = List.filled(n, 0);
+    for (final s in sleeps) {
+      if (s.endedAt == null) continue;
+      final i = idxFor(s.startedAt);
+      if (i >= 0) {
+        sleepMin[i] += s.endedAt!.difference(s.startedAt).inMinutes;
+      }
+    }
+
+    final diaperCount = List.filled(n, 0);
+    for (final d in diapers) {
+      final i = idxFor(d.recordedAt);
+      if (i >= 0) diaperCount[i]++;
+    }
+
+    String bucketLabel(int i) {
+      final d = buckets[i];
+      if (mode == _PeriodMode.weekly) return '${d.month}/${d.day}';
+      return '${d.month}월';
+    }
+
     return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: Radii.brMd,
+        side: BorderSide(
+          color: theme.colorScheme.primary.withValues(alpha: 0.6),
+          width: 1.2,
+        ),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(Spacing.md),
+        padding: const EdgeInsets.symmetric(
+            horizontal: Spacing.md, vertical: Spacing.sm),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    )),
-            Text(subtitle,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    )),
-            const SizedBox(height: Spacing.md),
-            SizedBox(height: 200, child: child),
+            Text(
+              mode == _PeriodMode.weekly ? '지난 7일' : '지난 12개월',
+              style: theme.textTheme.titleSmall
+                  ?.copyWith(fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: Spacing.xs),
+            _MiniBarChart(
+              emoji: '🍼',
+              label: '수유 횟수',
+              values: feedCount.map((v) => v.toDouble()).toList(),
+              color: theme.colorScheme.primary,
+              valueFormatter: (v) => v == 0 ? '' : '${v.toInt()}',
+              dayLabel: bucketLabel,
+            ),
+            _MiniBarChart(
+              emoji: '💤',
+              label: '수면 시간',
+              values: sleepMin.map((v) => v / 60.0).toList(),
+              color: theme.colorScheme.tertiary,
+              valueFormatter: (v) => v == 0 ? '' : '${v.toStringAsFixed(1)}h',
+              dayLabel: bucketLabel,
+            ),
+            _MiniBarChart(
+              emoji: '💩',
+              label: '기저귀',
+              values: diaperCount.map((v) => v.toDouble()).toList(),
+              color: theme.colorScheme.secondary,
+              valueFormatter: (v) => v == 0 ? '' : '${v.toInt()}',
+              dayLabel: bucketLabel,
+            ),
           ],
         ),
       ),
@@ -124,397 +260,310 @@ class _ChartCard extends StatelessWidget {
   }
 }
 
-/// 지난 7일 일별 카운트 데이터 한 묶음 — 막대 차트 input.
-class _DailyCounts {
-  _DailyCounts(this.values, this.labels);
-  final List<double> values;
-  final List<String> labels; // X축 레이블 (요일 또는 일자)
-}
-
-_DailyCounts _bucketByDay<T>(
-  List<T> items,
-  DateTime Function(T) timestamp, {
-  int days = 7,
-  double Function(T)? weight,
-}) {
-  final now = DateTime.now();
-  final today = DateTime(now.year, now.month, now.day);
-  final values = List<double>.filled(days, 0);
-  final labels = List<String>.filled(days, '');
-
-  for (var i = 0; i < days; i++) {
-    final day = today.subtract(Duration(days: days - 1 - i));
-    labels[i] = '${day.month}/${day.day}';
-  }
-
-  for (final item in items) {
-    final t = timestamp(item);
-    final tDay = DateTime(t.year, t.month, t.day);
-    final diff = today.difference(tDay).inDays;
-    if (diff < 0 || diff >= days) continue;
-    final idx = days - 1 - diff;
-    values[idx] += (weight?.call(item) ?? 1.0);
-  }
-
-  return _DailyCounts(values, labels);
-}
-
-class _FeedingBarChart extends ConsumerWidget {
-  const _FeedingBarChart({required this.childId});
-  final String childId;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final asyncList = ref.watch(statsFeedingsProvider(childId));
-    return asyncList.when(
-      loading: () => const Center(child: BabyLoading()),
-      error: (err, _) => Center(child: Text('$err')),
-      data: (list) {
-        final data = _bucketByDay(list, (f) => f.startedAt);
-        return _BarChart(
-          values: data.values,
-          labels: data.labels,
-          color: Theme.of(context).colorScheme.primary,
-        );
-      },
-    );
-  }
-}
-
-class _SleepBarChart extends ConsumerWidget {
-  const _SleepBarChart({required this.childId});
-  final String childId;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final asyncList = ref.watch(statsSleepsProvider(childId));
-    return asyncList.when(
-      loading: () => const Center(child: BabyLoading()),
-      error: (err, _) => Center(child: Text('$err')),
-      data: (list) {
-        // 분 단위 → 시간 단위로 변환해서 표시 (값이 너무 크지 않게)
-        final data = _bucketByDay<dynamic>(
-          list,
-          (s) => s.startedAt as DateTime,
-          weight: (s) {
-            final endedAt = s.endedAt as DateTime?;
-            if (endedAt == null) return 0;
-            return endedAt
-                    .difference(s.startedAt as DateTime)
-                    .inMinutes /
-                60.0;
-          },
-        );
-        return _BarChart(
-          values: data.values,
-          labels: data.labels,
-          color: Theme.of(context).colorScheme.tertiary,
-        );
-      },
-    );
-  }
-}
-
-class _DiaperBarChart extends ConsumerWidget {
-  const _DiaperBarChart({required this.childId});
-  final String childId;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final asyncList = ref.watch(statsDiapersProvider(childId));
-    return asyncList.when(
-      loading: () => const Center(child: BabyLoading()),
-      error: (err, _) => Center(child: Text('$err')),
-      data: (list) {
-        final data = _bucketByDay(list, (d) => d.recordedAt);
-        return _BarChart(
-          values: data.values,
-          labels: data.labels,
-          color: Theme.of(context).colorScheme.secondary,
-        );
-      },
-    );
-  }
-}
-
-/// 공통 막대 차트 위젯 — fl_chart BarChart 래퍼.
-class _BarChart extends StatelessWidget {
-  const _BarChart({
+class _MiniBarChart extends StatelessWidget {
+  const _MiniBarChart({
+    required this.emoji,
+    required this.label,
     required this.values,
-    required this.labels,
     required this.color,
+    required this.valueFormatter,
+    required this.dayLabel,
   });
 
+  final String emoji;
+  final String label;
   final List<double> values;
-  final List<String> labels;
   final Color color;
+  final String Function(double) valueFormatter;
+  final String Function(int) dayLabel;
 
   @override
   Widget build(BuildContext context) {
-    final maxV = values.isEmpty
-        ? 1.0
-        : values.reduce((a, b) => a > b ? a : b);
-    final yMax = maxV <= 0 ? 1.0 : (maxV * 1.2);
     final theme = Theme.of(context);
+    final n = values.length;
+    final maxV = values.fold<double>(0, (m, v) => v > m ? v : m);
+    final total = values.fold<double>(0, (s, v) => s + v);
+    final hasData = total > 0;
+    final barWidth = n <= 7 ? 14.0 : (n <= 14 ? 8.0 : 4.0);
+    final showValueOnTop = n <= 7;
 
-    return BarChart(
-      BarChartData(
-        maxY: yMax,
-        minY: 0,
-        alignment: BarChartAlignment.spaceAround,
-        barTouchData: BarTouchData(enabled: true),
-        gridData: FlGridData(
-          show: true,
-          drawVerticalLine: false,
-          getDrawingHorizontalLine: (_) => FlLine(
-            color: theme.colorScheme.surfaceContainerHighest,
-            strokeWidth: 1,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(emoji, style: const TextStyle(fontSize: 14)),
+              const SizedBox(width: 4),
+              Text(label,
+                  style: theme.textTheme.bodySmall?.copyWith(fontSize: 12)),
+              const Spacer(),
+              if (!hasData)
+                Text('데이터 없음',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontSize: 11,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    )),
+            ],
           ),
-        ),
-        borderData: FlBorderData(show: false),
-        titlesData: FlTitlesData(
-          leftTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              reservedSize: 32,
-              getTitlesWidget: (v, _) => Text(
-                v.toStringAsFixed(0),
-                style: theme.textTheme.bodySmall,
+          const SizedBox(height: 2),
+          SizedBox(
+            height: 60,
+            child: BarChart(
+              BarChartData(
+                minY: 0,
+                maxY: maxV == 0 ? 1 : maxV * 1.25,
+                gridData: const FlGridData(show: false),
+                borderData: FlBorderData(show: false),
+                titlesData: FlTitlesData(
+                  leftTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
+                  topTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: showValueOnTop,
+                      reservedSize: 14,
+                      getTitlesWidget: (v, _) {
+                        final i = v.toInt();
+                        if (i < 0 || i >= n) return const SizedBox.shrink();
+                        return Text(
+                          valueFormatter(values[i]),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w600,
+                            color: color,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 16,
+                      getTitlesWidget: (v, _) {
+                        final i = v.toInt();
+                        if (i < 0 || i >= n) return const SizedBox.shrink();
+                        final l = dayLabel(i);
+                        if (l.isEmpty) return const SizedBox.shrink();
+                        return Text(
+                          l,
+                          style:
+                              theme.textTheme.bodySmall?.copyWith(fontSize: 9),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                barGroups: [
+                  for (var i = 0; i < n; i++)
+                    BarChartGroupData(
+                      x: i,
+                      barRods: [
+                        BarChartRodData(
+                          toY: values[i],
+                          color: color,
+                          width: barWidth,
+                          borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(3)),
+                        ),
+                      ],
+                    ),
+                ],
               ),
             ),
           ),
-          rightTitles:
-              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          topTitles:
-              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          bottomTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              reservedSize: 24,
-              getTitlesWidget: (v, _) {
-                final i = v.toInt();
-                if (i < 0 || i >= labels.length) return const SizedBox.shrink();
-                return Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Text(
-                    labels[i],
-                    style: theme.textTheme.bodySmall,
-                  ),
-                );
-              },
-            ),
-          ),
-        ),
-        barGroups: [
-          for (var i = 0; i < values.length; i++)
-            BarChartGroupData(
-              x: i,
-              barRods: [
-                BarChartRodData(
-                  toY: values[i],
-                  color: color,
-                  width: 16,
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(4),
-                  ),
-                ),
-              ],
-            ),
         ],
       ),
     );
   }
 }
 
-class _GrowthLineChart extends ConsumerWidget {
-  const _GrowthLineChart({required this.child});
-  final Child child;
+// ─────────────────────────────────────────────────────────────────────────
+// 기간 통계 카드
+// ─────────────────────────────────────────────────────────────────────────
+class _PeriodStats extends StatelessWidget {
+  const _PeriodStats({
+    required this.mode,
+    required this.feedings,
+    required this.sleeps,
+    required this.diapers,
+  });
+
+  final _PeriodMode mode;
+  final List<Feeding> feedings;
+  final List<Sleep> sleeps;
+  final List<Diaper> diapers;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
-    final asyncList = ref.watch(statsGrowthsProvider(child.id));
-    return asyncList.when(
-      loading: () => const Center(child: BabyLoading()),
-      error: (err, _) => Center(child: Text('$err')),
-      data: (list) {
-        final withWeight = list
-            .where((g) => g.weightG != null)
-            .toList()
-          ..sort((a, b) => a.measuredAt.compareTo(b.measuredAt));
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
 
-        if (withWeight.length < 2) {
-          return Center(child: Text(l10n.statsNotEnoughData));
-        }
+    int feedTotal = feedings.length;
+    int feedMlTotal = 0;
+    int breastCount = 0, formulaCount = 0, solidCount = 0;
+    int breastMl = 0, formulaMl = 0;
+    for (final f in feedings) {
+      feedMlTotal += f.amountMl ?? 0;
+      switch (f.type) {
+        case 'breast':
+          breastCount++;
+          breastMl += f.amountMl ?? 0;
+          break;
+        case 'formula':
+          formulaCount++;
+          formulaMl += f.amountMl ?? 0;
+          break;
+        case 'solid':
+          solidCount++;
+          break;
+      }
+    }
 
-        final theme = Theme.of(context);
+    int sleepMin = 0;
+    for (final s in sleeps) {
+      if (s.endedAt != null) {
+        sleepMin += s.endedAt!.difference(s.startedAt).inMinutes;
+      }
+    }
 
-        // X축 = 측정 시점의 "생후 개월수"(소수점 허용).
-        // child.birthDate 기준으로 환산. WHO 표(0~24개월)와 같은 단위.
-        // 30.44 = 평균 1개월 길이(31, 28, 30 평균).
-        double monthsFromBirth(DateTime t) =>
-            t.difference(child.birthDate).inDays / 30.44;
+    int diaperTotal = diapers.length;
+    int peeCount = 0, poopCount = 0, bothCount = 0;
+    for (final d in diapers) {
+      switch (d.type) {
+        case 'pee':
+          peeCount++;
+          break;
+        case 'poop':
+          poopCount++;
+          break;
+        case 'both':
+          bothCount++;
+          break;
+      }
+    }
 
-        // 자녀 측정값 spots
-        final spots = withWeight.map((g) {
-          return FlSpot(
-            monthsFromBirth(g.measuredAt),
-            g.weightG! / 1000.0,
-          );
-        }).toList();
+    String hm(int min) {
+      final h = min ~/ 60;
+      final m = min % 60;
+      if (h == 0) return '${m}분';
+      if (m == 0) return '${h}시간';
+      return '${h}시간 ${m}분';
+    }
 
-        // WHO 표 — 자녀 성별 기반 (other는 boys fallback)
-        final table = WhoWeightForAge.forGender(child.gender);
+    final periodLabel =
+        mode == _PeriodMode.weekly ? '지난 7일' : '지난 12개월';
+    final divisor = mode == _PeriodMode.weekly ? 7 : 12;
+    final perUnit = mode == _PeriodMode.weekly ? '/일' : '/월';
 
-        // 차트 X 범위: WHO 표 마지막(24개월)까지 항상 보여줌.
-        // 자녀 측정점이 24개월 넘으면 그만큼 늘림.
-        final lastChildMonths = spots.last.x;
-        final maxX = lastChildMonths > 24 ? lastChildMonths : 24.0;
-
-        // WHO 라인용 spots — 0개월부터 maxX까지, 표의 각 데이터포인트 사용.
-        final whoP3 = <FlSpot>[];
-        final whoP50 = <FlSpot>[];
-        final whoP97 = <FlSpot>[];
-        for (final pt in table) {
-          if (pt.monthAge.toDouble() > maxX) break;
-          whoP3.add(FlSpot(pt.monthAge.toDouble(), pt.p3));
-          whoP50.add(FlSpot(pt.monthAge.toDouble(), pt.p50));
-          whoP97.add(FlSpot(pt.monthAge.toDouble(), pt.p97));
-        }
-
-        // Y 범위: WHO P3 minimum과 자녀 minimum 중 작은 쪽 - 1, P97과 자녀 max 중 큰 쪽 + 1.
-        final allYs = [
-          ...spots.map((s) => s.y),
-          ...whoP3.map((s) => s.y),
-          ...whoP97.map((s) => s.y),
-        ];
-        final minY = (allYs.reduce((a, b) => a < b ? a : b) - 1)
-            .clamp(0, 100)
-            .toDouble();
-        final maxY = allYs.reduce((a, b) => a > b ? a : b) + 1;
-
-        return LineChart(
-          LineChartData(
-            minX: 0,
-            maxX: maxX,
-            minY: minY,
-            maxY: maxY,
-            gridData: FlGridData(
-              show: true,
-              drawVerticalLine: false,
-              getDrawingHorizontalLine: (_) => FlLine(
-                color: theme.colorScheme.surfaceContainerHighest,
-                strokeWidth: 1,
-              ),
-            ),
-            borderData: FlBorderData(show: false),
-            titlesData: FlTitlesData(
-              leftTitles: AxisTitles(
-                sideTitles: SideTitles(
-                  showTitles: true,
-                  reservedSize: 36,
-                  getTitlesWidget: (v, _) => Text(
-                    '${v.toStringAsFixed(0)}kg',
-                    style: theme.textTheme.bodySmall,
-                  ),
-                ),
-              ),
-              rightTitles: const AxisTitles(
-                  sideTitles: SideTitles(showTitles: false)),
-              topTitles: const AxisTitles(
-                  sideTitles: SideTitles(showTitles: false)),
-              bottomTitles: AxisTitles(
-                sideTitles: SideTitles(
-                  showTitles: true,
-                  reservedSize: 24,
-                  interval: 6, // 6개월마다 라벨
-                  getTitlesWidget: (v, _) {
-                    return Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: Text(
-                        '${v.toStringAsFixed(0)}m',
-                        style: theme.textTheme.bodySmall,
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
-            lineBarsData: [
-              // ── WHO P3 (하한선, 점선 회색) ────────────────────────
-              LineChartBarData(
-                spots: whoP3,
-                isCurved: true,
-                color: theme.colorScheme.outlineVariant,
-                barWidth: 1.5,
-                dashArray: const [4, 4],
-                dotData: const FlDotData(show: false),
-              ),
-              // ── WHO P97 (상한선, 점선 회색) ────────────────────────
-              LineChartBarData(
-                spots: whoP97,
-                isCurved: true,
-                color: theme.colorScheme.outlineVariant,
-                barWidth: 1.5,
-                dashArray: const [4, 4],
-                dotData: const FlDotData(show: false),
-              ),
-              // ── WHO P50 (중간값, 실선 회색) ────────────────────────
-              LineChartBarData(
-                spots: whoP50,
-                isCurved: true,
-                color: theme.colorScheme.outline,
-                barWidth: 1.5,
-                dotData: const FlDotData(show: false),
-              ),
-              // ── 자녀 측정값 (강조 — primary 색) ─────────────────────
-              LineChartBarData(
-                spots: spots,
-                isCurved: true,
-                color: theme.colorScheme.primary,
-                barWidth: 3,
-                dotData: const FlDotData(show: true),
-                belowBarData: BarAreaData(
-                  show: true,
-                  color: theme.colorScheme.primary.withValues(alpha: 0.15),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _StatsCard(
+          icon: '🍼',
+          title: '수유 ($periodLabel)',
+          headline: feedTotal == 0
+              ? '기록 없음'
+              : '총 $feedTotal회'
+                  '${feedMlTotal > 0 ? ' / ${feedMlTotal}ml' : ''}',
+          subItems: [
+            if (breastCount > 0)
+              '· 모유 $breastCount회'
+                  '${breastMl > 0 ? ' (${breastMl}ml)' : ''}',
+            if (formulaCount > 0)
+              '· 분유 $formulaCount회'
+                  '${formulaMl > 0 ? ' (${formulaMl}ml)' : ''}',
+            if (solidCount > 0) '· 이유식 $solidCount회',
+          ],
+          color: theme.colorScheme.primary,
+        ),
+        _StatsCard(
+          icon: '💤',
+          title: '수면 ($periodLabel)',
+          headline: sleepMin == 0 ? '기록 없음' : '총 ${hm(sleepMin)}',
+          subItems: [
+            if (sleepMin > 0)
+              '· 평균 ${hm((sleepMin / divisor).round())}$perUnit',
+          ],
+          color: theme.colorScheme.tertiary,
+        ),
+        _StatsCard(
+          icon: '💩',
+          title: '기저귀 ($periodLabel)',
+          headline: diaperTotal == 0 ? '기록 없음' : '총 $diaperTotal회',
+          subItems: [
+            if (peeCount > 0) '· 소변 $peeCount회',
+            if (poopCount > 0) '· 대변 $poopCount회',
+            if (bothCount > 0) '· 둘 다 $bothCount회',
+          ],
+          color: theme.colorScheme.secondary,
+        ),
+      ],
     );
   }
 }
 
-/// 성장 차트 범례 — WHO P3/P50/P97 + 자녀 측정값.
-class _GrowthLegend extends StatelessWidget {
-  const _GrowthLegend();
+class _StatsCard extends StatelessWidget {
+  const _StatsCard({
+    required this.icon,
+    required this.title,
+    required this.headline,
+    required this.subItems,
+    required this.color,
+  });
+  final String icon;
+  final String title;
+  final String headline;
+  final List<String> subItems;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    Widget item(Color color, String label, {bool dashed = false}) {
-      return Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(width: 16, height: 3, color: color),
-          const SizedBox(width: 4),
-          Text(label, style: theme.textTheme.bodySmall),
-        ],
-      );
-    }
-
-    return Wrap(
-      spacing: Spacing.md,
-      runSpacing: 4,
-      children: [
-        item(theme.colorScheme.primary, l10n.statsLegendChild),
-        item(theme.colorScheme.outline, l10n.statsLegendP50),
-        item(theme.colorScheme.outlineVariant, l10n.statsLegendP3P97,
-            dashed: true),
-      ],
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: Radii.brMd,
+        side: BorderSide(
+          color: color.withValues(alpha: 0.6),
+          width: 1.2,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+            horizontal: Spacing.md, vertical: Spacing.sm),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(icon, style: const TextStyle(fontSize: 20)),
+                const SizedBox(width: 6),
+                Text(title,
+                    style: theme.textTheme.titleSmall
+                        ?.copyWith(fontWeight: FontWeight.w700)),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              headline,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: color,
+              ),
+            ),
+            for (final s in subItems)
+              Padding(
+                padding: const EdgeInsets.only(top: 2, left: 6),
+                child: Text(
+                  s,
+                  style: theme.textTheme.bodySmall?.copyWith(fontSize: 12),
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -544,7 +593,3 @@ class _NoChildPlaceholder extends StatelessWidget {
     );
   }
 }
-
-// 사용하지 않는 import 경고 회피 — Growth 타입 노출 보장.
-// ignore: unused_element
-typedef _GrowthAlias = Growth;

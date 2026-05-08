@@ -76,15 +76,63 @@ class _ElephantPainter extends CustomPainter {
     // 몸 전체 가벼운 보브
     final bob = math.sin(t * 4 * math.pi) * 1.5;
 
+    final cx = w * 0.5 + travel;
+    final cy = h * 0.5 + bob;
+    final s = w * 0.34; // 코끼리 크기 (대략 반지름)
+
+    // ── 뒤따라가는 하트 파티클 (코끼리보다 먼저 그려서 코끼리 뒤에 위치) ──
+    _drawHearts(canvas, cx, cy, s, t);
+
     canvas.save();
-    canvas.translate(w * 0.5 + travel, h * 0.5 + bob);
+    canvas.translate(cx, cy);
     // 좌→우 진행 방향에 따라 미세하게 기울임 (좌측 이동 시 약간 좌향)
     final tilt = math.cos(t * 2 * math.pi) * 0.08;
     canvas.rotate(tilt);
 
-    final s = w * 0.34; // 코끼리 크기 (대략 반지름)
     _drawElephant(canvas, s, t);
     canvas.restore();
+  }
+
+  void _drawHearts(Canvas canvas, double cx, double cy, double s, double t) {
+    // 4개 하트 — phase 0, 0.25, 0.5, 0.75 로 동일 간격 spawn
+    const count = 4;
+    for (var i = 0; i < count; i++) {
+      final phase = (t + i / count) % 1.0;
+      // 코끼리 꼬리 위치(왼쪽 뒤)에서 방출 → 점점 왼쪽 뒤로 이동
+      // 진행 방향(오른쪽)의 반대로 흘러간다는 인상.
+      final dx = -s * 0.7 - phase * s * 1.2;
+      final dy = -phase * s * 0.6 - s * 0.05;
+      final scale = (1 - phase) * 0.9 + 0.1; // 살짝 커지며 사라짐
+      final opacity = (1 - phase).clamp(0.0, 1.0) * 0.85;
+      _heart(canvas, cx + dx, cy + dy, s * 0.12 * scale, opacity);
+    }
+  }
+
+  void _heart(Canvas canvas, double cx, double cy, double r, double opacity) {
+    if (r <= 0 || opacity <= 0) return;
+    final fill = Paint()
+      ..color = const Color(0xFFFF8FA0).withValues(alpha: opacity)
+      ..style = PaintingStyle.fill;
+    final stroke = Paint()
+      ..color = _stroke.withValues(alpha: opacity)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = r * 0.18
+      ..strokeJoin = StrokeJoin.round;
+    final path = Path();
+    // 두 원 + 삼각으로 하트 — 베지어 곡선 사용
+    path.moveTo(cx, cy + r * 0.6);
+    path.cubicTo(
+      cx + r * 1.2, cy - r * 0.4,
+      cx + r * 0.4, cy - r * 1.2,
+      cx, cy - r * 0.4,
+    );
+    path.cubicTo(
+      cx - r * 0.4, cy - r * 1.2,
+      cx - r * 1.2, cy - r * 0.4,
+      cx, cy + r * 0.6,
+    );
+    canvas.drawPath(path, fill);
+    canvas.drawPath(path, stroke);
   }
 
   void _drawElephant(Canvas canvas, double s, double t) {
