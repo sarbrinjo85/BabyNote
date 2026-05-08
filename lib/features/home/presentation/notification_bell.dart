@@ -179,53 +179,72 @@ class NotificationBellAction extends ConsumerWidget {
         final alerts = _collectAlerts(sheetCtx, ref, child);
         final l10n = AppLocalizations.of(sheetCtx);
 
+        // 알림이 많을 때 시트 높이를 넘기면 RenderFlex overflow가 뜨므로
+        // 화면 높이의 70%로 제한 + 내부 ListView로 스크롤.
         return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-                horizontal: Spacing.md, vertical: Spacing.sm),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.bellSheetTitle,
-                  style: Theme.of(sheetCtx).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(sheetCtx).size.height * 0.7,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: Spacing.md, vertical: Spacing.sm),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.bellSheetTitle,
+                    style: Theme.of(sheetCtx).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                  const SizedBox(height: Spacing.sm),
+                  if (alerts.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: Spacing.lg),
+                      child: Center(
+                        child: Text(
+                          l10n.bellEmpty,
+                          style:
+                              Theme.of(sheetCtx).textTheme.bodyMedium?.copyWith(
+                                    color: Theme.of(sheetCtx)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
+                        ),
                       ),
-                ),
-                const SizedBox(height: Spacing.sm),
-                if (alerts.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: Spacing.lg),
-                    child: Center(
-                      child: Text(
-                        l10n.bellEmpty,
-                        style: Theme.of(sheetCtx).textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(sheetCtx)
-                                  .colorScheme
-                                  .onSurfaceVariant,
-                            ),
+                    )
+                  else
+                    Flexible(
+                      child: ListView(
+                        shrinkWrap: true,
+                        padding: EdgeInsets.zero,
+                        children: alerts
+                            .map((a) => Card(
+                                  color: a.urgent
+                                      ? Theme.of(sheetCtx)
+                                          .colorScheme
+                                          .errorContainer
+                                      : null,
+                                  child: ListTile(
+                                    leading: Text(a.icon,
+                                        style: const TextStyle(fontSize: 28)),
+                                    title: Text(a.title),
+                                    subtitle: Text(a.subtitle),
+                                    trailing: const Icon(Icons.chevron_right),
+                                    onTap: () {
+                                      Navigator.pop(sheetCtx);
+                                      a.onTap();
+                                    },
+                                  ),
+                                ))
+                            .toList(),
                       ),
                     ),
-                  )
-                else
-                  ...alerts.map((a) => Card(
-                        color: a.urgent
-                            ? Theme.of(sheetCtx).colorScheme.errorContainer
-                            : null,
-                        child: ListTile(
-                          leading: Text(a.icon, style: const TextStyle(fontSize: 28)),
-                          title: Text(a.title),
-                          subtitle: Text(a.subtitle),
-                          trailing: const Icon(Icons.chevron_right),
-                          onTap: () {
-                            Navigator.pop(sheetCtx);
-                            a.onTap();
-                          },
-                        ),
-                      )),
-                const SizedBox(height: Spacing.md),
-              ],
+                  const SizedBox(height: Spacing.md),
+                ],
+              ),
             ),
           ),
         );
