@@ -59,12 +59,18 @@ class AppTheme {
     // 라이트 테마 한정으로 Coral Cream 통일 배경 적용.
     final isLight = brightness == Brightness.light;
     final scaffoldBg = isLight ? BrandColors.scaffoldLight : null;
+    // 메뉴/버튼 누름 피드백 — 어두운 코랄
+    const pressedDark = Color(0xFFD97A6C); // Coral Deep
     return ThemeData(
       useMaterial3: true,
       colorScheme: cs,
       scaffoldBackgroundColor: scaffoldBg,
       canvasColor: scaffoldBg,
       visualDensity: VisualDensity.adaptivePlatformDensity,
+      // ripple(잔물결) 색
+      splashColor: pressedDark.withValues(alpha: 0.28),
+      // 누름 유지 시의 하이라이트 색 (탭 영역 전체)
+      highlightColor: pressedDark.withValues(alpha: 0.16),
 
       // ── Typography: 본문 1단계 키움 ─────────────────────────────────
       // Material 3 default(bodyLarge=16, bodyMedium=14)에서 한 단계 위로 시프트.
