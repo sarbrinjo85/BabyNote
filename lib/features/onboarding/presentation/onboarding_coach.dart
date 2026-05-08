@@ -120,11 +120,11 @@ class OnboardingCoach {
         TargetFocus(
           identify: 'records',
           keyTarget: OnboardingCoach.recordButtonsKey,
-          paddingFocus: 0, // 포커스 영역 타이트
+          paddingFocus: 0,
           contents: [
             textContent('오늘의 기록',
                 '수유, 수면, 기저귀, 성장 4가지를 한 탭으로 기록해요.\n각 버튼에 마지막 활동 시간이 함께 표시돼요.',
-                ContentAlign.top, extraOffset: 56),
+                ContentAlign.top, extraOffset: 140),
           ],
           radius: 14,
         ),
@@ -136,7 +136,7 @@ class OnboardingCoach {
           contents: [
             textContent('데이터/관리',
                 '분유·기저귀 재고 관리, 기록 편집, 성장 통계로 진입해요.',
-                ContentAlign.top, extraOffset: 56),
+                ContentAlign.top, extraOffset: 140),
           ],
           radius: 14,
         ),
@@ -144,10 +144,11 @@ class OnboardingCoach {
         TargetFocus(
           identify: 'medical_menu',
           keyTarget: OnboardingCoach.medicalMenuKey,
+          paddingFocus: 0,
           contents: [
             textContent('의료',
                 '단골 병원 등록과 예방접종 일정을 한 곳에서 관리해요.',
-                ContentAlign.top),
+                ContentAlign.top, extraOffset: 140),
           ],
           radius: 14,
         ),
