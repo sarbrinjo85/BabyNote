@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../core/widgets/baby_loading.dart';
 import 'package:lottie/lottie.dart';
+
+import 'elephant_loader.dart';
 
 /// 로딩 인디케이터 — Lottie 애니메이션이 있으면 그걸 사용, 없으면 fallback.
 ///
@@ -20,7 +21,6 @@ class BabyLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return SizedBox(
       width: size,
       height: size,
@@ -28,16 +28,8 @@ class BabyLoading extends StatelessWidget {
         _assetPath,
         repeat: true,
         animate: true,
-        errorBuilder: (ctx, err, stack) => Center(
-          child: SizedBox(
-            width: size * 0.4,
-            height: size * 0.4,
-            child: CircularProgressIndicator(
-              strokeWidth: 3,
-              color: theme.colorScheme.primary,
-            ),
-          ),
-        ),
+        // Lottie 파일이 없거나 로드 실패 — 핑크 코끼리 달리기 애니메이션 fallback
+        errorBuilder: (ctx, err, stack) => ElephantLoader(size: size),
       ),
     );
   }
