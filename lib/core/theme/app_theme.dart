@@ -147,13 +147,15 @@ class AppTheme {
       ),
 
       // ── AppBar: 라이트는 Coral Cream과 통일, 다크는 surface ─────────
+      // titleTextStyle도 Jua로 통일 — appBar는 textTheme을 자동 적용하지 않으므로
+      // GoogleFonts.jua(...)로 직접 감쌈.
       appBarTheme: AppBarTheme(
         backgroundColor: scaffoldBg ?? cs.surface,
         foregroundColor: cs.onSurface,
         centerTitle: false,
         elevation: 0,
         scrolledUnderElevation: 1,
-        titleTextStyle: TextStyle(
+        titleTextStyle: GoogleFonts.jua(
           fontSize: 22,
           fontWeight: FontWeight.w700,
           color: cs.onSurface,
