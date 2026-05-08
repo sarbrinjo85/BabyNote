@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/baby_loading.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:babynote/l10n/app_localizations.dart';
@@ -30,7 +31,7 @@ class AuthGate extends ConsumerWidget {
     return asyncAuth.when(
       // 첫 stream 이벤트 도착 전 (보통 SDK가 cached session 복구 중)
       loading: () => const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+        body: Center(child: BabyLoading()),
       ),
       // 스트림 자체가 에러 — 거의 발생 안 함
       error: (err, _) => Scaffold(

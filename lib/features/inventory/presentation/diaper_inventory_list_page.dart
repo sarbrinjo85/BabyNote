@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/baby_loading.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -22,7 +23,7 @@ class DiaperInventoryListPage extends ConsumerWidget {
     final asyncChildren = ref.watch(myChildrenProvider);
 
     final body = SafeArea(top: false, child: asyncChildren.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: BabyLoading()),
         error: (err, _) => Center(child: Text(l10n.errorChildLoadFailed(err))),
         data: (children) {
           if (children.isEmpty) return _NoChildPlaceholder();
@@ -31,7 +32,7 @@ class DiaperInventoryListPage extends ConsumerWidget {
           final asyncList = ref.watch(diaperInventoriesProvider(childId));
 
           return asyncList.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
+            loading: () => const Center(child: BabyLoading()),
             error: (err, _) => Center(child: Text(l10n.diaperInventoryLoadFailure(err))),
             data: (list) {
               if (list.isEmpty) return _EmptyPlaceholder();

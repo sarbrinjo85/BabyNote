@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/baby_loading.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -28,7 +29,7 @@ class HospitalListPage extends ConsumerWidget {
         ],
       ),
       body: SafeArea(top: false, child: asyncList.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: BabyLoading()),
         error: (err, _) => Center(child: Text(l10n.hospitalLoadFailure(err))),
         data: (list) {
           if (list.isEmpty) return _EmptyPlaceholder();

@@ -1,0 +1,9 @@
+Place Lottie animation files here.
+
+Recommended:
+- loading.json  (BabyLoading 위젯이 이 파일을 자동으로 사용)
+
+Sources:
+- https://lottiefiles.com — search "baby loading", "rocking cradle", "feeding bottle"
+
+If loading.json is missing, BabyLoading falls back to a coral pink CircularProgressIndicator.

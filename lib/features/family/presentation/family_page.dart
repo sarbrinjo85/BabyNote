@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/baby_loading.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -37,7 +38,7 @@ class _FamilyPageState extends ConsumerState<FamilyPage> {
         actions: const [ChildPickerAction()],
       ),
       body: SafeArea(top: false, child: asyncChildren.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: BabyLoading()),
         error: (err, _) =>
             Center(child: Text(l10n.errorChildrenLoadFailed(err))),
         data: (children) {
@@ -111,7 +112,7 @@ class _CaregiversSection extends ConsumerWidget {
                 ?.copyWith(fontWeight: FontWeight.w700)),
         const SizedBox(height: Spacing.xs),
         asyncList.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => const Center(child: BabyLoading()),
           error: (err, _) => Text(l10n.errorFailed(err)),
           data: (caregivers) {
             return Column(
@@ -226,7 +227,7 @@ class _InvitesSection extends ConsumerWidget {
                 ?.copyWith(fontWeight: FontWeight.w700)),
         const SizedBox(height: Spacing.xs),
         asyncInvites.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => const Center(child: BabyLoading()),
           error: (err, _) => Text(l10n.errorFailed(err)),
           data: (invites) {
             return Column(

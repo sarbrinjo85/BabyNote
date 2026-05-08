@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/baby_loading.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -83,7 +84,7 @@ class HomePage extends ConsumerWidget {
                     child: asyncChildren.when(
                       loading: () => const Padding(
                         padding: EdgeInsets.all(Spacing.md),
-                        child: Center(child: CircularProgressIndicator()),
+                        child: Center(child: BabyLoading()),
                       ),
                       error: (err, _) => Card(
                         color: Theme.of(context).colorScheme.errorContainer,

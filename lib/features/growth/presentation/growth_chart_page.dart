@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import '../../../core/widgets/baby_loading.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/tokens.dart';
@@ -56,7 +57,7 @@ class _GrowthChartPageState extends ConsumerState<GrowthChartPage> {
               Expanded(
                 child: asyncGrowths.when(
                   loading: () =>
-                      const Center(child: CircularProgressIndicator()),
+                      const Center(child: BabyLoading()),
                   error: (e, _) => Center(child: Text('로드 실패: $e')),
                   data: (list) => _Chart(
                     child: widget.child,

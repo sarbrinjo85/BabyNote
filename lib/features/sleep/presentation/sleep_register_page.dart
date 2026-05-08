@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/baby_loading.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -139,7 +140,7 @@ class _SleepRegisterPageState extends ConsumerState<SleepRegisterPage> {
         actions: _isEdit ? null : const [ChildPickerAction()],
       ),
       body: asyncChildren.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: BabyLoading()),
         error: (err, _) => Center(child: Text(l10n.errorChildrenLoadFailed(err))),
         data: (children) {
           if (children.isEmpty) return _NoChildPlaceholder();
@@ -179,7 +180,7 @@ class _SleepRegisterPageState extends ConsumerState<SleepRegisterPage> {
               padding: const EdgeInsets.all(Spacing.md),
               child: asyncOngoing.when(
                 loading: () =>
-                    const Center(child: CircularProgressIndicator()),
+                    const Center(child: BabyLoading()),
                 error: (err, _) => Center(child: Text(l10n.sleepInProgressLoadFailure(err))),
                 data: (ongoing) {
                   if (ongoing == null) {

@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import '../../../core/widgets/baby_loading.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -36,7 +37,7 @@ class StatisticsPage extends ConsumerWidget {
         actions: const [ChildPickerAction()],
       ),
       body: SafeArea(top: false, child: asyncChildren.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: BabyLoading()),
         error: (err, _) =>
             Center(child: Text(l10n.errorChildrenLoadFailed(err))),
         data: (children) {
@@ -166,7 +167,7 @@ class _FeedingBarChart extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncList = ref.watch(statsFeedingsProvider(childId));
     return asyncList.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const Center(child: BabyLoading()),
       error: (err, _) => Center(child: Text('$err')),
       data: (list) {
         final data = _bucketByDay(list, (f) => f.startedAt);
@@ -188,7 +189,7 @@ class _SleepBarChart extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncList = ref.watch(statsSleepsProvider(childId));
     return asyncList.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const Center(child: BabyLoading()),
       error: (err, _) => Center(child: Text('$err')),
       data: (list) {
         // 분 단위 → 시간 단위로 변환해서 표시 (값이 너무 크지 않게)
@@ -222,7 +223,7 @@ class _DiaperBarChart extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncList = ref.watch(statsDiapersProvider(childId));
     return asyncList.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const Center(child: BabyLoading()),
       error: (err, _) => Center(child: Text('$err')),
       data: (list) {
         final data = _bucketByDay(list, (d) => d.recordedAt);
@@ -334,7 +335,7 @@ class _GrowthLineChart extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final asyncList = ref.watch(statsGrowthsProvider(child.id));
     return asyncList.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const Center(child: BabyLoading()),
       error: (err, _) => Center(child: Text('$err')),
       data: (list) {
         final withWeight = list

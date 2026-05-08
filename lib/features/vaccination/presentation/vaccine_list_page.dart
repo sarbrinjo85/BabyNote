@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/baby_loading.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -37,7 +38,7 @@ class VaccineListPage extends ConsumerWidget {
         actions: const [ChildPickerAction()],
       ),
       body: SafeArea(top: false, child: asyncChildren.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: BabyLoading()),
         error: (err, _) => Center(child: Text(l10n.errorChildLoadFailed(err))),
         data: (children) {
           if (children.isEmpty) return _NoChildPlaceholder();
@@ -49,7 +50,7 @@ class VaccineListPage extends ConsumerWidget {
               ref.watch(vaccinationsProvider(child.id));
 
           if (asyncSchedules.isLoading || asyncVaccinations.isLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: BabyLoading());
           }
           if (asyncSchedules.hasError) {
             return Center(child: Text(l10n.vaccineScheduleLoadFailure(asyncSchedules.error!)));

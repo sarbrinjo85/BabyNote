@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/baby_loading.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -132,7 +133,7 @@ class _VaccineRecordPageState extends ConsumerState<VaccineRecordPage> {
             // ── 병원 선택 ──────────────────────────────────────────
             asyncHospitals.when(
               loading: () =>
-                  const Center(child: CircularProgressIndicator()),
+                  const Center(child: BabyLoading()),
               error: (err, _) => Text(l10n.vaccineHospitalLoadFailure(err)),
               data: (hospitals) {
                 if (hospitals.isEmpty) {

@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import '../../../core/widgets/baby_loading.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -48,7 +49,7 @@ class RecordsPage extends ConsumerWidget {
         body: SafeArea(
           top: false,
           child: asyncChildren.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
+            loading: () => const Center(child: BabyLoading()),
             error: (err, _) =>
                 Center(child: Text(l10n.errorChildrenLoadFailed(err))),
             data: (children) {
@@ -98,7 +99,7 @@ class _DailyTimelineListState extends ConsumerState<_DailyTimelineList> {
     if (asyncFeedings.isLoading ||
         asyncSleeps.isLoading ||
         asyncDiapers.isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: BabyLoading());
     }
     if (asyncFeedings.hasError ||
         asyncSleeps.hasError ||
@@ -225,7 +226,7 @@ class _GrowthList extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final asyncList = ref.watch(statsGrowthsProvider(childId));
     return asyncList.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const Center(child: BabyLoading()),
       error: (err, _) => Center(child: Text(l10n.errorFailed(err))),
       data: (list) {
         if (list.isEmpty) return _EmptyTab(message: l10n.recordsEmpty);

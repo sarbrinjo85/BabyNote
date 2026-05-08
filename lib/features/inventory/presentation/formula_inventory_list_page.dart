@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/baby_loading.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -25,7 +26,7 @@ class FormulaInventoryListPage extends ConsumerWidget {
     final asyncChildren = ref.watch(myChildrenProvider);
 
     final body = SafeArea(top: false, child: asyncChildren.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: BabyLoading()),
         error: (err, _) => Center(child: Text(l10n.errorChildLoadFailed(err))),
         data: (children) {
           if (children.isEmpty) return _NoChildPlaceholder();
@@ -34,7 +35,7 @@ class FormulaInventoryListPage extends ConsumerWidget {
           final asyncList = ref.watch(formulaInventoriesProvider(childId));
 
           return asyncList.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
+            loading: () => const Center(child: BabyLoading()),
             error: (err, _) =>
                 Center(child: Text(l10n.formulaInventoryLoadFailure(err))),
             data: (list) {
