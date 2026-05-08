@@ -2077,13 +2077,13 @@ abstract class AppLocalizations {
   /// No description provided for @recordsTitle.
   ///
   /// In ko, this message translates to:
-  /// **'전체 기록'**
+  /// **'기록 편집'**
   String get recordsTitle;
 
   /// No description provided for @recordsEntryHome.
   ///
   /// In ko, this message translates to:
-  /// **'전체 기록 보기'**
+  /// **'기록 편집'**
   String get recordsEntryHome;
 
   /// No description provided for @recordsEmpty.

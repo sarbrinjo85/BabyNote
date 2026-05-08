@@ -1080,10 +1080,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recordDeleted => 'Record deleted';
 
   @override
-  String get recordsTitle => 'All records';
+  String get recordsTitle => 'Edit records';
 
   @override
-  String get recordsEntryHome => 'View all records';
+  String get recordsEntryHome => 'Edit records';
 
   @override
   String get recordsEmpty =>

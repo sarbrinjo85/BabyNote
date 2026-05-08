@@ -1068,10 +1068,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get recordDeleted => '記録を削除しました';
 
   @override
-  String get recordsTitle => '全記録';
+  String get recordsTitle => '記録編集';
 
   @override
-  String get recordsEntryHome => '全記録を見る';
+  String get recordsEntryHome => '記録編集';
 
   @override
   String get recordsEmpty => 'まだ記録がありません。ホームから新しい記録を追加してください。';

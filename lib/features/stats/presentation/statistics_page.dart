@@ -36,7 +36,7 @@ class StatisticsPage extends ConsumerWidget {
           bottom: const TabBar(
             tabs: [
               Tab(text: '기간 통계'),
-              Tab(text: '성장'),
+              Tab(text: '성장 통계'),
             ],
           ),
         ),

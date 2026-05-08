@@ -1069,10 +1069,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get recordDeleted => '기록을 삭제했어요';
 
   @override
-  String get recordsTitle => '전체 기록';
+  String get recordsTitle => '기록 편집';
 
   @override
-  String get recordsEntryHome => '전체 기록 보기';
+  String get recordsEntryHome => '기록 편집';
 
   @override
   String get recordsEmpty => '아직 기록이 없어요. 홈에서 새 기록을 추가해보세요.';
