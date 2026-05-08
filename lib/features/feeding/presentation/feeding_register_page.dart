@@ -46,7 +46,6 @@ class _FeedingRegisterPageState extends ConsumerState<FeedingRegisterPage>
 
   // 분유 탭 상태
   late final TextEditingController _formulaAmountCtrl;
-  late final TextEditingController _formulaBrandCtrl;
 
   // 이유식 탭 상태
   late final TextEditingController _foodNameCtrl;
@@ -78,9 +77,6 @@ class _FeedingRegisterPageState extends ConsumerState<FeedingRegisterPage>
     _formulaAmountCtrl = TextEditingController(
       text: e?.type == 'formula' ? (e!.amountMl?.toString() ?? '') : '',
     );
-    _formulaBrandCtrl = TextEditingController(
-      text: e?.type == 'formula' ? (e!.formulaBrand ?? '') : '',
-    );
     _foodNameCtrl = TextEditingController(
       text: e?.type == 'solid' ? (e!.foodName ?? '') : '',
     );
@@ -107,7 +103,6 @@ class _FeedingRegisterPageState extends ConsumerState<FeedingRegisterPage>
     _tabController.dispose();
     _breastAmountCtrl.dispose();
     _formulaAmountCtrl.dispose();
-    _formulaBrandCtrl.dispose();
     _foodNameCtrl.dispose();
     _solidAmountCtrl.dispose();
     _noteCtrl.dispose();
@@ -160,9 +155,7 @@ class _FeedingRegisterPageState extends ConsumerState<FeedingRegisterPage>
         break;
       case 'formula':
         amountMl = int.tryParse(_formulaAmountCtrl.text);
-        formulaBrand = _formulaBrandCtrl.text.trim().isEmpty
-            ? null
-            : _formulaBrandCtrl.text.trim();
+        // formulaBrand는 더 이상 직접 입력받지 않음 — 활성 통의 brand 사용.
         // FIFO: 활성 분유 통 첫 번째(가장 먼저 개봉한 것)에 자동 연결.
         // P3-1c에서 잔량 계산할 때 이 id로 join.
         final actives = ref.read(
@@ -309,7 +302,6 @@ class _FeedingRegisterPageState extends ConsumerState<FeedingRegisterPage>
                     _FormulaForm(
                       childId: child.id,
                       amountCtrl: _formulaAmountCtrl,
-                      brandCtrl: _formulaBrandCtrl,
                     ),
                     _SolidForm(
                       foodNameCtrl: _foodNameCtrl,
@@ -416,12 +408,10 @@ class _FormulaForm extends ConsumerWidget {
   const _FormulaForm({
     required this.childId,
     required this.amountCtrl,
-    required this.brandCtrl,
   });
 
   final String childId;
   final TextEditingController amountCtrl;
-  final TextEditingController brandCtrl;
 
   void _setAmount(int v) {
     amountCtrl.text = v.toString();
@@ -539,14 +529,6 @@ class _FormulaForm extends ConsumerWidget {
                     child: Text('${v}ml'),
                   );
           }),
-        ),
-        const SizedBox(height: Spacing.lg),
-        TextField(
-          controller: brandCtrl,
-          decoration: InputDecoration(
-            labelText: l10n.feedingFormulaBrandLabel,
-            hintText: l10n.feedingFormulaBrandHint,
-          ),
         ),
       ],
     );
