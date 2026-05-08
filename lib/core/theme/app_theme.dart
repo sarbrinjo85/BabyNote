@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'tokens.dart';
 
@@ -72,28 +73,23 @@ class AppTheme {
       // 누름 유지 시의 하이라이트 색 (탭 영역 전체)
       highlightColor: pressedDark.withValues(alpha: 0.16),
 
-      // ── Typography: 본문 1단계 키움 ─────────────────────────────────
-      // Material 3 default(bodyLarge=16, bodyMedium=14)에서 한 단계 위로 시프트.
-      // 라벨/제목은 비례적으로 따라 키움.
-      textTheme: const TextTheme(
-        // 본문 — 가장 흔히 쓰임
-        bodyLarge:  TextStyle(fontSize: 18, height: 1.4),
-        bodyMedium: TextStyle(fontSize: 16, height: 1.4),
-        bodySmall:  TextStyle(fontSize: 14, height: 1.35),
-
-        // 라벨 — 버튼 텍스트, 칩 등
-        labelLarge:  TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-        labelMedium: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-
-        // 제목 — Card 헤더, AppBar 등
-        titleLarge:  TextStyle(fontSize: 24, fontWeight: FontWeight.w700, height: 1.3),
-        titleMedium: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, height: 1.3),
-        titleSmall:  TextStyle(fontSize: 16, fontWeight: FontWeight.w600, height: 1.3),
-
-        // 큰 디스플레이 (Hero, 환영 메시지)
-        headlineLarge:  TextStyle(fontSize: 36, fontWeight: FontWeight.w700, height: 1.2),
-        headlineMedium: TextStyle(fontSize: 30, fontWeight: FontWeight.w700, height: 1.2),
-        headlineSmall:  TextStyle(fontSize: 24, fontWeight: FontWeight.w700, height: 1.2),
+      // ── Typography: 둥근 느낌의 Jua(주아체) 적용 + 본문 1단계 키움 ──
+      // Google Fonts의 Jua는 한국어 라운드 디스플레이 폰트.
+      // 영문 글리프도 둥근 느낌. 사이즈/굵기는 그대로 유지.
+      textTheme: GoogleFonts.juaTextTheme(
+        const TextTheme(
+          bodyLarge:  TextStyle(fontSize: 18, height: 1.4),
+          bodyMedium: TextStyle(fontSize: 16, height: 1.4),
+          bodySmall:  TextStyle(fontSize: 14, height: 1.35),
+          labelLarge:  TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          labelMedium: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          titleLarge:  TextStyle(fontSize: 24, fontWeight: FontWeight.w700, height: 1.3),
+          titleMedium: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, height: 1.3),
+          titleSmall:  TextStyle(fontSize: 16, fontWeight: FontWeight.w600, height: 1.3),
+          headlineLarge:  TextStyle(fontSize: 36, fontWeight: FontWeight.w700, height: 1.2),
+          headlineMedium: TextStyle(fontSize: 30, fontWeight: FontWeight.w700, height: 1.2),
+          headlineSmall:  TextStyle(fontSize: 24, fontWeight: FontWeight.w700, height: 1.2),
+        ),
       ),
 
       // ── 버튼: 홈 메뉴 카드와 동일한 톤 ──────────────────────────────

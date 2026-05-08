@@ -66,6 +66,7 @@ dependencies:
   home_widget: ^0.7.0
   http: ^1.6.0
   lottie: ^3.3.3
+  google_fonts: ^8.1.0
 
   # NOTE — packages added in later phases (kept here for reference; uncomment when needed):
   # # Local DB (Phase 2 — records storage offline)
