@@ -505,9 +505,23 @@ class _FormulaForm extends ConsumerWidget {
           children: List.generate(25, (i) {
             final v = (i + 1) * 10;
             final isSelected = currentMl == v;
-            final style = ButtonStyle(
-              minimumSize:
-                  const WidgetStatePropertyAll(Size(0, 36)),
+            // 선택된 버튼은 짙은 코랄 배경 + 흰 텍스트로 명확히 구분.
+            // 미선택은 surface + 코랄 외곽선.
+            final selectedStyle = ButtonStyle(
+              minimumSize: const WidgetStatePropertyAll(Size(0, 36)),
+              padding: const WidgetStatePropertyAll(
+                  EdgeInsets.symmetric(horizontal: Spacing.sm)),
+              textStyle: const WidgetStatePropertyAll(
+                  TextStyle(fontSize: 14, fontWeight: FontWeight.w800)),
+              backgroundColor:
+                  const WidgetStatePropertyAll(Color(0xFFD06A5C)),
+              foregroundColor:
+                  const WidgetStatePropertyAll(Colors.white),
+              side: const WidgetStatePropertyAll(
+                  BorderSide(color: Color(0xFFA43F45), width: 1.5)),
+            );
+            final unselectedStyle = ButtonStyle(
+              minimumSize: const WidgetStatePropertyAll(Size(0, 36)),
               padding: const WidgetStatePropertyAll(
                   EdgeInsets.symmetric(horizontal: Spacing.sm)),
               textStyle:
@@ -516,12 +530,12 @@ class _FormulaForm extends ConsumerWidget {
             return isSelected
                 ? FilledButton(
                     onPressed: () => _setAmount(v),
-                    style: style,
+                    style: selectedStyle,
                     child: Text('${v}ml'),
                   )
                 : OutlinedButton(
                     onPressed: () => _setAmount(v),
-                    style: style,
+                    style: unselectedStyle,
                     child: Text('${v}ml'),
                   );
           }),

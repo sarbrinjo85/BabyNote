@@ -169,10 +169,11 @@ class AppTheme {
         contentTextStyle: TextStyle(fontSize: 16, color: cs.onInverseSurface),
       ),
 
-      // ── TabBar: 선택된 탭의 폰트색을 밝게(코랄핑크) ───────────────
+      // ── TabBar: 선택 = 밝은 코랄핑크, 미선택 = 흐린 비활성 톤 ────
       tabBarTheme: TabBarThemeData(
-        labelColor: const Color(0xFFFE7D81), // 밝은 코랄핑크 (홈 타이틀과 동일 톤)
-        unselectedLabelColor: cs.onSurfaceVariant,
+        labelColor: const Color(0xFFFE7D81), // 밝은 코랄핑크
+        // 비활성처럼 보이도록 onSurfaceVariant를 추가로 흐리게
+        unselectedLabelColor: cs.onSurfaceVariant.withValues(alpha: 0.45),
         indicatorColor: BrandColors.seed,
         labelStyle: GoogleFonts.jua(
           fontSize: 16,
@@ -180,7 +181,7 @@ class AppTheme {
         ),
         unselectedLabelStyle: GoogleFonts.jua(
           fontSize: 16,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w500,
         ),
       ),
 
