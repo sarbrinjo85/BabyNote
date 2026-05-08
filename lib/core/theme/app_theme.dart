@@ -168,6 +168,45 @@ class AppTheme {
         shape: const RoundedRectangleBorder(borderRadius: Radii.brMd),
         contentTextStyle: TextStyle(fontSize: 16, color: cs.onInverseSurface),
       ),
+
+      // ── TabBar: 선택된 탭의 폰트색을 밝게(코랄핑크) ───────────────
+      tabBarTheme: TabBarThemeData(
+        labelColor: const Color(0xFFFE7D81), // 밝은 코랄핑크 (홈 타이틀과 동일 톤)
+        unselectedLabelColor: cs.onSurfaceVariant,
+        indicatorColor: BrandColors.seed,
+        labelStyle: GoogleFonts.jua(
+          fontSize: 16,
+          fontWeight: FontWeight.w700,
+        ),
+        unselectedLabelStyle: GoogleFonts.jua(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+
+      // ── SegmentedButton: 선택 시 핑크 파스텔로 (민트 → 핑크) ─────
+      segmentedButtonTheme: SegmentedButtonThemeData(
+        style: ButtonStyle(
+          backgroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return BrandColors.seed.withValues(alpha: 0.35);
+            }
+            return cs.surfaceContainerLow;
+          }),
+          foregroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return const Color(0xFFA43F45);
+            }
+            return cs.onSurfaceVariant;
+          }),
+          side: WidgetStateProperty.all(
+            BorderSide(color: BrandColors.seed.withValues(alpha: 0.6), width: 1.2),
+          ),
+          textStyle: WidgetStateProperty.all(
+            GoogleFonts.jua(fontSize: 14, fontWeight: FontWeight.w700),
+          ),
+        ),
+      ),
     );
   }
 }
