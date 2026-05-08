@@ -10,6 +10,7 @@ import '../../../core/widgets/grid_action_tile.dart';
 import '../../auth/data/auth_repository.dart';
 import '../../child/presentation/child_providers.dart';
 import '../../child/presentation/selected_child_provider.dart';
+import '../../onboarding/presentation/onboarding_coach.dart';
 import 'child_info_card.dart';
 import 'notification_bell.dart';
 import 'notification_scheduler.dart';
@@ -30,11 +31,25 @@ import 'todays_summary_chart.dart';
 /// 7. LastActivityGrid 2x2 — 4종 마지막 1건씩
 /// 8. 진입점 grid 4 col × 2 row (재고/기록/통계/병원/접종/가족 등)
 /// 9. FAB — 마지막 수유 1탭 빠른 기록
-class HomePage extends ConsumerWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends ConsumerState<HomePage> {
+  bool _onboardingTriggered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    // 첫 build 직후 — 자녀가 1명 이상 있을 때만 코치마크 표시 (UX상 자연스러움).
+    // 자녀 0명이면 _OnboardingHero가 떠서 코치마크와 겹침 X.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_onboardingTriggered) return;
+      _onboardingTriggered = true;
+      OnboardingCoach.maybeShow(context);
+    });
     final l10n = AppLocalizations.of(context);
     final asyncChildren = ref.watch(myChildrenProvider);
     final selectedChild = ref.watch(selectedChildProvider);
@@ -42,7 +57,10 @@ class HomePage extends ConsumerWidget {
 
     return Scaffold(
       floatingActionButton: selectedChild != null
-          ? QuickFeedingFab(child: selectedChild)
+          ? Container(
+              key: OnboardingCoach.fabKey,
+              child: QuickFeedingFab(child: selectedChild),
+            )
           : null,
       appBar: AppBar(
         // 글자 fill + stroke 두 겹 — Stack으로 구현.
@@ -50,11 +68,12 @@ class HomePage extends ConsumerWidget {
         title: const StrokedTitle('Baby Note'),
         actions: [
           IconButton(
+            key: OnboardingCoach.addChildKey,
             tooltip: l10n.homeAddChild,
             icon: const Icon(Icons.person_add_alt_1_outlined),
             onPressed: () => context.push('/child/new'),
           ),
-          const NotificationBellAction(),
+          NotificationBellAction(key: OnboardingCoach.bellKey),
           IconButton(
             tooltip: l10n.settingsTitle,
             icon: const Icon(Icons.settings_outlined),
@@ -143,56 +162,64 @@ class HomePage extends ConsumerWidget {
                             // 메인 기록 4 col — 마지막 활동 시간 + 알림 dot 통합
                             _SectionLabel(text: l10n.homeTodayRecord),
                             const SizedBox(height: Spacing.xxs),
-                            RecordButtonsGrid(childId: child.id),
+                            Container(
+                              key: OnboardingCoach.recordButtonsKey,
+                              child: RecordButtonsGrid(childId: child.id),
+                            ),
                             const SizedBox(height: Spacing.sm),
 
                             // ── 카테고리 1: 데이터/관리 ──────────────
                             _SectionLabel(text: l10n.homeSectionData),
                             const SizedBox(height: Spacing.xxs),
-                            GridView.count(
-                              crossAxisCount: 4,
-                              shrinkWrap: true,
-                              physics:
-                                  const NeverScrollableScrollPhysics(),
-                              mainAxisSpacing: Spacing.xs,
-                              crossAxisSpacing: Spacing.xs,
-                              childAspectRatio: 0.9,
-                              children: [
-                                GridActionTile(
-                                  emoji: '📦',
-                                  label: l10n.homeInventory,
-                                  onTap: () => context.push('/inventory'),
-                                ),
-                                GridActionTile(
-                                  emoji: '📋',
-                                  label: l10n.recordsEntryHome,
-                                  onTap: () => context.push('/records'),
-                                ),
-                                GridActionTile(
-                                  emoji: '📊',
-                                  label: l10n.statsEntryHome,
-                                  onTap: () => context.push('/stats'),
-                                ),
-                              ],
+                            Container(
+                              key: OnboardingCoach.dataMenuKey,
+                              child: GridView.count(
+                                crossAxisCount: 4,
+                                shrinkWrap: true,
+                                physics:
+                                    const NeverScrollableScrollPhysics(),
+                                mainAxisSpacing: Spacing.xs,
+                                crossAxisSpacing: Spacing.xs,
+                                childAspectRatio: 0.9,
+                                children: [
+                                  GridActionTile(
+                                    emoji: '📦',
+                                    label: l10n.homeInventory,
+                                    onTap: () => context.push('/inventory'),
+                                  ),
+                                  GridActionTile(
+                                    emoji: '📋',
+                                    label: l10n.recordsEntryHome,
+                                    onTap: () => context.push('/records'),
+                                  ),
+                                  GridActionTile(
+                                    emoji: '📊',
+                                    label: l10n.statsEntryHome,
+                                    onTap: () => context.push('/stats'),
+                                  ),
+                                ],
+                              ),
                             ),
                             const SizedBox(height: Spacing.sm),
 
                             // ── 카테고리 2: 의료 ────────────────────
                             _SectionLabel(text: l10n.homeSectionMedical),
                             const SizedBox(height: Spacing.xxs),
-                            GridView.count(
-                              crossAxisCount: 4,
-                              shrinkWrap: true,
-                              physics:
-                                  const NeverScrollableScrollPhysics(),
-                              mainAxisSpacing: Spacing.xs,
-                              crossAxisSpacing: Spacing.xs,
-                              childAspectRatio: 0.9,
-                              children: [
-                                GridActionTile(
-                                  emoji: '🏥',
-                                  label: l10n.homeHospitalEntry,
-                                  onTap: () => context.push('/hospital'),
+                            Container(
+                              key: OnboardingCoach.medicalMenuKey,
+                              child: GridView.count(
+                                crossAxisCount: 4,
+                                shrinkWrap: true,
+                                physics:
+                                    const NeverScrollableScrollPhysics(),
+                                mainAxisSpacing: Spacing.xs,
+                                crossAxisSpacing: Spacing.xs,
+                                childAspectRatio: 0.9,
+                                children: [
+                                  GridActionTile(
+                                    emoji: '🏥',
+                                    label: l10n.homeHospitalEntry,
+                                    onTap: () => context.push('/hospital'),
                                 ),
                                 GridActionTile(
                                   emoji: '💉',
@@ -200,6 +227,7 @@ class HomePage extends ConsumerWidget {
                                   onTap: () => context.push('/vaccine'),
                                 ),
                               ],
+                            ),
                             ),
                             const SizedBox(height: Spacing.lg),
                           ],
