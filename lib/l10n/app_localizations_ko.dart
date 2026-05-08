@@ -969,7 +969,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get statsTitle => '통계';
 
   @override
-  String get statsEntryHome => '통계 보기';
+  String get statsEntryHome => '성장 통계';
 
   @override
   String get statsFeedingDaily => '일별 수유 횟수';

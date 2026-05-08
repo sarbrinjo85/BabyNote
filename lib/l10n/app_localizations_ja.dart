@@ -969,7 +969,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get statsTitle => '統計';
 
   @override
-  String get statsEntryHome => '統計を見る';
+  String get statsEntryHome => '成長統計';
 
   @override
   String get statsFeedingDaily => '日別 授乳回数';

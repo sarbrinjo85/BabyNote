@@ -978,7 +978,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statsTitle => 'Statistics';
 
   @override
-  String get statsEntryHome => 'View statistics';
+  String get statsEntryHome => 'Growth stats';
 
   @override
   String get statsFeedingDaily => 'Feedings per day';

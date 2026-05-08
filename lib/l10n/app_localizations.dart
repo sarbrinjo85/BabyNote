@@ -1891,7 +1891,7 @@ abstract class AppLocalizations {
   /// No description provided for @statsEntryHome.
   ///
   /// In ko, this message translates to:
-  /// **'통계 보기'**
+  /// **'성장 통계'**
   String get statsEntryHome;
 
   /// No description provided for @statsFeedingDaily.

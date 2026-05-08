@@ -87,9 +87,9 @@ class BrandColors {
   /// 파스텔 민트. tertiarySeed — 코랄과 무게 비슷하게 맞춤.
   static const Color tertiarySeed = Color(0xFFB6E3C9);
 
-  /// 라이트 테마 전체 배경색 — 사용자 지정 코랄크림.
+  /// 라이트 테마 전체 배경색 — 코랄핑크 hint가 살짝 들어간 밝은 톤.
   /// Scaffold/AppBar/Card 배경에 통일감 부여.
-  static const Color scaffoldLight = Color(0xFFFDEAE4);
+  static const Color scaffoldLight = Color(0xFFFFF5F0);
 }
 
 /// 애니메이션 지속 시간 (Material Motion 권장 기반).
