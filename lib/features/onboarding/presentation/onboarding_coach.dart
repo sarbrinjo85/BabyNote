@@ -112,7 +112,7 @@ class OnboardingCoach {
           contents: [
             textContent('오늘의 기록',
                 '수유, 수면, 기저귀, 성장 4가지를 한 탭으로 기록해요.\n각 버튼에 마지막 활동 시간이 함께 표시돼요.',
-                ContentAlign.bottom),
+                ContentAlign.top),
           ],
           radius: 14,
         ),
@@ -123,7 +123,7 @@ class OnboardingCoach {
           contents: [
             textContent('데이터/관리',
                 '분유·기저귀 재고 관리, 기록 편집, 성장 통계로 진입해요.',
-                ContentAlign.bottom),
+                ContentAlign.top),
           ],
           radius: 14,
         ),
