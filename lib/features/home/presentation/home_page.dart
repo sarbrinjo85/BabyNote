@@ -11,6 +11,7 @@ import '../../../core/widgets/grid_action_tile.dart';
 import '../../auth/data/auth_repository.dart';
 import '../../child/presentation/child_providers.dart';
 import '../../child/presentation/selected_child_provider.dart';
+import '../../family/data/realtime_sync.dart';
 import '../../onboarding/presentation/onboarding_coach.dart';
 import 'child_info_card.dart';
 import 'notification_bell.dart';
@@ -56,6 +57,12 @@ class _HomePageState extends ConsumerState<HomePage> {
     final asyncChildren = ref.watch(myChildrenProvider);
     final selectedChild = ref.watch(selectedChildProvider);
     final selectedChildId = ref.watch(selectedChildIdProvider);
+
+    // 가족 실시간 동기화 — 자녀별 4 테이블 INSERT/UPDATE/DELETE 구독.
+    // 자녀 바뀌면 이전 구독 자동 dispose, 새 구독 시작.
+    if (selectedChild != null) {
+      ref.watch(childRealtimeSyncProvider(selectedChild.id));
+    }
 
     return PopScope(
       canPop: false, // 시스템이 자동으로 pop하지 않게 막고 직접 처리
