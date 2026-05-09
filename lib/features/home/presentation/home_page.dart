@@ -160,9 +160,35 @@ class _HomePageState extends ConsumerState<HomePage> {
                                       c.id;
                                   return ChoiceChip(
                                     label: Text(c.name),
-                                    avatar: const Icon(Icons.child_care,
-                                        size: 18),
+                                    avatar: Icon(
+                                      Icons.child_care,
+                                      size: 18,
+                                      color: isSel
+                                          ? const Color(0xFFA43F45)
+                                          : null,
+                                    ),
                                     selected: isSel,
+                                    // 선택 시 코랄핑크 파스텔 배경 + 다크 코랄 글자
+                                    selectedColor: const Color(0xFFFFB5A7),
+                                    backgroundColor:
+                                        Theme.of(context).colorScheme.surface,
+                                    labelStyle: TextStyle(
+                                      color: isSel
+                                          ? const Color(0xFFA43F45)
+                                          : Theme.of(context)
+                                              .colorScheme
+                                              .onSurface,
+                                      fontWeight: isSel
+                                          ? FontWeight.w800
+                                          : FontWeight.w600,
+                                    ),
+                                    side: BorderSide(
+                                      color: isSel
+                                          ? const Color(0xFFA43F45)
+                                          : const Color(0x99FFB5A7),
+                                      width: 1.2,
+                                    ),
+                                    showCheckmark: false,
                                     onSelected: (sel) {
                                       if (sel) {
                                         ref
