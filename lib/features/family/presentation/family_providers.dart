@@ -53,6 +53,13 @@ class FamilyController extends AsyncNotifier<void> {
   }
 
   Future<void> removeCaregiver(String childId, String caregiverId) async {
+    // 마지막 보호자 나가기 방지 — 자녀가 orphan 되는 사고 차단.
+    final caregivers = await ref.read(caregiversProvider(childId).future);
+    if (caregivers.length <= 1) {
+      throw StateError(
+        '마지막 보호자는 나갈 수 없어요. 다른 가족을 먼저 초대해주세요.',
+      );
+    }
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       final repo = ref.read(familyRepositoryProvider);

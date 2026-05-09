@@ -64,6 +64,22 @@ class _HomePageState extends ConsumerState<HomePage> {
       ref.watch(childRealtimeSyncProvider(selectedChild.id));
     }
 
+    // 가족 다른 사용자가 추가한 활동 — 토스트 알림
+    ref.listen(familyActivityFeedProvider, (prev, next) {
+      if (next == null || !mounted) return;
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text('${next.icon} 가족이 ${next.kind} 기록을 남겼어요'),
+            duration: const Duration(seconds: 3),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      // 일회성 — 알림 후 reset
+      ref.read(familyActivityFeedProvider.notifier).state = null;
+    });
+
     return PopScope(
       canPop: false, // 시스템이 자동으로 pop하지 않게 막고 직접 처리
       onPopInvokedWithResult: (didPop, _) {

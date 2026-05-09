@@ -3,6 +3,7 @@ import '../../../core/widgets/baby_loading.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart';
 
 import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/theme/tokens.dart';
@@ -91,6 +92,8 @@ class _CaregiversSection extends ConsumerWidget {
 
   String _roleLabel(AppLocalizations l10n, String role) => switch (role) {
         'parent' => l10n.familyRoleParent,
+        'guardian' => '보호자',
+        'view_only' => '조회 전용',
         'grandparent' => l10n.familyRoleGrandparent,
         'nanny' => l10n.familyRoleNanny,
         _ => l10n.familyRoleOther,
@@ -126,7 +129,20 @@ class _CaregiversSection extends ConsumerWidget {
                 return Card(
                   child: ListTile(
                     leading: CircleAvatar(
-                      child: Text((isMe ? l10n.familyMe : name).characters.first),
+                      backgroundColor: isMe
+                          ? const Color(0xFFFFB5A7)
+                          : Theme.of(context)
+                              .colorScheme
+                              .secondaryContainer,
+                      foregroundColor: const Color(0xFFA43F45),
+                      child: Text(
+                        (name.isNotEmpty ? name : l10n.familyMe)
+                            .characters
+                            .first
+                            .toUpperCase(),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w800),
+                      ),
                     ),
                     title: Row(
                       children: [
@@ -154,9 +170,20 @@ class _CaregiversSection extends ConsumerWidget {
                         if (v == 'remove') {
                           final ok = await _confirmRemove(context, isMe);
                           if (ok && context.mounted) {
-                            await ref
-                                .read(familyControllerProvider.notifier)
-                                .removeCaregiver(childId, c.id);
+                            try {
+                              await ref
+                                  .read(familyControllerProvider.notifier)
+                                  .removeCaregiver(childId, c.id);
+                            } catch (e) {
+                              if (!context.mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(e is StateError
+                                      ? e.message
+                                      : l10n.errorFailed(e)),
+                                ),
+                              );
+                            }
                           }
                         }
                       },
@@ -249,11 +276,20 @@ class _InvitesSection extends ConsumerWidget {
                     ),
                     trailing: PopupMenuButton<String>(
                       onSelected: (v) async {
-                        if (v == 'copy') {
-                          await Clipboard.setData(ClipboardData(text: inv.code));
+                        if (v == 'share') {
+                          // 카카오톡/SMS 등 시스템 공유 시트로 보냄.
+                          // 코드 + 안내문 + 딥링크.
+                          final text =
+                              '베이비노트 가족 공유 초대 코드: ${inv.code}\n'
+                              '앱에서 "초대 코드로 참여" → 위 코드 입력.\n'
+                              'babynote://invite/${inv.code}';
+                          await Share.share(text, subject: '베이비노트 초대');
+                        } else if (v == 'copy') {
+                          await Clipboard.setData(
+                              ClipboardData(text: inv.code));
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(inv.code)),
+                              SnackBar(content: Text('${inv.code} 복사됨')),
                             );
                           }
                         } else if (v == 'revoke') {
@@ -263,13 +299,32 @@ class _InvitesSection extends ConsumerWidget {
                         }
                       },
                       itemBuilder: (_) => [
+                        const PopupMenuItem(
+                          value: 'share',
+                          child: ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            dense: true,
+                            leading: Icon(Icons.ios_share),
+                            title: Text('카카오톡/문자로 공유'),
+                          ),
+                        ),
                         PopupMenuItem(
                           value: 'copy',
-                          child: Text(l10n.familyShareCode),
+                          child: ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            dense: true,
+                            leading: const Icon(Icons.copy),
+                            title: Text(l10n.familyShareCode),
+                          ),
                         ),
                         PopupMenuItem(
                           value: 'revoke',
-                          child: Text(l10n.familyRevokeInvite),
+                          child: ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            dense: true,
+                            leading: const Icon(Icons.delete_outline),
+                            title: Text(l10n.familyRevokeInvite),
+                          ),
                         ),
                       ],
                     ),
@@ -291,10 +346,38 @@ class _InvitesSection extends ConsumerWidget {
 
   Future<void> _onCreate(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context);
+    // 역할 선택 다이얼로그 — view_only / parent
+    final role = await showDialog<String>(
+      context: context,
+      builder: (ctx) => SimpleDialog(
+        title: const Text('초대할 가족의 역할'),
+        children: [
+          SimpleDialogOption(
+            child: const ListTile(
+              leading: Icon(Icons.edit),
+              title: Text('보호자 (편집 가능)'),
+              subtitle: Text('수유/수면/기저귀/성장 모두 추가·편집·삭제 가능'),
+            ),
+            onPressed: () => Navigator.pop(ctx, 'parent'),
+          ),
+          SimpleDialogOption(
+            child: const ListTile(
+              leading: Icon(Icons.visibility_outlined),
+              title: Text('조회 전용'),
+              subtitle: Text('기록을 볼 수만 있음 (예: 친척)'),
+            ),
+            onPressed: () => Navigator.pop(ctx, 'view_only'),
+          ),
+        ],
+      ),
+    );
+    if (role == null) return;
+    if (!context.mounted) return;
+
     try {
       final invite = await ref
           .read(familyControllerProvider.notifier)
-          .createInvite(childId: childId);
+          .createInvite(childId: childId, role: role);
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('${l10n.familyInviteCreated}  →  ${invite.code}')),
