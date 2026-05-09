@@ -91,4 +91,4 @@
 
 ---
 
-**문의**: support@babynote.app
+**문의**: support.babynote@gmail.com

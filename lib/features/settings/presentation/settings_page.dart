@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/widgets/baby_loading.dart';
 import '../../onboarding/presentation/onboarding_coach.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -259,8 +261,18 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               ),
             ],
 
-            // ── 법적 문서 ────────────────────────────────────────
+            // ── 문의 ──────────────────────────────────────────────
             const SizedBox(height: Spacing.xl),
+            const Divider(),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.mail_outline),
+              title: const Text('문의하기'),
+              subtitle: const Text('support.babynote@gmail.com'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => _openSupportMail(context),
+            ),
+            // ── 법적 문서 ────────────────────────────────────────
             const Divider(),
             ListTile(
               contentPadding: EdgeInsets.zero,
@@ -287,5 +299,31 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         ),
       ),
     );
+  }
+
+  /// 문의 메일 — mailto 스킴으로 시스템 이메일 앱 열기.
+  /// 메일 앱이 없으면 주소를 클립보드에 복사하고 SnackBar로 안내.
+  Future<void> _openSupportMail(BuildContext context) async {
+    const address = 'support.babynote@gmail.com';
+    final uri = Uri(
+      scheme: 'mailto',
+      path: address,
+      query: Uri(queryParameters: {
+        'subject': 'BabyNote 문의',
+        'body': '안녕하세요,\n\n[문의 내용을 적어주세요]\n\n--\n앱 버전: 1.0.0\n',
+      }).query,
+    );
+    final launched = await canLaunchUrl(uri) && await launchUrl(uri);
+    if (!context.mounted) return;
+    if (!launched) {
+      // 메일 앱이 없거나 실패 → 주소 복사 fallback
+      await Clipboard.setData(const ClipboardData(text: address));
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('메일 앱을 열 수 없어 주소를 복사했어요: $address'),
+        ),
+      );
+    }
   }
 }

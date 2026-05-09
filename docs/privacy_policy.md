@@ -73,7 +73,7 @@ BabyNote는 사용자의 개인정보 보호를 매우 중요하게 생각하며
 - **조회**: 앱 내 설정 → 데이터 내보내기(CSV)
 - **수정/삭제**: 각 기록의 편집/삭제 기능
 - **탈퇴**: 설정 → 계정 → 회원 탈퇴 (모든 데이터 즉시 삭제)
-- **문의**: privacy@babynote.app
+- **문의**: support.babynote@gmail.com
 
 ---
 
@@ -101,5 +101,5 @@ BabyNote는 사용자의 개인정보 보호를 매우 중요하게 생각하며
 ## 9. 개인정보 보호 책임자
 
 - 이름: BabyNote 개발팀
-- 이메일: privacy@babynote.app
+- 이메일: support.babynote@gmail.com
 - 신고 / 분쟁 조정: [개인정보분쟁조정위원회](https://www.kopico.go.kr) 1833-6972
