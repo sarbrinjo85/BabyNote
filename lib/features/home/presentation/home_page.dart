@@ -113,13 +113,20 @@ class _HomePageState extends ConsumerState<HomePage> {
         // Flutter의 TextStyle.foreground는 fill XOR stroke 둘 중 하나만 지원.
         title: const StrokedTitle('Baby Note'),
         actions: [
-          IconButton(
+          // GlobalKey는 Container로 감싸서 위치 계산이 IconButton 외곽 박스에
+          // 정확히 매칭되도록 함.
+          Container(
             key: OnboardingCoach.addChildKey,
-            tooltip: l10n.homeAddChild,
-            icon: const Icon(Icons.person_add_alt_1_outlined),
-            onPressed: () => context.push('/child/new'),
+            child: IconButton(
+              tooltip: l10n.homeAddChild,
+              icon: const Icon(Icons.person_add_alt_1_outlined),
+              onPressed: () => context.push('/child/new'),
+            ),
           ),
-          NotificationBellAction(key: OnboardingCoach.bellKey),
+          Container(
+            key: OnboardingCoach.bellKey,
+            child: const NotificationBellAction(),
+          ),
           IconButton(
             tooltip: l10n.settingsTitle,
             icon: const Icon(Icons.settings_outlined),
