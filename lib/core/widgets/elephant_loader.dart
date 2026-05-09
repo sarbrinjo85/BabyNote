@@ -174,8 +174,8 @@ class _ElephantPainter extends CustomPainter {
     // ── 큰 귀 (머리 좌측 위, 펄럭임) ──────────────────────────
     final earFlap = math.sin(t * 4 * math.pi) * 0.13;
     canvas.save();
-    canvas.translate(s * 0.18, -s * 0.42);
-    canvas.rotate(-0.5 + earFlap);
+    canvas.translate(s * 0.18, -s * 0.25); // 귀 위치 살짝 아래로
+    canvas.rotate(-0.4 + earFlap);
     // 외곽
     final earOuter = Rect.fromCenter(
         center: Offset.zero, width: s * 0.55, height: s * 0.80);
