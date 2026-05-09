@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'app.dart';
 import 'core/config/env.dart';
 import 'core/notifications/notification_service.dart';
+import 'features/billing/data/billing_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,6 +28,9 @@ Future<void> main() async {
   // 로컬 알림 서비스 초기화 (timezone 로드 + plugin init + 권한 요청).
   // await로 기다려야 setLocalLocation이 안전하게 끝남.
   await NotificationService.instance.init();
+
+  // 인앱 결제 (RevenueCat) 초기화 — 환경 키 없으면 no-op.
+  await BillingService.instance.initialize();
 
   // Sentry는 DSN이 주입돼있을 때만 init.
   // 개발 단계 또는 DSN 미설정 시엔 SentryFlutter.init 건너뛰고 그냥 runApp.

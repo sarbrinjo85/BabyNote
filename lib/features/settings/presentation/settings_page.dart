@@ -93,6 +93,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         child: ListView(
           padding: const EdgeInsets.all(Spacing.md),
           children: [
+            // ── 가족 플랜 / 구독 ─────────────────────────────────
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.workspace_premium_outlined),
+              title: const Text('가족 플랜'),
+              subtitle: const Text('자녀 무제한 추가 + 가족 공유'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push('/paywall'),
+            ),
+            const Divider(),
             // ── 도움말 다시 보기 ─────────────────────────────────
             ListTile(
               contentPadding: EdgeInsets.zero,

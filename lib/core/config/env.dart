@@ -26,4 +26,17 @@ class Env {
 
   /// Google Places API 키가 주입됐는지.
   static bool get isPlacesEnabled => googlePlacesApiKey.isNotEmpty;
+
+  /// RevenueCat 공개 API 키.
+  /// app.revenuecat.com → Project → API keys 발급. 비어 있으면 결제 비활성.
+  static const revenueCatAndroidKey =
+      String.fromEnvironment('REVENUECAT_ANDROID_KEY');
+  static const revenueCatIosKey =
+      String.fromEnvironment('REVENUECAT_IOS_KEY');
+
+  static bool get isBillingEnabled =>
+      revenueCatAndroidKey.isNotEmpty || revenueCatIosKey.isNotEmpty;
+
+  /// 멀티 자녀 entitlement 식별자 (RevenueCat 콘솔에서 동일하게 등록).
+  static const billingEntitlement = 'multi_child';
 }

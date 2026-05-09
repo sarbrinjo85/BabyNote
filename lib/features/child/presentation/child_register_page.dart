@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 
 import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/widgets/date_input_dialog.dart';
+import '../../billing/data/billing_service.dart';
 import 'child_providers.dart';
+// myChildrenProvider 는 child_providers.dart에서 export됨.
 
 /// 자녀 등록 화면.
 ///
@@ -94,6 +96,26 @@ class _ChildRegisterPageState extends ConsumerState<ChildRegisterPage> {
         );
       },
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // 페이월 게이트 — 이미 자녀 1명 이상이고 멀티 자녀 entitlement 미보유면
+    // 등록 페이지를 닫고 /paywall로 보냄.
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      final children = ref.read(myChildrenProvider).valueOrNull ?? const [];
+      final hasEntitlement = ref.read(hasMultiChildEntitlementProvider);
+      if (children.isNotEmpty && !hasEntitlement) {
+        if (!mounted) return;
+        final unlocked = await context.push<bool>('/paywall');
+        if (!mounted) return;
+        if (unlocked != true) {
+          context.pop();
+        }
+      }
+    });
   }
 
   @override
