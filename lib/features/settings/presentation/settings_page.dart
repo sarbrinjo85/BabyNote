@@ -258,6 +258,31 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 label: const Text('테스트 에러 전송'),
               ),
             ],
+
+            // ── 법적 문서 ────────────────────────────────────────
+            const SizedBox(height: Spacing.xl),
+            const Divider(),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.privacy_tip_outlined),
+              title: const Text('개인정보처리방침'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push('/legal/privacy'),
+            ),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.description_outlined),
+              title: const Text('이용약관'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push('/legal/terms'),
+            ),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.info_outline),
+              title: const Text('앱 버전'),
+              trailing: const Text('1.0.0'),
+              onTap: null,
+            ),
           ],
         ),
       ),

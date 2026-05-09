@@ -20,6 +20,7 @@ import '../../features/growth/presentation/growth_register_page.dart';
 import '../../features/billing/presentation/paywall_page.dart';
 import '../../features/home/presentation/home_page.dart';
 import '../../features/intro/presentation/intro_page.dart';
+import '../../features/legal/presentation/legal_doc_page.dart';
 import '../../features/hospital/domain/hospital.dart';
 import '../../features/hospital/presentation/hospital_list_page.dart';
 import '../../features/hospital/presentation/hospital_register_page.dart';
@@ -93,6 +94,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/paywall',
         name: 'paywall',
         builder: (context, state) => const AuthGate(child: PaywallPage()),
+      ),
+      GoRoute(
+        path: '/legal/privacy',
+        name: 'legalPrivacy',
+        builder: (context, state) => LegalDocPage.privacy(),
+      ),
+      GoRoute(
+        path: '/legal/terms',
+        name: 'legalTerms',
+        builder: (context, state) => LegalDocPage.terms(),
       ),
       GoRoute(
         // /child/new — 새 자녀 등록 폼. 인증된 사용자만 접근 가능 (RLS가 막아주지만
