@@ -195,14 +195,18 @@ class _ElephantPainter extends CustomPainter {
       _stk(s * 0.06),
     );
 
-    // ── 트렁크 ────────────────────────────────────────────────
+    // ── 트렁크 — 앞으로 길게 뻗어 들어올림 ─────────────────
+    // 코끼리 트렁크는 머리 바로 옆에 짧게 매달리지 않고, 앞으로 길게
+    // 뻗어 나갔다가 위/아래로 휘어짐. 두 가지 자세 사이를 raise(0~1)로 lerp.
     final trunkStart = Offset(s * 0.95, -s * 0.05);
-    final downC1 = Offset(s * 1.20, -s * 0.05);
-    final downC2 = Offset(s * 1.22, s * 0.22);
-    final downEnd = Offset(s * 0.97, s * 0.30);
-    final upC1 = Offset(s * 1.30, -s * 0.10);
-    final upC2 = Offset(s * 1.35, -s * 0.55);
-    final upEnd = Offset(s * 1.10, -s * 0.72);
+    // DOWN — 앞으로 뻗었다가 끝이 살짝 아래로
+    final downC1 = Offset(s * 1.30, s * 0.05);
+    final downC2 = Offset(s * 1.45, s * 0.30);
+    final downEnd = Offset(s * 1.30, s * 0.45);
+    // UP — 앞으로 뻗었다가 위로 컬업 (코끼리 인사 자세)
+    final upC1 = Offset(s * 1.35, -s * 0.20);
+    final upC2 = Offset(s * 1.55, -s * 0.55);
+    final upEnd = Offset(s * 1.40, -s * 0.85);
 
     final c1 = Offset.lerp(downC1, upC1, raise)!;
     final c2 = Offset.lerp(downC2, upC2, raise)!;
@@ -211,8 +215,35 @@ class _ElephantPainter extends CustomPainter {
     final trunk = Path()
       ..moveTo(trunkStart.dx, trunkStart.dy)
       ..cubicTo(c1.dx, c1.dy, c2.dx, c2.dy, endPt.dx, endPt.dy);
-    canvas.drawPath(trunk, _stk(s * 0.20, _bodyMid));
+    // 두께를 시작은 굵게, 끝은 얇게 — 일반 strokeWidth로는 안 돼서
+    // 굵은 stroke 한 번 + 약간 안쪽 stroke 한 번으로 시각적 보강
+    canvas.drawPath(trunk, _stk(s * 0.22, _bodyMid));
     canvas.drawPath(trunk, _stk(s * 0.085));
+
+    // 트렁크 주름 라인 3가닥 (디테일)
+    final wrinklePaint = _stk(s * 0.04, _stroke.withValues(alpha: 0.55));
+    Offset cubic(double u) {
+      final v = 1 - u;
+      return Offset(
+        v * v * v * trunkStart.dx +
+            3 * v * v * u * c1.dx +
+            3 * v * u * u * c2.dx +
+            u * u * u * endPt.dx,
+        v * v * v * trunkStart.dy +
+            3 * v * v * u * c1.dy +
+            3 * v * u * u * c2.dy +
+            u * u * u * endPt.dy,
+      );
+    }
+    for (final pos in [0.30, 0.55, 0.78]) {
+      final p = cubic(pos);
+      final ahead = cubic(pos + 0.02);
+      final dir = ahead - p;
+      final len = dir.distance;
+      if (len < 0.001) continue;
+      final perp = Offset(-dir.dy / len, dir.dx / len) * (s * 0.10);
+      canvas.drawLine(p - perp, p + perp, wrinklePaint);
+    }
 
     // 코끝
     canvas.drawCircle(endPt, s * 0.08, _fill(_earInner));
