@@ -92,36 +92,36 @@ class AppTheme {
         ),
       ),
 
-      // ── 버튼: 홈 메뉴 카드와 동일한 톤 ──────────────────────────────
-      // 홈 GridActionTile = surfaceContainerLow 배경 + 코랄핑크 60% 테두리
-      // FilledButton/OutlinedButton 모두 같은 시각 언어로 통일.
-      // (특정 버튼이 styleFrom backgroundColor 으로 오버라이드 시 그쪽 우선)
+      // ── 버튼: 코랄핑크 파스텔 배경으로 더 또렷하게 ─────────────
+      // 배경: BrandColors.seed (#FFB5A7) — 홈 카드보다 채도 ↑ → 진한 인상
+      // 글자/아이콘: Coral Deep #A43F45 — stroke 컬러와 통일
+      // 외곽선: 동일 stroke 컬러로 더 선명한 경계
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: cs.surfaceContainerLow,
-          foregroundColor: const Color(0xFFD97A6C), // Coral Deep
-          side: BorderSide(
-            color: BrandColors.seed.withValues(alpha: 0.6),
+          backgroundColor: BrandColors.seed,
+          foregroundColor: const Color(0xFFA43F45),
+          side: const BorderSide(
+            color: Color(0xFFA43F45),
             width: 1.2,
           ),
           minimumSize: const Size.fromHeight(TouchTarget.comfortable),
           shape: const StadiumBorder(),
           padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
-          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          backgroundColor: cs.surfaceContainerLow,
-          foregroundColor: const Color(0xFFD97A6C),
-          side: BorderSide(
-            color: BrandColors.seed.withValues(alpha: 0.6),
+          backgroundColor: BrandColors.seed,
+          foregroundColor: const Color(0xFFA43F45),
+          side: const BorderSide(
+            color: Color(0xFFA43F45),
             width: 1.2,
           ),
           minimumSize: const Size.fromHeight(TouchTarget.comfortable),
           shape: const StadiumBorder(),
           padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
-          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
         ),
       ),
       textButtonTheme: TextButtonThemeData(

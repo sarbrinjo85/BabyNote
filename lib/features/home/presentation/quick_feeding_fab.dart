@@ -37,25 +37,24 @@ class QuickFeedingFab extends ConsumerWidget {
     // ⚠️ tooltip을 지정하면 FAB 내부 Tooltip 위젯이 longPress를 먼저
     //    가져가 툴팁만 뜨고 onLongPress 콜백은 안 불림 → tooltip 제거.
     //    안내는 처음 진입 시 hint dialog 또는 SnackBar에서 다른 방법으로.
-    // FAB 배경색을 등록 버튼(FilledButton 테마)과 동일하게 — 흰 배경 + 코랄
-    // 외곽선 + Coral Deep 글자.
-    final theme = Theme.of(context);
+    // FAB 배경 — 등록 버튼(FilledButton 테마)과 동일.
+    // 코랄핑크 #FFB5A7 배경 + 다크 코랄 #A43F45 글자/외곽선.
     return GestureDetector(
       onLongPress: () => _onLongPress(context, ref),
       child: FloatingActionButton.extended(
         onPressed: () => _onTap(context, ref),
-        backgroundColor: theme.colorScheme.surfaceContainerLow,
-        foregroundColor: const Color(0xFFD97A6C),
+        backgroundColor: const Color(0xFFFFB5A7),
+        foregroundColor: const Color(0xFFA43F45),
         elevation: 2,
         shape: const StadiumBorder(
-          side: BorderSide(color: Color(0x99FFB5A7), width: 1.4),
+          side: BorderSide(color: Color(0xFFA43F45), width: 1.4),
         ),
         icon: const Text('🍼', style: TextStyle(fontSize: 22)),
         label: Text(
           l10n.fabQuickFeed,
           style: const TextStyle(
-              fontWeight: FontWeight.w700,
-              color: Color(0xFFD97A6C)),
+              fontWeight: FontWeight.w800,
+              color: Color(0xFFA43F45)),
         ),
       ),
     );
