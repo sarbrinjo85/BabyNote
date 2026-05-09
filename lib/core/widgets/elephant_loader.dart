@@ -171,19 +171,21 @@ class _ElephantPainter extends CustomPainter {
     canvas.drawCircle(headCenter, headRadius, _fill(_bodyMid));
     canvas.drawCircle(headCenter, headRadius, _stk(s * 0.085));
 
-    // ── 큰 귀 (머리 좌측 위, 펄럭임) ──────────────────────────
-    final earFlap = math.sin(t * 4 * math.pi) * 0.13;
+    // ── 큰 귀 (머리 옆, 앞뒤로 펄럭) ──────────────────────────
+    // 회전 대신 가로 scale로 부피감 변화 → 앞뒤로 부채질하는 느낌.
+    // sin → 0.65 ~ 1.0 사이 스케일.
+    final flapPhase = (math.sin(t * 4 * math.pi) + 1) / 2; // 0..1
+    final earScaleX = 0.65 + flapPhase * 0.35; // 0.65..1.0
     canvas.save();
-    canvas.translate(s * 0.18, -s * 0.25); // 귀 위치 살짝 아래로
-    canvas.rotate(-0.4 + earFlap);
-    // 외곽
+    canvas.translate(s * 0.20, -s * 0.10); // 머리 측면 중간 높이
+    canvas.rotate(-0.25); // 살짝만 기울임 (고정)
+    canvas.scale(earScaleX, 1.0);
     final earOuter = Rect.fromCenter(
-        center: Offset.zero, width: s * 0.55, height: s * 0.80);
+        center: Offset.zero, width: s * 0.60, height: s * 0.85);
     canvas.drawOval(earOuter, _fill(_bodyMid));
     canvas.drawOval(earOuter, _stk(s * 0.075));
-    // 안쪽
     final earInner = Rect.fromCenter(
-        center: const Offset(0, 4), width: s * 0.32, height: s * 0.55);
+        center: const Offset(0, 4), width: s * 0.34, height: s * 0.58);
     canvas.drawOval(earInner, _fill(_earInner));
     canvas.restore();
 
