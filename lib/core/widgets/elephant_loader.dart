@@ -123,9 +123,8 @@ class _ElephantPainter extends CustomPainter {
     ..strokeCap = StrokeCap.round;
 
   void _drawElephant(Canvas canvas, double s, double t, double raise) {
-    // ── 큰 귀 (몸 뒤쪽) ───────────────────────────────────────
-    // 머리에 가려지는 뒤쪽 귀. 잎사귀 모양 + 그라디언트 + 안쪽 핑크 강조.
-    final earFlap = math.sin(t * 4 * math.pi) * 0.15;
+    // 귀 그리기 헬퍼 — 잎사귀 cubic + 안쪽 핑크.
+    final earFlap = math.sin(t * 4 * math.pi) * 0.12;
     void drawEar({
       required double cx,
       required double cy,
@@ -137,11 +136,9 @@ class _ElephantPainter extends CustomPainter {
       canvas.save();
       canvas.translate(cx, cy);
       canvas.rotate(rotation + (flipped ? -earFlap : earFlap));
-      // 외곽선 + 본체
       final earRect = Rect.fromCenter(
           center: Offset.zero, width: w, height: h);
       final outerPath = Path();
-      // 부드러운 잎사귀 — 위는 좁고 아래는 넓게
       outerPath.moveTo(0, -h * 0.5);
       outerPath.cubicTo(w * 0.55, -h * 0.45, w * 0.65, h * 0.35,
           w * 0.05, h * 0.5);
@@ -157,7 +154,7 @@ class _ElephantPainter extends CustomPainter {
         ),
       );
       canvas.drawPath(outerPath, _stk(s * 0.075));
-      // 안쪽 핑크 (귀 안쪽 살)
+      // 안쪽 핑크
       final innerPath = Path();
       innerPath.moveTo(0, -h * 0.32);
       innerPath.cubicTo(w * 0.32, -h * 0.28, w * 0.40, h * 0.20,
@@ -167,14 +164,6 @@ class _ElephantPainter extends CustomPainter {
       canvas.drawPath(innerPath, Paint()..color = _earInner);
       canvas.restore();
     }
-
-    // 뒤쪽 귀 — 머리 뒤에 살짝 보이게 (오른쪽 위)
-    drawEar(
-      cx: s * 0.25, cy: -s * 0.55,
-      w: s * 0.65, h: s * 0.85,
-      rotation: -0.45,
-      flipped: false,
-    );
 
     // ── 다리 4개 (몸통보다 먼저 — 몸이 위에서 가림) ─────────
     void leg(double xOffset, double phase) {
@@ -272,11 +261,15 @@ class _ElephantPainter extends CustomPainter {
         _gradientFill(headRect, [_bodyTop, _bodyMid, _bodyBot]));
     canvas.drawCircle(headCenter, headRadius, _stk(s * 0.085));
 
-    // ── 앞쪽 큰 귀 (머리 측면에 펄럭) ────────────────────────
+    // ── 큰 귀 — 머리 좌측에 살짝 큰 잎사귀처럼 ──────────────
+    // 사용자 요청: 귀를 더 크게. 단, 얼굴/몸을 가리지 않도록 헤드 좌측 위로
+    // 약간 떨어뜨리고 회전 각을 조절해 자연스러운 펄럭임.
     drawEar(
-      cx: s * 0.18, cy: -s * 0.45,
-      w: s * 0.85, h: s * 1.05, // 큰 귀!
-      rotation: -0.35,
+      cx: s * 0.20,         // 머리 가장자리 부근
+      cy: -s * 0.50,        // 살짝 위
+      w: s * 0.70,          // 가로 큼
+      h: s * 0.95,          // 세로 큼 (머리보다 살짝 작은 사이즈)
+      rotation: -0.55,
       flipped: true,
     );
 
