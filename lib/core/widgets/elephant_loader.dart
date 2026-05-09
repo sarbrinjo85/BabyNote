@@ -171,15 +171,10 @@ class _ElephantPainter extends CustomPainter {
     canvas.drawCircle(headCenter, headRadius, _fill(_bodyMid));
     canvas.drawCircle(headCenter, headRadius, _stk(s * 0.085));
 
-    // ── 큰 귀 (머리 옆, 앞뒤로 펄럭) ──────────────────────────
-    // 회전 대신 가로 scale로 부피감 변화 → 앞뒤로 부채질하는 느낌.
-    // sin → 0.65 ~ 1.0 사이 스케일.
-    final flapPhase = (math.sin(t * 4 * math.pi) + 1) / 2; // 0..1
-    final earScaleX = 0.65 + flapPhase * 0.35; // 0.65..1.0
+    // ── 큰 귀 (머리 옆, 고정) ─────────────────────────────────
     canvas.save();
-    canvas.translate(s * 0.20, -s * 0.10); // 머리 측면 중간 높이
-    canvas.rotate(-0.25); // 살짝만 기울임 (고정)
-    canvas.scale(earScaleX, 1.0);
+    canvas.translate(s * 0.20, -s * 0.10);
+    canvas.rotate(-0.25);
     final earOuter = Rect.fromCenter(
         center: Offset.zero, width: s * 0.60, height: s * 0.85);
     canvas.drawOval(earOuter, _fill(_bodyMid));
