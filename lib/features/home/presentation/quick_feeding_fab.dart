@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -179,30 +181,32 @@ class QuickFeedingFab extends ConsumerWidget {
 
     if (!context.mounted) return;
     final summary = _summary(l10n, created);
-    // 이전 SnackBar 즉시 제거 — clearSnackBars 는 화면 + 큐 모두 비움
-    // (hideCurrentSnackBar 는 화면 한 개만 → 빠른 탭 시 큐가 쌓여 1초씩 줄줄이
-    // 나타나 "안 사라짐"으로 보이는 회귀 픽스).
-    ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(l10n.fabSaved(summary)),
-          // 취소 버튼이 있어도 duration이 만료되면 자동 dismiss됨.
-          // 3초로 단축 (기본 4s) — 사용자가 "안 사라진다"고 느끼지 않도록.
-          duration: const Duration(seconds: 1),
-          behavior: SnackBarBehavior.floating,
-          action: SnackBarAction(
-            label: l10n.fabUndo,
-            onPressed: () async {
-              try {
-                await repo.deleteFeeding(created!.id);
-                ref.invalidate(recentFeedingsProvider(child.id));
-                ref.invalidate(formulaInventoryStatsProvider);
-              } catch (_) {/* 무시 */}
-            },
-          ),
+    final messenger = ScaffoldMessenger.of(context);
+    // 화면 + 큐 모두 비워서 빠른 연속 탭 시 누적 방지.
+    messenger.clearSnackBars();
+    final controller = messenger.showSnackBar(
+      SnackBar(
+        content: Text(l10n.fabSaved(summary)),
+        duration: const Duration(seconds: 1),
+        behavior: SnackBarBehavior.floating,
+        action: SnackBarAction(
+          label: l10n.fabUndo,
+          onPressed: () async {
+            try {
+              await repo.deleteFeeding(created!.id);
+              ref.invalidate(recentFeedingsProvider(child.id));
+              ref.invalidate(formulaInventoryStatsProvider);
+            } catch (_) {/* 무시 */}
+          },
         ),
-      );
+      ),
+    );
+    // 강제 dismiss backup — Material 의 자체 timer 가 일부 디바이스/Material 3
+    // 조합에서 SnackBarAction 과 함께면 안 발동하는 케이스 회피.
+    // duration(1s) + 페이드 전환 250ms 합쳐 1.3s 후 controller.close.
+    unawaited(Future.delayed(const Duration(milliseconds: 1300), () {
+      controller.close();
+    }));
   }
 
   String _summary(AppLocalizations l10n, Feeding f) {
