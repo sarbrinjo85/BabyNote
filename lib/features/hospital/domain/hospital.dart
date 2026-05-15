@@ -53,6 +53,7 @@ class Hospital {
 
   Map<String, dynamic> toInsertMap({required String userId}) {
     return {
+      if (id != 'pending') 'id': id,
       'user_id': userId,
       'name': name,
       if (specialty != null) 'specialty': specialty,

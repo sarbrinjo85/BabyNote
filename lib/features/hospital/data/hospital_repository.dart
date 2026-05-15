@@ -1,27 +1,55 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../core/sync/offline_writes.dart';
 import '../../../data/supabase_client_provider.dart';
 import '../domain/hospital.dart';
 
 class HospitalRepository {
-  HospitalRepository(this._client);
+  HospitalRepository(this._client, this._ref);
 
   final SupabaseClient _client;
+  final Ref _ref;
 
   Future<Hospital> create({
     required String currentUserId,
     required Hospital draft,
   }) async {
-    final inserted = await _client
-        .from('hospitals')
-        .insert(draft.toInsertMap(userId: currentUserId))
-        .select()
-        .single();
-    return Hospital.fromMap(inserted);
+    final id = genUuid();
+    final payload = draft.toInsertMap(userId: currentUserId);
+    payload['id'] = id;
+
+    final optimistic = Hospital(
+      id: id,
+      userId: currentUserId,
+      name: draft.name,
+      specialty: draft.specialty,
+      phone: draft.phone,
+      address: draft.address,
+      latitude: draft.latitude,
+      longitude: draft.longitude,
+      note: draft.note,
+      isDefault: draft.isDefault,
+    );
+
+    return OfflineWrites.execute<Hospital>(
+      ref: _ref,
+      table: 'hospitals',
+      op: 'insert',
+      rowId: id,
+      payload: payload,
+      onlineCall: () async {
+        final r = await _client
+            .from('hospitals')
+            .insert(payload)
+            .select()
+            .single();
+        return Hospital.fromMap(r);
+      },
+      optimisticResult: () => optimistic,
+    );
   }
 
-  /// 본인 소유 병원 목록 (default 먼저).
   Future<List<Hospital>> listMine() async {
     final rows = await _client
         .from('hospitals')
@@ -31,19 +59,26 @@ class HospitalRepository {
     return rows.map((r) => Hospital.fromMap(r)).toList();
   }
 
+  /// is_default 토글 — 큐잉 어려움 (두 개 row 영향 + .neq filter).
+  /// 단순화 위해 큐잉 X — 오프라인 시 그대로 실패. 사용자가 재시도.
   Future<void> setDefault(String hospitalId) async {
-    // 단순화: 호출 측이 "기존 default 해제 → 새 default" 두 번 호출.
-    // 더 견고하게 하려면 RPC로 트랜잭션 처리.
     await _client.from('hospitals').update({'is_default': false}).neq('id', hospitalId);
     await _client.from('hospitals').update({'is_default': true}).eq('id', hospitalId);
   }
 
   Future<void> delete(String hospitalId) async {
-    await _client.from('hospitals').delete().eq('id', hospitalId);
+    return OfflineWrites.executeVoid(
+      ref: _ref,
+      table: 'hospitals',
+      op: 'delete',
+      rowId: hospitalId,
+      payload: const {},
+      onlineCall: () async {
+        await _client.from('hospitals').delete().eq('id', hospitalId);
+      },
+    );
   }
 
-  /// 병원 정보 부분 수정 (이름/진료과/전화/주소/메모/기본여부).
-  /// is_default가 true로 바뀌면 호출 측이 setDefault로 처리하는 게 깔끔.
   Future<Hospital> update({
     required String id,
     required String name,
@@ -61,16 +96,35 @@ class HospitalRepository {
       'note': note,
       'is_default': isDefault,
     };
-    final updated = await _client
-        .from('hospitals')
-        .update(patch)
-        .eq('id', id)
-        .select()
-        .single();
-    return Hospital.fromMap(updated);
+    return OfflineWrites.execute<Hospital>(
+      ref: _ref,
+      table: 'hospitals',
+      op: 'update',
+      rowId: id,
+      payload: patch,
+      onlineCall: () async {
+        final r = await _client
+            .from('hospitals')
+            .update(patch)
+            .eq('id', id)
+            .select()
+            .single();
+        return Hospital.fromMap(r);
+      },
+      optimisticResult: () => Hospital(
+        id: id,
+        userId: '',
+        name: name,
+        specialty: specialty,
+        phone: phone,
+        address: address,
+        note: note,
+        isDefault: isDefault,
+      ),
+    );
   }
 }
 
 final hospitalRepositoryProvider = Provider<HospitalRepository>((ref) {
-  return HospitalRepository(ref.watch(supabaseClientProvider));
+  return HospitalRepository(ref.watch(supabaseClientProvider), ref);
 });

@@ -47,11 +47,13 @@ class Child {
     );
   }
 
-  /// INSERT용 payload — id/created_at/created_by 같은 서버가 채울 컬럼은 제외.
+  /// INSERT용 payload — created_at/created_by 같은 서버가 채울 컬럼은 제외.
+  /// id 는 'pending' 이 아닐 때 포함 (오프라인 큐 — 클라이언트 UUID).
   /// created_by는 children_set_created_by 트리거가 auth.uid()로 자동 채워줌
   /// (08_auto_created_by.sql 참조). 클라이언트는 보내지 않음 → token mismatch 회피.
   Map<String, dynamic> toInsertMap() {
     return {
+      if (id != 'pending') 'id': id,
       'name': name,
       if (gender != null) 'gender': gender,
       // date 컬럼: 'YYYY-MM-DD' 문자열로 보내야 안전 (timezone 영향 없음).

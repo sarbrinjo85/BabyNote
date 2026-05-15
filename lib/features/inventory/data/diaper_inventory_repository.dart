@@ -1,24 +1,56 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../core/sync/offline_writes.dart';
 import '../../../data/supabase_client_provider.dart';
 import '../domain/diaper_inventory.dart';
 
 class DiaperInventoryRepository {
-  DiaperInventoryRepository(this._client);
+  DiaperInventoryRepository(this._client, this._ref);
 
   final SupabaseClient _client;
+  final Ref _ref;
 
   Future<DiaperInventory> create({
     required String currentUserId,
     required DiaperInventory draft,
   }) async {
-    final inserted = await _client
-        .from('diaper_inventories')
-        .insert(draft.toInsertMap(createdBy: currentUserId))
-        .select()
-        .single();
-    return DiaperInventory.fromMap(inserted);
+    final id = genUuid();
+    final payload = draft.toInsertMap(createdBy: currentUserId);
+    payload['id'] = id;
+
+    final optimistic = DiaperInventory(
+      id: id,
+      childId: draft.childId,
+      size: draft.size,
+      quantity: draft.quantity,
+      currency: draft.currency,
+      brand: draft.brand,
+      usageKind: draft.usageKind,
+      purchasedAt: draft.purchasedAt,
+      priceMinor: draft.priceMinor,
+      store: draft.store,
+      openedAt: draft.openedAt,
+      depletedAt: draft.depletedAt,
+      createdBy: currentUserId,
+    );
+
+    return OfflineWrites.execute<DiaperInventory>(
+      ref: _ref,
+      table: 'diaper_inventories',
+      op: 'insert',
+      rowId: id,
+      payload: payload,
+      onlineCall: () async {
+        final r = await _client
+            .from('diaper_inventories')
+            .insert(payload)
+            .select()
+            .single();
+        return DiaperInventory.fromMap(r);
+      },
+      optimisticResult: () => optimistic,
+    );
   }
 
   Future<List<DiaperInventory>> listAll(String childId) async {
@@ -42,27 +74,61 @@ class DiaperInventoryRepository {
   }
 
   Future<DiaperInventory> markOpened(String inventoryId) async {
-    final updated = await _client
-        .from('diaper_inventories')
-        .update({'opened_at': _today()})
-        .eq('id', inventoryId)
-        .select()
-        .single();
-    return DiaperInventory.fromMap(updated);
+    final patch = {'opened_at': _today()};
+    return OfflineWrites.execute<DiaperInventory>(
+      ref: _ref,
+      table: 'diaper_inventories',
+      op: 'update',
+      rowId: inventoryId,
+      payload: patch,
+      onlineCall: () async {
+        final r = await _client
+            .from('diaper_inventories')
+            .update(patch)
+            .eq('id', inventoryId)
+            .select()
+            .single();
+        return DiaperInventory.fromMap(r);
+      },
+      optimisticResult: () => DiaperInventory(
+        id: inventoryId,
+        childId: '',
+        size: '',
+        quantity: 0,
+        currency: 'KRW',
+        openedAt: DateTime.now(),
+      ),
+    );
   }
 
   Future<DiaperInventory> markDepleted(String inventoryId) async {
-    final updated = await _client
-        .from('diaper_inventories')
-        .update({'depleted_at': _today()})
-        .eq('id', inventoryId)
-        .select()
-        .single();
-    return DiaperInventory.fromMap(updated);
+    final patch = {'depleted_at': _today()};
+    return OfflineWrites.execute<DiaperInventory>(
+      ref: _ref,
+      table: 'diaper_inventories',
+      op: 'update',
+      rowId: inventoryId,
+      payload: patch,
+      onlineCall: () async {
+        final r = await _client
+            .from('diaper_inventories')
+            .update(patch)
+            .eq('id', inventoryId)
+            .select()
+            .single();
+        return DiaperInventory.fromMap(r);
+      },
+      optimisticResult: () => DiaperInventory(
+        id: inventoryId,
+        childId: '',
+        size: '',
+        quantity: 0,
+        currency: 'KRW',
+        depletedAt: DateTime.now(),
+      ),
+    );
   }
 
-  /// 한 기저귀 팩에 연결된 사용 기록(diapers) 매수 카운트.
-  /// "둘다"도 1매로 계산 (현실에서도 한 번에 한 매).
   Future<int> countUsed(String inventoryId) async {
     final rows = await _client
         .from('diapers')
@@ -83,7 +149,6 @@ class DiaperInventoryRepository {
     return '${d.year}-${two(d.month)}-${two(d.day)}';
   }
 
-  /// 기저귀 팩 정보 부분 수정.
   Future<DiaperInventory> updateInventory({
     required String id,
     required String size,
@@ -105,21 +170,52 @@ class DiaperInventoryRepository {
       'store': store,
       'opened_at': openedAt == null ? null : _dateOrNull(openedAt),
     };
-    final updated = await _client
-        .from('diaper_inventories')
-        .update(patch)
-        .eq('id', id)
-        .select()
-        .single();
-    return DiaperInventory.fromMap(updated);
+    return OfflineWrites.execute<DiaperInventory>(
+      ref: _ref,
+      table: 'diaper_inventories',
+      op: 'update',
+      rowId: id,
+      payload: patch,
+      onlineCall: () async {
+        final r = await _client
+            .from('diaper_inventories')
+            .update(patch)
+            .eq('id', id)
+            .select()
+            .single();
+        return DiaperInventory.fromMap(r);
+      },
+      optimisticResult: () => DiaperInventory(
+        id: id,
+        childId: '',
+        size: size,
+        quantity: quantity,
+        currency: 'KRW',
+        brand: brand,
+        usageKind: usageKind,
+        purchasedAt: purchasedAt,
+        priceMinor: priceMinor,
+        store: store,
+        openedAt: openedAt,
+      ),
+    );
   }
 
   Future<void> deleteInventory(String id) async {
-    await _client.from('diaper_inventories').delete().eq('id', id);
+    return OfflineWrites.executeVoid(
+      ref: _ref,
+      table: 'diaper_inventories',
+      op: 'delete',
+      rowId: id,
+      payload: const {},
+      onlineCall: () async {
+        await _client.from('diaper_inventories').delete().eq('id', id);
+      },
+    );
   }
 }
 
 final diaperInventoryRepositoryProvider =
     Provider<DiaperInventoryRepository>((ref) {
-  return DiaperInventoryRepository(ref.watch(supabaseClientProvider));
+  return DiaperInventoryRepository(ref.watch(supabaseClientProvider), ref);
 });

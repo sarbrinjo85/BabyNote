@@ -110,6 +110,7 @@ class FormulaInventory {
 
   Map<String, dynamic> toInsertMap({required String createdBy}) {
     return {
+      if (id != 'pending') 'id': id,
       'child_id': childId,
       'created_by': createdBy,
       'product_name': productName,

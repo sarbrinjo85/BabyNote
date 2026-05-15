@@ -79,6 +79,7 @@ class DiaperInventory {
 
   Map<String, dynamic> toInsertMap({required String createdBy}) {
     return {
+      if (id != 'pending') 'id': id,
       'child_id': childId,
       'created_by': createdBy,
       'size': size,

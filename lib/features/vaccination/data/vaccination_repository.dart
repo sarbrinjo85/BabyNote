@@ -1,14 +1,16 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../core/sync/offline_writes.dart';
 import '../../../data/supabase_client_provider.dart';
 import '../domain/vaccination.dart';
 
 /// vaccinations 테이블 CRUD.
 class VaccinationRepository {
-  VaccinationRepository(this._client);
+  VaccinationRepository(this._client, this._ref);
 
   final SupabaseClient _client;
+  final Ref _ref;
 
   /// 자녀의 모든 접종 기록.
   Future<List<Vaccination>> listForChild(String childId) async {
@@ -31,8 +33,9 @@ class VaccinationRepository {
     String? hospitalId,
     String? note,
   }) async {
+    final id = genUuid();
     final draft = Vaccination(
-      id: 'pending',
+      id: id,
       childId: childId,
       vaccineCode: vaccineCode,
       doseNumber: doseNumber,
@@ -41,15 +44,27 @@ class VaccinationRepository {
       hospitalId: hospitalId,
       note: note,
     );
-    final inserted = await _client
-        .from('vaccinations')
-        .insert(draft.toInsertMap(recordedBy: currentUserId))
-        .select()
-        .single();
-    return Vaccination.fromMap(inserted);
+    final payload = draft.toInsertMap(recordedBy: currentUserId);
+
+    return OfflineWrites.execute<Vaccination>(
+      ref: _ref,
+      table: 'vaccinations',
+      op: 'insert',
+      rowId: id,
+      payload: payload,
+      onlineCall: () async {
+        final r = await _client
+            .from('vaccinations')
+            .insert(payload)
+            .select()
+            .single();
+        return Vaccination.fromMap(r);
+      },
+      optimisticResult: () => draft,
+    );
   }
 }
 
 final vaccinationRepositoryProvider = Provider<VaccinationRepository>((ref) {
-  return VaccinationRepository(ref.watch(supabaseClientProvider));
+  return VaccinationRepository(ref.watch(supabaseClientProvider), ref);
 });
