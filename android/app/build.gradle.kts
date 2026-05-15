@@ -1,5 +1,6 @@
 import java.util.Properties
 import java.io.FileInputStream
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("com.android.application")
@@ -29,8 +30,12 @@ android {
         isCoreLibraryDesugaringEnabled = true
     }
 
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
+    // Kotlin 2.x 새 DSL — 이전의 kotlinOptions { jvmTarget = "17" } 는 deprecated
+    // (Kotlin Gradle Plugin 2.2+ 에선 컴파일 에러).
+    kotlin {
+        compilerOptions {
+            jvmTarget = JvmTarget.JVM_17
+        }
     }
 
     defaultConfig {
@@ -48,7 +53,7 @@ android {
     // release 서명: key.properties (gitignore 됨) 에서 비밀번호/keystore 경로 로드.
     // 파일 없으면 release 서명 설정도 생성 안 됨 → release 빌드가 debug 서명 사용.
     signingConfigs {
-        if (keystoreProperties.isNotEmpty) {
+        if (!keystoreProperties.isEmpty) {
             create("release") {
                 keyAlias = keystoreProperties["keyAlias"] as String?
                 keyPassword = keystoreProperties["keyPassword"] as String?
@@ -61,7 +66,7 @@ android {
     buildTypes {
         release {
             // key.properties 가 있으면 release 서명, 없으면 debug fallback (개발 편의).
-            signingConfig = if (keystoreProperties.isNotEmpty) {
+            signingConfig = if (!keystoreProperties.isEmpty) {
                 signingConfigs.getByName("release")
             } else {
                 signingConfigs.getByName("debug")
