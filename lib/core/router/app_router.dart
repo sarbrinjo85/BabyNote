@@ -34,8 +34,12 @@ import '../../features/inventory/presentation/inventory_hub_page.dart';
 import '../../features/vaccination/domain/vaccine_schedule.dart';
 import '../../features/vaccination/presentation/vaccine_list_page.dart';
 import '../../features/vaccination/presentation/vaccine_record_page.dart';
+import '../../features/routine/domain/routine.dart';
+import '../../features/routine/presentation/routine_register_page.dart';
 import '../../features/sleep/domain/sleep.dart';
 import '../../features/sleep/presentation/sleep_register_page.dart';
+import '../../features/symptom/domain/symptom.dart';
+import '../../features/symptom/presentation/symptom_register_page.dart';
 
 /// 앱 전체 라우팅 정의.
 ///
@@ -166,6 +170,41 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final editing = state.extra as Growth?;
           return AuthGate(child: GrowthRegisterPage(editing: editing));
+        },
+      ),
+      GoRoute(
+        // /routine/new — 루틴 4종 통합 등록 페이지.
+        // extra 형태:
+        //   - null: 신규 등록, kind 는 walk 기본값
+        //   - RoutineKind: 신규 + 해당 kind 선택 (홈 grid 4개 진입점)
+        //   - Routine: 편집 모드
+        path: '/routine/new',
+        name: 'routineNew',
+        builder: (context, state) {
+          final extra = state.extra;
+          if (extra is Routine) {
+            return AuthGate(child: RoutineRegisterPage(editing: extra));
+          }
+          if (extra is RoutineKind) {
+            return AuthGate(child: RoutineRegisterPage(initialKind: extra));
+          }
+          return const AuthGate(child: RoutineRegisterPage());
+        },
+      ),
+      GoRoute(
+        // /symptom/new — 증상 4종 통합 등록.
+        // extra 패턴은 routine 과 동일 (Symptom | SymptomKind | null).
+        path: '/symptom/new',
+        name: 'symptomNew',
+        builder: (context, state) {
+          final extra = state.extra;
+          if (extra is Symptom) {
+            return AuthGate(child: SymptomRegisterPage(editing: extra));
+          }
+          if (extra is SymptomKind) {
+            return AuthGate(child: SymptomRegisterPage(initialKind: extra));
+          }
+          return const AuthGate(child: SymptomRegisterPage());
         },
       ),
       GoRoute(

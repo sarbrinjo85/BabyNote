@@ -213,7 +213,7 @@ class _FeedingRegisterPageState extends ConsumerState<FeedingRegisterPage>
       loading: () {},
       error: (err, _) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(l10n.feedingSaveFailed(err))));
+            .showSnackBar(SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.feedingSaveFailed(err))));
       },
     );
   }
@@ -235,7 +235,7 @@ class _FeedingRegisterPageState extends ConsumerState<FeedingRegisterPage>
       if (!mounted) return;
       final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(l10n.feedingPhotoFailed(e))));
+          .showSnackBar(SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.feedingPhotoFailed(e))));
     }
   }
 

@@ -5,8 +5,12 @@ import '../../diaper/domain/diaper.dart';
 import '../../feeding/data/feeding_repository.dart';
 import '../../feeding/domain/feeding.dart';
 import '../../growth/presentation/growth_providers.dart';
+import '../../routine/data/routine_repository.dart';
+import '../../routine/domain/routine.dart';
 import '../../sleep/data/sleep_repository.dart';
 import '../../sleep/domain/sleep.dart';
+import '../../symptom/data/symptom_repository.dart';
+import '../../symptom/domain/symptom.dart';
 
 /// 통계 화면용 — 최근 200건 데이터.
 ///
@@ -32,3 +36,17 @@ final statsDiapersProvider =
 
 /// 성장 기록 — 모든 기록 (월 단위로 보면 작아서 limit 불필요).
 final statsGrowthsProvider = growthsProvider;
+
+/// 루틴 7일치 — 산책/목욕/영양제/간식 통합. UI 에서 kind 별로 그룹화.
+final statsRoutinesProvider =
+    FutureProvider.family<List<Routine>, String>((ref, childId) async {
+  final repo = ref.watch(routineRepositoryProvider);
+  return repo.listRecent(childId, limit: 1000);
+});
+
+/// 증상 7일치 — 기침/구토/발진/상처 통합.
+final statsSymptomsProvider =
+    FutureProvider.family<List<Symptom>, String>((ref, childId) async {
+  final repo = ref.watch(symptomRepositoryProvider);
+  return repo.listRecent(childId, limit: 1000);
+});

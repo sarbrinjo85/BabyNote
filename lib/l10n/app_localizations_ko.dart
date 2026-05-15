@@ -1192,4 +1192,130 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get fabAmountEditHint => '예: 120';
+
+  @override
+  String get routineTitle => '루틴 기록';
+
+  @override
+  String get routineEditTitle => '루틴 기록 편집';
+
+  @override
+  String get routineSavedToast => '루틴 기록을 저장했어요';
+
+  @override
+  String get routineKindWalk => '산책';
+
+  @override
+  String get routineKindBath => '목욕';
+
+  @override
+  String get routineKindSupplement => '영양제';
+
+  @override
+  String get routineKindSnack => '간식';
+
+  @override
+  String get routineDurationLabel => '지속 시간 (분)';
+
+  @override
+  String get routineDurationHint => '예: 30';
+
+  @override
+  String get routineItemNameLabel => '이름';
+
+  @override
+  String get routineItemNameHintSupplement => '예: 비타민D 1방울';
+
+  @override
+  String get routineItemNameHintSnack => '예: 사과 1/4쪽';
+
+  @override
+  String get routineStartedAtLabel => '기록 시각';
+
+  @override
+  String get routineNoteLabel => '메모 (선택)';
+
+  @override
+  String get routineSectionHome => '루틴';
+
+  @override
+  String get homeRoutineWalk => '산책';
+
+  @override
+  String get homeRoutineBath => '목욕';
+
+  @override
+  String get homeRoutineSupplement => '영양제';
+
+  @override
+  String get homeRoutineSnack => '간식';
+
+  @override
+  String get symptomTitle => '건강 기록';
+
+  @override
+  String get symptomEditTitle => '건강 기록 편집';
+
+  @override
+  String get symptomSavedToast => '건강 기록을 저장했어요';
+
+  @override
+  String get symptomKindCough => '기침';
+
+  @override
+  String get symptomKindVomit => '구토';
+
+  @override
+  String get symptomKindRash => '발진';
+
+  @override
+  String get symptomKindInjury => '상처';
+
+  @override
+  String get symptomSeverityLabel => '강도';
+
+  @override
+  String get symptomSeverityMild => '가벼움';
+
+  @override
+  String get symptomSeverityModerate => '보통';
+
+  @override
+  String get symptomSeveritySevere => '심함';
+
+  @override
+  String get symptomOccurredAtLabel => '발생 시각';
+
+  @override
+  String get symptomNoteLabel => '메모 (선택)';
+
+  @override
+  String get symptomPhotoLabel => '사진 (발진/상처)';
+
+  @override
+  String get symptomPhotoPick => '사진 선택';
+
+  @override
+  String get symptomPhotoFromCamera => '카메라';
+
+  @override
+  String get symptomPhotoFromGallery => '갤러리';
+
+  @override
+  String get symptomPhotoRemove => '사진 제거';
+
+  @override
+  String get symptomSectionHome => '건강';
+
+  @override
+  String get homeSymptomCough => '기침';
+
+  @override
+  String get homeSymptomVomit => '구토';
+
+  @override
+  String get homeSymptomRash => '발진';
+
+  @override
+  String get homeSymptomInjury => '상처';
 }

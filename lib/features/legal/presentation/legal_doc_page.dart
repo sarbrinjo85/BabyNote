@@ -31,7 +31,7 @@ class LegalDocPage extends StatelessWidget {
               await Clipboard.setData(ClipboardData(text: content));
               if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('전체 내용을 복사했어요')),
+                const SnackBar(duration: Duration(seconds: 1), content: Text('전체 내용을 복사했어요')),
               );
             },
           ),

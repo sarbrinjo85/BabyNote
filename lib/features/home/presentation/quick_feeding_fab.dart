@@ -172,7 +172,7 @@ class QuickFeedingFab extends ConsumerWidget {
     } catch (e) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.errorFailed(e))),
+        SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.errorFailed(e))),
       );
       return;
     }
@@ -187,7 +187,7 @@ class QuickFeedingFab extends ConsumerWidget {
           content: Text(l10n.fabSaved(summary)),
           // 취소 버튼이 있어도 duration이 만료되면 자동 dismiss됨.
           // 3초로 단축 (기본 4s) — 사용자가 "안 사라진다"고 느끼지 않도록.
-          duration: const Duration(seconds: 3),
+          duration: const Duration(seconds: 1),
           behavior: SnackBarBehavior.floating,
           action: SnackBarAction(
             label: l10n.fabUndo,

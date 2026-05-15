@@ -2313,6 +2313,258 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'예: 120'**
   String get fabAmountEditHint;
+
+  /// No description provided for @routineTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'루틴 기록'**
+  String get routineTitle;
+
+  /// No description provided for @routineEditTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'루틴 기록 편집'**
+  String get routineEditTitle;
+
+  /// No description provided for @routineSavedToast.
+  ///
+  /// In ko, this message translates to:
+  /// **'루틴 기록을 저장했어요'**
+  String get routineSavedToast;
+
+  /// No description provided for @routineKindWalk.
+  ///
+  /// In ko, this message translates to:
+  /// **'산책'**
+  String get routineKindWalk;
+
+  /// No description provided for @routineKindBath.
+  ///
+  /// In ko, this message translates to:
+  /// **'목욕'**
+  String get routineKindBath;
+
+  /// No description provided for @routineKindSupplement.
+  ///
+  /// In ko, this message translates to:
+  /// **'영양제'**
+  String get routineKindSupplement;
+
+  /// No description provided for @routineKindSnack.
+  ///
+  /// In ko, this message translates to:
+  /// **'간식'**
+  String get routineKindSnack;
+
+  /// No description provided for @routineDurationLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'지속 시간 (분)'**
+  String get routineDurationLabel;
+
+  /// No description provided for @routineDurationHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'예: 30'**
+  String get routineDurationHint;
+
+  /// No description provided for @routineItemNameLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'이름'**
+  String get routineItemNameLabel;
+
+  /// No description provided for @routineItemNameHintSupplement.
+  ///
+  /// In ko, this message translates to:
+  /// **'예: 비타민D 1방울'**
+  String get routineItemNameHintSupplement;
+
+  /// No description provided for @routineItemNameHintSnack.
+  ///
+  /// In ko, this message translates to:
+  /// **'예: 사과 1/4쪽'**
+  String get routineItemNameHintSnack;
+
+  /// No description provided for @routineStartedAtLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'기록 시각'**
+  String get routineStartedAtLabel;
+
+  /// No description provided for @routineNoteLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'메모 (선택)'**
+  String get routineNoteLabel;
+
+  /// No description provided for @routineSectionHome.
+  ///
+  /// In ko, this message translates to:
+  /// **'루틴'**
+  String get routineSectionHome;
+
+  /// No description provided for @homeRoutineWalk.
+  ///
+  /// In ko, this message translates to:
+  /// **'산책'**
+  String get homeRoutineWalk;
+
+  /// No description provided for @homeRoutineBath.
+  ///
+  /// In ko, this message translates to:
+  /// **'목욕'**
+  String get homeRoutineBath;
+
+  /// No description provided for @homeRoutineSupplement.
+  ///
+  /// In ko, this message translates to:
+  /// **'영양제'**
+  String get homeRoutineSupplement;
+
+  /// No description provided for @homeRoutineSnack.
+  ///
+  /// In ko, this message translates to:
+  /// **'간식'**
+  String get homeRoutineSnack;
+
+  /// No description provided for @symptomTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'건강 기록'**
+  String get symptomTitle;
+
+  /// No description provided for @symptomEditTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'건강 기록 편집'**
+  String get symptomEditTitle;
+
+  /// No description provided for @symptomSavedToast.
+  ///
+  /// In ko, this message translates to:
+  /// **'건강 기록을 저장했어요'**
+  String get symptomSavedToast;
+
+  /// No description provided for @symptomKindCough.
+  ///
+  /// In ko, this message translates to:
+  /// **'기침'**
+  String get symptomKindCough;
+
+  /// No description provided for @symptomKindVomit.
+  ///
+  /// In ko, this message translates to:
+  /// **'구토'**
+  String get symptomKindVomit;
+
+  /// No description provided for @symptomKindRash.
+  ///
+  /// In ko, this message translates to:
+  /// **'발진'**
+  String get symptomKindRash;
+
+  /// No description provided for @symptomKindInjury.
+  ///
+  /// In ko, this message translates to:
+  /// **'상처'**
+  String get symptomKindInjury;
+
+  /// No description provided for @symptomSeverityLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'강도'**
+  String get symptomSeverityLabel;
+
+  /// No description provided for @symptomSeverityMild.
+  ///
+  /// In ko, this message translates to:
+  /// **'가벼움'**
+  String get symptomSeverityMild;
+
+  /// No description provided for @symptomSeverityModerate.
+  ///
+  /// In ko, this message translates to:
+  /// **'보통'**
+  String get symptomSeverityModerate;
+
+  /// No description provided for @symptomSeveritySevere.
+  ///
+  /// In ko, this message translates to:
+  /// **'심함'**
+  String get symptomSeveritySevere;
+
+  /// No description provided for @symptomOccurredAtLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'발생 시각'**
+  String get symptomOccurredAtLabel;
+
+  /// No description provided for @symptomNoteLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'메모 (선택)'**
+  String get symptomNoteLabel;
+
+  /// No description provided for @symptomPhotoLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'사진 (발진/상처)'**
+  String get symptomPhotoLabel;
+
+  /// No description provided for @symptomPhotoPick.
+  ///
+  /// In ko, this message translates to:
+  /// **'사진 선택'**
+  String get symptomPhotoPick;
+
+  /// No description provided for @symptomPhotoFromCamera.
+  ///
+  /// In ko, this message translates to:
+  /// **'카메라'**
+  String get symptomPhotoFromCamera;
+
+  /// No description provided for @symptomPhotoFromGallery.
+  ///
+  /// In ko, this message translates to:
+  /// **'갤러리'**
+  String get symptomPhotoFromGallery;
+
+  /// No description provided for @symptomPhotoRemove.
+  ///
+  /// In ko, this message translates to:
+  /// **'사진 제거'**
+  String get symptomPhotoRemove;
+
+  /// No description provided for @symptomSectionHome.
+  ///
+  /// In ko, this message translates to:
+  /// **'건강'**
+  String get symptomSectionHome;
+
+  /// No description provided for @homeSymptomCough.
+  ///
+  /// In ko, this message translates to:
+  /// **'기침'**
+  String get homeSymptomCough;
+
+  /// No description provided for @homeSymptomVomit.
+  ///
+  /// In ko, this message translates to:
+  /// **'구토'**
+  String get homeSymptomVomit;
+
+  /// No description provided for @homeSymptomRash.
+  ///
+  /// In ko, this message translates to:
+  /// **'발진'**
+  String get homeSymptomRash;
+
+  /// No description provided for @homeSymptomInjury.
+  ///
+  /// In ko, this message translates to:
+  /// **'상처'**
+  String get homeSymptomInjury;
 }
 
 class _AppLocalizationsDelegate

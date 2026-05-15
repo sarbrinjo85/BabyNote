@@ -289,7 +289,7 @@ class _InvitesSection extends ConsumerWidget {
                               ClipboardData(text: inv.code));
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('${inv.code} 복사됨')),
+                              SnackBar(duration: const Duration(seconds: 1), content: Text('${inv.code} 복사됨')),
                             );
                           }
                         } else if (v == 'revoke') {
@@ -380,12 +380,12 @@ class _InvitesSection extends ConsumerWidget {
           .createInvite(childId: childId, role: role);
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${l10n.familyInviteCreated}  →  ${invite.code}')),
+        SnackBar(duration: const Duration(seconds: 1), content: Text('${l10n.familyInviteCreated}  →  ${invite.code}')),
       );
     } catch (e) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(l10n.errorFailed(e))));
+          .showSnackBar(SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.errorFailed(e))));
     }
   }
 

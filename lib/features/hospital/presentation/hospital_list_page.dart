@@ -176,7 +176,7 @@ class _HospitalCard extends ConsumerWidget {
     final ok = await HospitalActions.callPhone(h);
     if (!ok && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.hospitalCallFailed)),
+        SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.hospitalCallFailed)),
       );
     }
   }
@@ -186,7 +186,7 @@ class _HospitalCard extends ConsumerWidget {
     final ok = await HospitalActions.openMaps(h);
     if (!ok && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.hospitalMapsFailed)),
+        SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.hospitalMapsFailed)),
       );
     }
   }

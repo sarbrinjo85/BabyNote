@@ -34,7 +34,7 @@ class _FamilyJoinPageState extends ConsumerState<FamilyJoinPage> {
       await ref.read(familyControllerProvider.notifier).redeemInvite(code);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.familyJoined)),
+        SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.familyJoined)),
       );
       context.pop();
     } on PostgrestException catch (e) {
@@ -50,11 +50,11 @@ class _FamilyJoinPageState extends ConsumerState<FamilyJoinPage> {
         userMsg = l10n.errorFailed(msg);
       }
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(userMsg)));
+          .showSnackBar(SnackBar(duration: const Duration(seconds: 1), content: Text(userMsg)));
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(l10n.errorFailed(e))));
+          .showSnackBar(SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.errorFailed(e))));
     } finally {
       if (mounted) setState(() => _busy = false);
     }

@@ -95,14 +95,14 @@ class _DiaperRegisterPageState extends ConsumerState<DiaperRegisterPage> {
     state.when(
       data: (_) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_isEdit ? l10n.recordEditSaved : l10n.diaperSavedToast)),
+          SnackBar(duration: const Duration(seconds: 1), content: Text(_isEdit ? l10n.recordEditSaved : l10n.diaperSavedToast)),
         );
         context.pop();
       },
       loading: () {},
       error: (err, _) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(l10n.errorFailed(err))));
+            .showSnackBar(SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.errorFailed(err))));
       },
     );
   }

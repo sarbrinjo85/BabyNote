@@ -67,14 +67,14 @@ class _SleepRegisterPageState extends ConsumerState<SleepRegisterPage> {
     state.when(
       data: (_) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.recordEditSaved)),
+          SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.recordEditSaved)),
         );
         context.pop();
       },
       loading: () {},
       error: (err, _) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(l10n.errorFailed(err))));
+            .showSnackBar(SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.errorFailed(err))));
       },
     );
   }
@@ -91,14 +91,14 @@ class _SleepRegisterPageState extends ConsumerState<SleepRegisterPage> {
     state.when(
       data: (_) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.sleepStartedToast)),
+          SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.sleepStartedToast)),
         );
         // 시작 후엔 그대로 같은 화면 유지 (진행 중 카드로 자동 전환)
       },
       loading: () {},
       error: (err, _) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(l10n.errorFailed(err))));
+            .showSnackBar(SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.errorFailed(err))));
       },
     );
   }
@@ -114,14 +114,14 @@ class _SleepRegisterPageState extends ConsumerState<SleepRegisterPage> {
     state.when(
       data: (_) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.sleepFinishedToast)),
+          SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.sleepFinishedToast)),
         );
         context.pop();
       },
       loading: () {},
       error: (err, _) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(l10n.errorFailed(err))));
+            .showSnackBar(SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.errorFailed(err))));
       },
     );
   }

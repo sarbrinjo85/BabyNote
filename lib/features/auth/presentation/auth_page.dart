@@ -47,7 +47,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
       if (!mounted) return;
       final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(l10n.errorFailed(e))));
+          .showSnackBar(SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.errorFailed(e))));
     } finally {
       if (mounted) setState(() => _busy = false);
     }

@@ -1208,4 +1208,130 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fabAmountEditHint => 'e.g. 120';
+
+  @override
+  String get routineTitle => 'Routine';
+
+  @override
+  String get routineEditTitle => 'Edit routine';
+
+  @override
+  String get routineSavedToast => 'Routine saved';
+
+  @override
+  String get routineKindWalk => 'Walk';
+
+  @override
+  String get routineKindBath => 'Bath';
+
+  @override
+  String get routineKindSupplement => 'Supplement';
+
+  @override
+  String get routineKindSnack => 'Snack';
+
+  @override
+  String get routineDurationLabel => 'Duration (min)';
+
+  @override
+  String get routineDurationHint => 'e.g. 30';
+
+  @override
+  String get routineItemNameLabel => 'Name';
+
+  @override
+  String get routineItemNameHintSupplement => 'e.g. Vitamin D, 1 drop';
+
+  @override
+  String get routineItemNameHintSnack => 'e.g. 1/4 apple';
+
+  @override
+  String get routineStartedAtLabel => 'Time';
+
+  @override
+  String get routineNoteLabel => 'Note (optional)';
+
+  @override
+  String get routineSectionHome => 'Routine';
+
+  @override
+  String get homeRoutineWalk => 'Walk';
+
+  @override
+  String get homeRoutineBath => 'Bath';
+
+  @override
+  String get homeRoutineSupplement => 'Supplement';
+
+  @override
+  String get homeRoutineSnack => 'Snack';
+
+  @override
+  String get symptomTitle => 'Health log';
+
+  @override
+  String get symptomEditTitle => 'Edit health log';
+
+  @override
+  String get symptomSavedToast => 'Health log saved';
+
+  @override
+  String get symptomKindCough => 'Cough';
+
+  @override
+  String get symptomKindVomit => 'Vomit';
+
+  @override
+  String get symptomKindRash => 'Rash';
+
+  @override
+  String get symptomKindInjury => 'Injury';
+
+  @override
+  String get symptomSeverityLabel => 'Severity';
+
+  @override
+  String get symptomSeverityMild => 'Mild';
+
+  @override
+  String get symptomSeverityModerate => 'Moderate';
+
+  @override
+  String get symptomSeveritySevere => 'Severe';
+
+  @override
+  String get symptomOccurredAtLabel => 'Time';
+
+  @override
+  String get symptomNoteLabel => 'Note (optional)';
+
+  @override
+  String get symptomPhotoLabel => 'Photo (rash / injury)';
+
+  @override
+  String get symptomPhotoPick => 'Pick photo';
+
+  @override
+  String get symptomPhotoFromCamera => 'Camera';
+
+  @override
+  String get symptomPhotoFromGallery => 'Gallery';
+
+  @override
+  String get symptomPhotoRemove => 'Remove photo';
+
+  @override
+  String get symptomSectionHome => 'Health';
+
+  @override
+  String get homeSymptomCough => 'Cough';
+
+  @override
+  String get homeSymptomVomit => 'Vomit';
+
+  @override
+  String get homeSymptomRash => 'Rash';
+
+  @override
+  String get homeSymptomInjury => 'Injury';
 }

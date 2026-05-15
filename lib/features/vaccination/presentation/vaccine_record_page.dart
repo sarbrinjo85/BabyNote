@@ -66,14 +66,14 @@ class _VaccineRecordPageState extends ConsumerState<VaccineRecordPage> {
     state.when(
       data: (_) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${widget.schedule.name} ✅')),
+          SnackBar(duration: const Duration(seconds: 1), content: Text('${widget.schedule.name} ✅')),
         );
         context.pop();
       },
       loading: () {},
       error: (err, _) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(l10n.errorFailed(err))));
+            .showSnackBar(SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.errorFailed(err))));
       },
     );
   }

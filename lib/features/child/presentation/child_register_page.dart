@@ -63,7 +63,7 @@ class _ChildRegisterPageState extends ConsumerState<ChildRegisterPage> {
     if (form == null || !form.validate()) return;
     if (_birthDate == null) {
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(l10n.childBirthDateRequired)));
+          .showSnackBar(SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.childBirthDateRequired)));
       return;
     }
     form.save();
@@ -85,14 +85,14 @@ class _ChildRegisterPageState extends ConsumerState<ChildRegisterPage> {
     state.when(
       data: (_) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${_name.trim()} 자녀가 등록되었어요 🎉')),
+          SnackBar(duration: const Duration(seconds: 1), content: Text('${_name.trim()} 자녀가 등록되었어요 🎉')),
         );
         context.pop(); // 홈으로 돌아감
       },
       loading: () {}, // submit 직후엔 loading일 수 있음, 그냥 두기
       error: (err, _) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.childRegisterFailed(err))),
+          SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.childRegisterFailed(err))),
         );
       },
     );

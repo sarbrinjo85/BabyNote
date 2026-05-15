@@ -49,12 +49,12 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
     if (info != null && svc.hasMultiChildEntitlement(info)) {
       ref.invalidate(customerInfoProvider);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('구매가 완료되었어요. 가족 플랜이 활성화됐습니다.')),
+        const SnackBar(duration: Duration(seconds: 1), content: Text('구매가 완료되었어요. 가족 플랜이 활성화됐습니다.')),
       );
       if (mounted) context.pop(true);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('결제가 완료되지 않았어요.')),
+        const SnackBar(duration: Duration(seconds: 1), content: Text('결제가 완료되지 않았어요.')),
       );
     }
   }
@@ -68,7 +68,7 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
     final ok = svc.hasMultiChildEntitlement(info);
     ref.invalidate(customerInfoProvider);
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(ok ? '구매가 복원됐어요.' : '복원할 구매가 없어요.')),
+      SnackBar(duration: const Duration(seconds: 1), content: Text(ok ? '구매가 복원됐어요.' : '복원할 구매가 없어요.')),
     );
     if (ok && mounted) context.pop(true);
   }

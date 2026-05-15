@@ -13,7 +13,9 @@ import '../../diaper/domain/diaper.dart';
 import '../../feeding/domain/feeding.dart';
 import '../../growth/data/growth_repository.dart';
 import '../../growth/domain/growth.dart';
+import '../../routine/domain/routine.dart';
 import '../../sleep/domain/sleep.dart';
+import '../../symptom/domain/symptom.dart';
 import 'stats_providers.dart';
 
 /// 통계 화면 — 1주일/1개월 토글 차트 + 기간 통계 카드.
@@ -84,23 +86,34 @@ class _PeriodViewState extends ConsumerState<_PeriodView> {
     final asyncFeedings = ref.watch(statsFeedingsProvider(childId));
     final asyncSleeps = ref.watch(statsSleepsProvider(childId));
     final asyncDiapers = ref.watch(statsDiapersProvider(childId));
+    final asyncRoutines = ref.watch(statsRoutinesProvider(childId));
+    final asyncSymptoms = ref.watch(statsSymptomsProvider(childId));
 
     if (asyncFeedings.isLoading ||
         asyncSleeps.isLoading ||
-        asyncDiapers.isLoading) {
+        asyncDiapers.isLoading ||
+        asyncRoutines.isLoading ||
+        asyncSymptoms.isLoading) {
       return const Center(child: BabyLoading());
     }
     if (asyncFeedings.hasError ||
         asyncSleeps.hasError ||
-        asyncDiapers.hasError) {
-      final err =
-          asyncFeedings.error ?? asyncSleeps.error ?? asyncDiapers.error;
+        asyncDiapers.hasError ||
+        asyncRoutines.hasError ||
+        asyncSymptoms.hasError) {
+      final err = asyncFeedings.error ??
+          asyncSleeps.error ??
+          asyncDiapers.error ??
+          asyncRoutines.error ??
+          asyncSymptoms.error;
       return Center(child: Text(l10n.errorFailed(err!)));
     }
 
     final feedings = asyncFeedings.value ?? const [];
     final sleeps = asyncSleeps.value ?? const [];
     final diapers = asyncDiapers.value ?? const [];
+    final routines = asyncRoutines.value ?? const [];
+    final symptoms = asyncSymptoms.value ?? const [];
 
     // 기간 필터링
     final now = DateTime.now();
@@ -120,6 +133,8 @@ class _PeriodViewState extends ConsumerState<_PeriodView> {
     final fInRange = feedings.where((f) => inRange(f.startedAt)).toList();
     final sInRange = sleeps.where((s) => inRange(s.startedAt)).toList();
     final dInRange = diapers.where((d) => inRange(d.recordedAt)).toList();
+    final rInRange = routines.where((r) => inRange(r.startedAt)).toList();
+    final symInRange = symptoms.where((s) => inRange(s.occurredAt)).toList();
 
     return ListView(
       padding: const EdgeInsets.all(Spacing.md),
@@ -148,6 +163,10 @@ class _PeriodViewState extends ConsumerState<_PeriodView> {
           sleeps: sInRange,
           diapers: dInRange,
         ),
+        const SizedBox(height: Spacing.sm),
+        _RoutineStatsCard(mode: _mode, routines: rInRange),
+        const SizedBox(height: Spacing.sm),
+        _SymptomStatsCard(mode: _mode, symptoms: symInRange),
       ],
     );
   }
@@ -585,6 +604,123 @@ class _StatsCard extends StatelessWidget {
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// 루틴 통계 — kind 별 횟수 + 산책/목욕 시간 합계
+// ─────────────────────────────────────────────────────────────────────────
+class _RoutineStatsCard extends StatelessWidget {
+  const _RoutineStatsCard({required this.mode, required this.routines});
+
+  final _PeriodMode mode;
+  final List<Routine> routines;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final periodLabel =
+        mode == _PeriodMode.weekly ? '지난 7일' : '지난 12개월';
+
+    int walk = 0, bath = 0, supp = 0, snack = 0;
+    int walkMin = 0, bathMin = 0;
+    for (final r in routines) {
+      switch (r.kind) {
+        case RoutineKind.walk:
+          walk++;
+          walkMin += r.durationMin ?? 0;
+          break;
+        case RoutineKind.bath:
+          bath++;
+          bathMin += r.durationMin ?? 0;
+          break;
+        case RoutineKind.supplement:
+          supp++;
+          break;
+        case RoutineKind.snack:
+          snack++;
+          break;
+      }
+    }
+    final total = routines.length;
+
+    String hm(int min) {
+      final h = min ~/ 60;
+      final m = min % 60;
+      if (h == 0) return '$m분';
+      if (m == 0) return '$h시간';
+      return '$h시간 $m분';
+    }
+
+    return _StatsCard(
+      icon: '🚶',
+      title: '루틴 ($periodLabel)',
+      headline: total == 0 ? '기록 없음' : '총 $total회',
+      subItems: [
+        if (walk > 0)
+          '· 산책 $walk회${walkMin > 0 ? ' (${hm(walkMin)})' : ''}',
+        if (bath > 0)
+          '· 목욕 $bath회${bathMin > 0 ? ' (${hm(bathMin)})' : ''}',
+        if (supp > 0) '· 영양제 $supp회',
+        if (snack > 0) '· 간식 $snack회',
+      ],
+      color: theme.colorScheme.primary,
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// 건강 통계 — kind 별 횟수 + severity 분포
+// ─────────────────────────────────────────────────────────────────────────
+class _SymptomStatsCard extends StatelessWidget {
+  const _SymptomStatsCard({required this.mode, required this.symptoms});
+
+  final _PeriodMode mode;
+  final List<Symptom> symptoms;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final periodLabel =
+        mode == _PeriodMode.weekly ? '지난 7일' : '지난 12개월';
+
+    int cough = 0, vomit = 0, rash = 0, injury = 0;
+    int severeCount = 0;
+    for (final s in symptoms) {
+      switch (s.kind) {
+        case SymptomKind.cough:
+          cough++;
+          break;
+        case SymptomKind.vomit:
+          vomit++;
+          break;
+        case SymptomKind.rash:
+          rash++;
+          break;
+        case SymptomKind.injury:
+          injury++;
+          break;
+      }
+      if (s.severity == Severity.severe) severeCount++;
+    }
+    final total = symptoms.length;
+
+    return _StatsCard(
+      icon: '🩹',
+      title: '건강 ($periodLabel)',
+      headline: total == 0 ? '기록 없음' : '총 $total건',
+      subItems: [
+        if (cough > 0) '· 기침 $cough건',
+        if (vomit > 0) '· 구토 $vomit건',
+        if (rash > 0) '· 발진 $rash건',
+        if (injury > 0) '· 상처 $injury건',
+        if (severeCount > 0) '⚠ "심함" $severeCount건 — 의사 상담 권장',
+      ],
+      // severe 가 있으면 강한 강조 색, 없으면 secondary
+      color: severeCount > 0
+          ? theme.colorScheme.error
+          : theme.colorScheme.tertiary,
+    );
+  }
+}
+
 class _NoChildPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -883,11 +1019,11 @@ Future<void> _confirmAndDeleteGrowth(
     await delete();
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.recordDeleted)),
+      SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.recordDeleted)),
     );
   } catch (e) {
     if (!context.mounted) return;
     ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(l10n.errorFailed(e))));
+        .showSnackBar(SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.errorFailed(e))));
   }
 }

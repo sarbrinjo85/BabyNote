@@ -1191,4 +1191,130 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get fabAmountEditHint => '例: 120';
+
+  @override
+  String get routineTitle => 'ルーティン記録';
+
+  @override
+  String get routineEditTitle => 'ルーティン編集';
+
+  @override
+  String get routineSavedToast => 'ルーティンを保存しました';
+
+  @override
+  String get routineKindWalk => '散歩';
+
+  @override
+  String get routineKindBath => 'お風呂';
+
+  @override
+  String get routineKindSupplement => 'サプリ';
+
+  @override
+  String get routineKindSnack => 'おやつ';
+
+  @override
+  String get routineDurationLabel => '時間 (分)';
+
+  @override
+  String get routineDurationHint => '例: 30';
+
+  @override
+  String get routineItemNameLabel => '名前';
+
+  @override
+  String get routineItemNameHintSupplement => '例: ビタミンD 1滴';
+
+  @override
+  String get routineItemNameHintSnack => '例: りんご 1/4個';
+
+  @override
+  String get routineStartedAtLabel => '時刻';
+
+  @override
+  String get routineNoteLabel => 'メモ (任意)';
+
+  @override
+  String get routineSectionHome => 'ルーティン';
+
+  @override
+  String get homeRoutineWalk => '散歩';
+
+  @override
+  String get homeRoutineBath => 'お風呂';
+
+  @override
+  String get homeRoutineSupplement => 'サプリ';
+
+  @override
+  String get homeRoutineSnack => 'おやつ';
+
+  @override
+  String get symptomTitle => '健康記録';
+
+  @override
+  String get symptomEditTitle => '健康記録の編集';
+
+  @override
+  String get symptomSavedToast => '健康記録を保存しました';
+
+  @override
+  String get symptomKindCough => 'せき';
+
+  @override
+  String get symptomKindVomit => '嘔吐';
+
+  @override
+  String get symptomKindRash => '発疹';
+
+  @override
+  String get symptomKindInjury => 'けが';
+
+  @override
+  String get symptomSeverityLabel => '程度';
+
+  @override
+  String get symptomSeverityMild => '軽い';
+
+  @override
+  String get symptomSeverityModerate => '普通';
+
+  @override
+  String get symptomSeveritySevere => '重い';
+
+  @override
+  String get symptomOccurredAtLabel => '時刻';
+
+  @override
+  String get symptomNoteLabel => 'メモ (任意)';
+
+  @override
+  String get symptomPhotoLabel => '写真 (発疹 / けが)';
+
+  @override
+  String get symptomPhotoPick => '写真を選ぶ';
+
+  @override
+  String get symptomPhotoFromCamera => 'カメラ';
+
+  @override
+  String get symptomPhotoFromGallery => 'ギャラリー';
+
+  @override
+  String get symptomPhotoRemove => '写真を削除';
+
+  @override
+  String get symptomSectionHome => '健康';
+
+  @override
+  String get homeSymptomCough => 'せき';
+
+  @override
+  String get homeSymptomVomit => '嘔吐';
+
+  @override
+  String get homeSymptomRash => '発疹';
+
+  @override
+  String get homeSymptomInjury => 'けが';
 }

@@ -76,7 +76,7 @@ class _GrowthRegisterPageState extends ConsumerState<GrowthRegisterPage> {
 
     if (w == null && h == null && hd == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.growthAtLeastOneRequired)),
+        SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.growthAtLeastOneRequired)),
       );
       return;
     }
@@ -107,14 +107,14 @@ class _GrowthRegisterPageState extends ConsumerState<GrowthRegisterPage> {
     state.when(
       data: (_) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_isEdit ? l10n.recordEditSaved : l10n.growthSavedToast)),
+          SnackBar(duration: const Duration(seconds: 1), content: Text(_isEdit ? l10n.recordEditSaved : l10n.growthSavedToast)),
         );
         context.pop();
       },
       loading: () {},
       error: (err, _) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(l10n.errorFailed(err))));
+            .showSnackBar(SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.errorFailed(err))));
       },
     );
   }

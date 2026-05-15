@@ -53,6 +53,17 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         firm: l10n.diaperFirm,
         small: l10n.diaperSmall,
         large: l10n.diaperLarge,
+        walk: l10n.routineKindWalk,
+        bath: l10n.routineKindBath,
+        supplement: l10n.routineKindSupplement,
+        snack: l10n.routineKindSnack,
+        cough: l10n.symptomKindCough,
+        vomit: l10n.symptomKindVomit,
+        rash: l10n.symptomKindRash,
+        injury: l10n.symptomKindInjury,
+        mild: l10n.symptomSeverityMild,
+        moderate: l10n.symptomSeverityModerate,
+        severe: l10n.symptomSeveritySevere,
       );
 
   Future<void> _onExport() async {
@@ -60,7 +71,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final children = ref.read(myChildrenProvider).valueOrNull ?? const [];
     if (children.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.commonRegisterChildFirst)),
+        SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.commonRegisterChildFirst)),
       );
       return;
     }
@@ -75,7 +86,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(l10n.errorFailed(e))));
+          .showSnackBar(SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.errorFailed(e))));
     } finally {
       if (mounted) setState(() => _exporting = false);
     }

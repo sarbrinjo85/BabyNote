@@ -11,8 +11,12 @@ import '../../feeding/data/feeding_repository.dart';
 import '../../feeding/domain/feeding.dart';
 import '../../growth/data/growth_repository.dart';
 import '../../growth/domain/growth.dart';
+import '../../routine/data/routine_repository.dart';
+import '../../routine/domain/routine.dart';
 import '../../sleep/data/sleep_repository.dart';
 import '../../sleep/domain/sleep.dart';
+import '../../symptom/data/symptom_repository.dart';
+import '../../symptom/domain/symptom.dart';
 
 /// 자녀의 모든 기록을 CSV로 묶어서 시스템 공유 시트로 내보내는 서비스.
 ///
@@ -35,12 +39,16 @@ class ExportService {
     required this.sleepRepo,
     required this.diaperRepo,
     required this.growthRepo,
+    required this.routineRepo,
+    required this.symptomRepo,
   });
 
   final FeedingRepository feedingRepo;
   final SleepRepository sleepRepo;
   final DiaperRepository diaperRepo;
   final GrowthRepository growthRepo;
+  final RoutineRepository routineRepo;
+  final SymptomRepository symptomRepo;
 
   /// 자녀의 모든 기록을 CSV로 만들어 공유 시트 띄우기.
   /// labels는 type 라벨 + diaper 색상/형태/양 등 다국어 텍스트 매핑.
@@ -53,6 +61,8 @@ class ExportService {
     final sleeps = await sleepRepo.listRecent(child.id, limit: 1000);
     final diapers = await diaperRepo.listRecent(child.id, limit: 1000);
     final growths = await growthRepo.listAll(child.id);
+    final routines = await routineRepo.listRecent(child.id, limit: 1000);
+    final symptoms = await symptomRepo.listRecent(child.id, limit: 1000);
 
     final rows = <List<String>>[];
     rows.add(['type', 'date', 'time', 'detail', 'note']);
@@ -91,6 +101,24 @@ class ExportService {
         _time(g.measuredAt),
         _growthDetail(g),
         g.note ?? '',
+      ]);
+    }
+    for (final r in routines) {
+      rows.add([
+        _routineTypeLabel(r.kind, labels),
+        _date(r.startedAt),
+        _time(r.startedAt),
+        _routineDetail(r, labels),
+        r.note ?? '',
+      ]);
+    }
+    for (final s in symptoms) {
+      rows.add([
+        _symptomTypeLabel(s.kind, labels),
+        _date(s.occurredAt),
+        _time(s.occurredAt),
+        _symptomDetail(s, labels),
+        s.note ?? '',
       ]);
     }
 
@@ -186,6 +214,63 @@ class ExportService {
     return parts.join(' ');
   }
 
+  String _routineTypeLabel(RoutineKind k, ExportLabels l) {
+    switch (k) {
+      case RoutineKind.walk:
+        return l.walk;
+      case RoutineKind.bath:
+        return l.bath;
+      case RoutineKind.supplement:
+        return l.supplement;
+      case RoutineKind.snack:
+        return l.snack;
+    }
+  }
+
+  String _routineDetail(Routine r, ExportLabels l) {
+    if (r.kind.usesDuration && r.durationMin != null) {
+      return '${r.durationMin} min';
+    }
+    if (r.kind.usesItemName && r.itemName != null && r.itemName!.isNotEmpty) {
+      return r.itemName!;
+    }
+    return '';
+  }
+
+  String _symptomTypeLabel(SymptomKind k, ExportLabels l) {
+    switch (k) {
+      case SymptomKind.cough:
+        return l.cough;
+      case SymptomKind.vomit:
+        return l.vomit;
+      case SymptomKind.rash:
+        return l.rash;
+      case SymptomKind.injury:
+        return l.injury;
+    }
+  }
+
+  String _symptomDetail(Symptom s, ExportLabels l) {
+    final parts = <String>[];
+    switch (s.severity) {
+      case Severity.mild:
+        parts.add(l.mild);
+        break;
+      case Severity.moderate:
+        parts.add(l.moderate);
+        break;
+      case Severity.severe:
+        parts.add(l.severe);
+        break;
+      case null:
+        break;
+    }
+    if (s.photoPath != null) {
+      parts.add('📷');
+    }
+    return parts.join(' ');
+  }
+
   String _growthDetail(Growth g) {
     final parts = <String>[];
     if (g.weightG != null) {
@@ -266,6 +351,17 @@ class ExportLabels {
     required this.firm,
     required this.small,
     required this.large,
+    required this.walk,
+    required this.bath,
+    required this.supplement,
+    required this.snack,
+    required this.cough,
+    required this.vomit,
+    required this.rash,
+    required this.injury,
+    required this.mild,
+    required this.moderate,
+    required this.severe,
   });
 
   final String feeding, sleep, diaper, growth;
@@ -276,6 +372,9 @@ class ExportLabels {
   final String yellow, brown, green, black, red, white, unknown;
   final String loose, normal, firm;
   final String small, large;
+  final String walk, bath, supplement, snack;
+  final String cough, vomit, rash, injury;
+  final String mild, moderate, severe;
 }
 
 final exportServiceProvider = Provider<ExportService>((ref) {
@@ -284,5 +383,7 @@ final exportServiceProvider = Provider<ExportService>((ref) {
     sleepRepo: ref.watch(sleepRepositoryProvider),
     diaperRepo: ref.watch(diaperRepositoryProvider),
     growthRepo: ref.watch(growthRepositoryProvider),
+    routineRepo: ref.watch(routineRepositoryProvider),
+    symptomRepo: ref.watch(symptomRepositoryProvider),
   );
 });

@@ -7,8 +7,12 @@ import '../../auth/presentation/auth_providers.dart';
 import '../../diaper/presentation/diaper_providers.dart';
 import '../../feeding/presentation/feeding_providers.dart';
 import '../../growth/presentation/growth_providers.dart';
+import '../../routine/domain/routine.dart';
+import '../../routine/presentation/routine_providers.dart';
 import '../../sleep/presentation/sleep_providers.dart';
 import '../../stats/presentation/stats_providers.dart';
+import '../../symptom/domain/symptom.dart';
+import '../../symptom/presentation/symptom_providers.dart';
 
 /// 가족 다른 사용자가 추가한 활동에 대한 토스트 알림 큐.
 /// HomePage에서 listen해서 SnackBar로 표시.
@@ -20,8 +24,8 @@ class FamilyActivityEvent {
 
 final familyActivityFeedProvider = StateProvider<FamilyActivityEvent?>((ref) => null);
 
-/// 가족 공유 실시간 동기화 — 자녀별 4개 테이블(feedings/sleeps/diapers/growths)
-/// INSERT/UPDATE/DELETE 이벤트 구독.
+/// 가족 공유 실시간 동기화 — 자녀별 6개 테이블
+/// (feedings/sleeps/diapers/growths/routines/symptoms) INSERT/UPDATE/DELETE 구독.
 ///
 /// ── 동작 ─────────────────────────────────────────────────────────────
 /// - 같은 자녀에 대한 caregivers가 한 명이라도 기록을 추가/수정/삭제하면
@@ -103,6 +107,55 @@ final childRealtimeSyncProvider =
       ref.invalidate(growthsProvider(childId));
       ref.invalidate(statsGrowthsProvider(childId));
       publishActivity(payload, '성장', '📏');
+    },
+  );
+  // ── routines / symptoms — kind 컬럼 기반으로 구체적 라벨 ────────────
+  // 예: "🚶 가족이 산책 기록을 남겼어요" / "🩹 가족이 발진 기록을 남겼어요"
+  // INSERT가 아니거나 kind 매핑 실패 시 통합 라벨로 fallback.
+  listenTable(
+    table: 'routines',
+    onChange: (payload) {
+      ref.invalidate(recentRoutinesProvider(childId));
+      ref.invalidate(statsRoutinesProvider(childId));
+      final kindStr = payload.newRecord['kind'] as String?;
+      String label = '루틴';
+      String icon = '🚶';
+      if (kindStr != null) {
+        try {
+          final k = RoutineKind.fromDbValue(kindStr);
+          icon = k.emoji;
+          label = switch (k) {
+            RoutineKind.walk => '산책',
+            RoutineKind.bath => '목욕',
+            RoutineKind.supplement => '영양제',
+            RoutineKind.snack => '간식',
+          };
+        } catch (_) {/* 알 수 없는 kind: fallback */}
+      }
+      publishActivity(payload, label, icon);
+    },
+  );
+  listenTable(
+    table: 'symptoms',
+    onChange: (payload) {
+      ref.invalidate(recentSymptomsProvider(childId));
+      ref.invalidate(statsSymptomsProvider(childId));
+      final kindStr = payload.newRecord['kind'] as String?;
+      String label = '건강 기록';
+      String icon = '🩹';
+      if (kindStr != null) {
+        try {
+          final k = SymptomKind.fromDbValue(kindStr);
+          icon = k.emoji;
+          label = switch (k) {
+            SymptomKind.cough => '기침',
+            SymptomKind.vomit => '구토',
+            SymptomKind.rash => '발진',
+            SymptomKind.injury => '상처',
+          };
+        } catch (_) {/* fallback */}
+      }
+      publishActivity(payload, label, icon);
     },
   );
 

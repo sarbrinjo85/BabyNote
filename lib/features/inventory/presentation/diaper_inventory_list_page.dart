@@ -229,12 +229,12 @@ class _InventoryTile extends StatelessWidget {
           .deleteInventory(childId: childId, id: inv.id);
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.inventoryDeleted)),
+        SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.inventoryDeleted)),
       );
     } catch (e) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(l10n.errorFailed(e))));
+          .showSnackBar(SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.errorFailed(e))));
     }
   }
 

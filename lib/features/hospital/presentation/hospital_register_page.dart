@@ -92,14 +92,14 @@ class _HospitalRegisterPageState extends ConsumerState<HospitalRegisterPage> {
     state.when(
       data: (_) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_isEdit ? l10n.recordEditSaved : l10n.hospitalSavedToast)),
+          SnackBar(duration: const Duration(seconds: 1), content: Text(_isEdit ? l10n.recordEditSaved : l10n.hospitalSavedToast)),
         );
         context.pop();
       },
       loading: () {},
       error: (err, _) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(l10n.errorFailed(err))));
+            .showSnackBar(SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.errorFailed(err))));
       },
     );
   }

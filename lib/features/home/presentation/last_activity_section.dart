@@ -177,12 +177,12 @@ class LastActivitySection extends ConsumerWidget {
       await delete();
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.recordDeleted)),
+        SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.recordDeleted)),
       );
     } catch (e) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(l10n.errorFailed(e))));
+          .showSnackBar(SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.errorFailed(e))));
     }
   }
 

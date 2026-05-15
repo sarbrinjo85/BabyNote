@@ -14,9 +14,15 @@ import '../../feeding/data/feeding_repository.dart';
 import '../../feeding/domain/feeding.dart';
 import '../../inventory/presentation/diaper_inventory_providers.dart';
 import '../../inventory/presentation/formula_inventory_providers.dart';
+import '../../routine/data/routine_repository.dart';
+import '../../routine/domain/routine.dart';
+import '../../routine/presentation/routine_providers.dart';
 import '../../sleep/data/sleep_repository.dart';
 import '../../sleep/domain/sleep.dart';
 import '../../stats/presentation/stats_providers.dart';
+import '../../symptom/data/symptom_repository.dart';
+import '../../symptom/domain/symptom.dart';
+import '../../symptom/presentation/symptom_providers.dart';
 
 /// 종합 기록 — 2탭 (일별 통합 / 성장).
 ///
@@ -80,23 +86,35 @@ class _DailyTimelineList extends ConsumerWidget {
     final asyncFeedings = ref.watch(statsFeedingsProvider(childId));
     final asyncSleeps = ref.watch(statsSleepsProvider(childId));
     final asyncDiapers = ref.watch(statsDiapersProvider(childId));
+    // 루틴/증상 — 모든 kind 혼합 30건. listRecent 가 limit=30 이라 충분.
+    final asyncRoutines = ref.watch(recentRoutinesProvider(childId));
+    final asyncSymptoms = ref.watch(recentSymptomsProvider(childId));
 
     if (asyncFeedings.isLoading ||
         asyncSleeps.isLoading ||
-        asyncDiapers.isLoading) {
+        asyncDiapers.isLoading ||
+        asyncRoutines.isLoading ||
+        asyncSymptoms.isLoading) {
       return const Center(child: BabyLoading());
     }
     if (asyncFeedings.hasError ||
         asyncSleeps.hasError ||
-        asyncDiapers.hasError) {
-      final err =
-          asyncFeedings.error ?? asyncSleeps.error ?? asyncDiapers.error;
+        asyncDiapers.hasError ||
+        asyncRoutines.hasError ||
+        asyncSymptoms.hasError) {
+      final err = asyncFeedings.error ??
+          asyncSleeps.error ??
+          asyncDiapers.error ??
+          asyncRoutines.error ??
+          asyncSymptoms.error;
       return Center(child: Text(l10n.errorFailed(err!)));
     }
 
     final feedings = asyncFeedings.value ?? const [];
     final sleeps = asyncSleeps.value ?? const [];
     final diapers = asyncDiapers.value ?? const [];
+    final routines = asyncRoutines.value ?? const [];
+    final symptoms = asyncSymptoms.value ?? const [];
 
     final events = <_DailyEvent>[
       ...feedings.map((f) => _DailyEvent(
@@ -131,6 +149,26 @@ class _DailyTimelineList extends ConsumerWidget {
               await ref.read(diaperRepositoryProvider).deleteDiaper(d.id);
               ref.invalidate(statsDiapersProvider(childId));
               ref.invalidate(diaperInventoryStatsProvider);
+            }),
+          )),
+      ...routines.map((r) => _DailyEvent(
+            when: r.startedAt,
+            icon: r.kind.emoji,
+            title: _summarizeRoutine(l10n, r),
+            onTap: () => context.push('/routine/new', extra: r),
+            onLongPress: () => _confirmAndDelete(context, delete: () async {
+              await ref.read(routineRepositoryProvider).delete(r.id);
+              ref.invalidate(recentRoutinesProvider(childId));
+            }),
+          )),
+      ...symptoms.map((s) => _DailyEvent(
+            when: s.occurredAt,
+            icon: s.kind.emoji,
+            title: _summarizeSymptom(l10n, s),
+            onTap: () => context.push('/symptom/new', extra: s),
+            onLongPress: () => _confirmAndDelete(context, delete: () async {
+              await ref.read(symptomRepositoryProvider).delete(s.id);
+              ref.invalidate(recentSymptomsProvider(childId));
             }),
           )),
     ];
@@ -220,12 +258,12 @@ Future<void> _confirmAndDelete(
     await delete();
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.recordDeleted)),
+      SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.recordDeleted)),
     );
   } catch (e) {
     if (!context.mounted) return;
     ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(l10n.errorFailed(e))));
+        .showSnackBar(SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.errorFailed(e))));
   }
 }
 
@@ -306,6 +344,38 @@ String _summarizeDiaper(AppLocalizations l10n, Diaper d) {
     });
   }
   return parts.join(' · ');
+}
+
+String _summarizeRoutine(AppLocalizations l10n, Routine r) {
+  final label = switch (r.kind) {
+    RoutineKind.walk => l10n.routineKindWalk,
+    RoutineKind.bath => l10n.routineKindBath,
+    RoutineKind.supplement => l10n.routineKindSupplement,
+    RoutineKind.snack => l10n.routineKindSnack,
+  };
+  if (r.kind.usesDuration && r.durationMin != null) {
+    return '$label ${r.durationMin}분';
+  }
+  if (r.kind.usesItemName && r.itemName != null && r.itemName!.isNotEmpty) {
+    return '$label · ${r.itemName}';
+  }
+  return label;
+}
+
+String _summarizeSymptom(AppLocalizations l10n, Symptom s) {
+  final label = switch (s.kind) {
+    SymptomKind.cough => l10n.symptomKindCough,
+    SymptomKind.vomit => l10n.symptomKindVomit,
+    SymptomKind.rash => l10n.symptomKindRash,
+    SymptomKind.injury => l10n.symptomKindInjury,
+  };
+  final severity = switch (s.severity) {
+    Severity.mild => l10n.symptomSeverityMild,
+    Severity.moderate => l10n.symptomSeverityModerate,
+    Severity.severe => l10n.symptomSeveritySevere,
+    null => '',
+  };
+  return severity.isEmpty ? label : '$label · $severity';
 }
 
 

@@ -13,6 +13,8 @@ import '../../child/presentation/child_providers.dart';
 import '../../child/presentation/selected_child_provider.dart';
 import '../../family/data/realtime_sync.dart';
 import '../../onboarding/presentation/onboarding_coach.dart';
+import '../../routine/domain/routine.dart';
+import '../../symptom/domain/symptom.dart';
 import 'child_info_card.dart';
 import 'notification_bell.dart';
 import 'notification_scheduler.dart';
@@ -46,17 +48,24 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // 첫 build 직후 — 자녀가 1명 이상 있을 때만 코치마크 표시 (UX상 자연스러움).
-    // 자녀 0명이면 _OnboardingHero가 떠서 코치마크와 겹침 X.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_onboardingTriggered) return;
-      _onboardingTriggered = true;
-      OnboardingCoach.maybeShow(context);
-    });
     final l10n = AppLocalizations.of(context);
     final asyncChildren = ref.watch(myChildrenProvider);
     final selectedChild = ref.watch(selectedChildProvider);
     final selectedChildId = ref.watch(selectedChildIdProvider);
+
+    // 첫 build 직후 — 자녀가 1명 이상 있을 때만 코치마크 표시.
+    // 자녀 0명이면 _OnboardingHero 가 떠서 코치마크와 겹치는 문제가 있어 보류.
+    // 자녀 추가 후 다음 build 의 postFrameCallback 에서 트리거됨.
+    final hasChildren = asyncChildren.maybeWhen(
+      data: (cs) => cs.isNotEmpty,
+      orElse: () => false,
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_onboardingTriggered) return;
+      if (!hasChildren) return; // 0명이면 latch 안 함
+      _onboardingTriggered = true;
+      OnboardingCoach.maybeShow(context);
+    });
 
     // 가족 실시간 동기화 — 자녀별 4 테이블 INSERT/UPDATE/DELETE 구독.
     // 자녀 바뀌면 이전 구독 자동 dispose, 새 구독 시작.
@@ -72,7 +81,7 @@ class _HomePageState extends ConsumerState<HomePage> {
         ..showSnackBar(
           SnackBar(
             content: Text('${next.icon} 가족이 ${next.kind} 기록을 남겼어요'),
-            duration: const Duration(seconds: 3),
+            duration: const Duration(seconds: 1),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -97,7 +106,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           ..showSnackBar(
             const SnackBar(
               content: Text('한 번 더 누르면 종료됩니다'),
-              duration: Duration(seconds: 2),
+              duration: Duration(seconds: 1),
             ),
           );
       },
@@ -244,6 +253,100 @@ class _HomePageState extends ConsumerState<HomePage> {
                             Container(
                               key: OnboardingCoach.recordButtonsKey,
                               child: RecordButtonsGrid(childId: child.id),
+                            ),
+                            const SizedBox(height: Spacing.sm),
+
+                            // ── 루틴 — 산책/목욕/영양제/간식 ───────────
+                            _SectionLabel(text: l10n.routineSectionHome),
+                            const SizedBox(height: Spacing.xxs),
+                            GridView.count(
+                              crossAxisCount: 4,
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              mainAxisSpacing: Spacing.xs,
+                              crossAxisSpacing: Spacing.xs,
+                              childAspectRatio: 0.9,
+                              children: [
+                                GridActionTile(
+                                  emoji: RoutineKind.walk.emoji,
+                                  label: l10n.homeRoutineWalk,
+                                  onTap: () => context.push(
+                                    '/routine/new',
+                                    extra: RoutineKind.walk,
+                                  ),
+                                ),
+                                GridActionTile(
+                                  emoji: RoutineKind.bath.emoji,
+                                  label: l10n.homeRoutineBath,
+                                  onTap: () => context.push(
+                                    '/routine/new',
+                                    extra: RoutineKind.bath,
+                                  ),
+                                ),
+                                GridActionTile(
+                                  emoji: RoutineKind.supplement.emoji,
+                                  label: l10n.homeRoutineSupplement,
+                                  onTap: () => context.push(
+                                    '/routine/new',
+                                    extra: RoutineKind.supplement,
+                                  ),
+                                ),
+                                GridActionTile(
+                                  emoji: RoutineKind.snack.emoji,
+                                  label: l10n.homeRoutineSnack,
+                                  onTap: () => context.push(
+                                    '/routine/new',
+                                    extra: RoutineKind.snack,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: Spacing.sm),
+
+                            // ── 건강 — 기침/구토/발진/상처 ─────────────
+                            _SectionLabel(text: l10n.symptomSectionHome),
+                            const SizedBox(height: Spacing.xxs),
+                            GridView.count(
+                              crossAxisCount: 4,
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              mainAxisSpacing: Spacing.xs,
+                              crossAxisSpacing: Spacing.xs,
+                              childAspectRatio: 0.9,
+                              children: [
+                                GridActionTile(
+                                  emoji: SymptomKind.cough.emoji,
+                                  label: l10n.homeSymptomCough,
+                                  onTap: () => context.push(
+                                    '/symptom/new',
+                                    extra: SymptomKind.cough,
+                                  ),
+                                ),
+                                GridActionTile(
+                                  emoji: SymptomKind.vomit.emoji,
+                                  label: l10n.homeSymptomVomit,
+                                  onTap: () => context.push(
+                                    '/symptom/new',
+                                    extra: SymptomKind.vomit,
+                                  ),
+                                ),
+                                GridActionTile(
+                                  emoji: SymptomKind.rash.emoji,
+                                  label: l10n.homeSymptomRash,
+                                  onTap: () => context.push(
+                                    '/symptom/new',
+                                    extra: SymptomKind.rash,
+                                  ),
+                                ),
+                                GridActionTile(
+                                  emoji: SymptomKind.injury.emoji,
+                                  label: l10n.homeSymptomInjury,
+                                  onTap: () => context.push(
+                                    '/symptom/new',
+                                    extra: SymptomKind.injury,
+                                  ),
+                                ),
+                              ],
                             ),
                             const SizedBox(height: Spacing.sm),
 

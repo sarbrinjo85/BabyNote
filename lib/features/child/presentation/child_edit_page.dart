@@ -86,14 +86,14 @@ class _ChildEditPageState extends ConsumerState<ChildEditPage> {
     state.when(
       data: (_) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.childEditSaved)),
+          SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.childEditSaved)),
         );
         context.pop();
       },
       loading: () {},
       error: (err, _) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.errorFailed(err))),
+          SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.errorFailed(err))),
         );
       },
     );
@@ -132,14 +132,14 @@ class _ChildEditPageState extends ConsumerState<ChildEditPage> {
     state.when(
       data: (_) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.childDeleted)),
+          SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.childDeleted)),
         );
         context.go('/'); // 홈으로 (편집 → 자녀 등록 → 등 stack 다 정리)
       },
       loading: () {},
       error: (err, _) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.errorFailed(err))),
+          SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.errorFailed(err))),
         );
       },
     );
