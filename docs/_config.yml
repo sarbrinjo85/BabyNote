@@ -1,0 +1,12 @@
+title: BabyNote
+description: 글로벌 육아기록 앱 — 법무 문서
+theme: jekyll-theme-cayman
+
+# release/ 폴더는 내부 개발 가이드라 GitHub Pages 빌드에서 제외 (선택적 — 공개해도 무방).
+exclude:
+  - release/
+  - spec_extracted.txt
+  - build_ppt.py
+  - babynote_summary.ppt
+  - babynote_summary.pptx
+  - android_setup.md
