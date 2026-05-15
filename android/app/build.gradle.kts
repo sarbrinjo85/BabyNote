@@ -1,8 +1,20 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+}
+
+// android/key.properties 로드 — release 서명용 (gitignore 됨).
+// 파일이 없으면 빈 Properties → release 가 debug 서명으로 fallback (개발 편의).
+val keystoreProperties = Properties().apply {
+    val keystorePropertiesFile = rootProject.file("key.properties")
+    if (keystorePropertiesFile.exists()) {
+        load(FileInputStream(keystorePropertiesFile))
+    }
 }
 
 android {
@@ -32,11 +44,31 @@ android {
         versionName = flutter.versionName
     }
 
+    // ── 서명 설정 ─────────────────────────────────────────────────────
+    // release 서명: key.properties (gitignore 됨) 에서 비밀번호/keystore 경로 로드.
+    // 파일 없으면 release 서명 설정도 생성 안 됨 → release 빌드가 debug 서명 사용.
+    signingConfigs {
+        if (keystoreProperties.isNotEmpty) {
+            create("release") {
+                keyAlias = keystoreProperties["keyAlias"] as String?
+                keyPassword = keystoreProperties["keyPassword"] as String?
+                storeFile = (keystoreProperties["storeFile"] as String?)?.let { file(it) }
+                storePassword = keystoreProperties["storePassword"] as String?
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            // key.properties 가 있으면 release 서명, 없으면 debug fallback (개발 편의).
+            signingConfig = if (keystoreProperties.isNotEmpty) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
+            // 첫 출시는 코드 축소/난독화 OFF — 안정화 후 활성화 검토.
+            isMinifyEnabled = false
+            isShrinkResources = false
         }
     }
 }

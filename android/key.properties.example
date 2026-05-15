@@ -1,0 +1,15 @@
+# Android release 서명 키 정보 (TEMPLATE).
+#
+# 사용법:
+#   1. 이 파일을 `key.properties` 로 복사 (`.gitignore` 로 추적 제외됨)
+#   2. 실제 값으로 채움
+#   3. `flutter build appbundle --release` 또는 `flutter build apk --release`
+#
+# keystore 자체(*.jks) 는 git 에 절대 commit 하지 말 것 — 분실 시 동일 앱 새 등록 필요.
+# USB + 클라우드(비공개) + 비밀번호 매니저 3중 백업 권장.
+
+storePassword=YOUR_KEYSTORE_PASSWORD
+keyPassword=YOUR_KEY_PASSWORD
+keyAlias=babynote
+# Windows 절대경로 — 역슬래시 대신 슬래시 사용 (Gradle 안전).
+storeFile=C:/Users/sarbr/babynote-release.jks
