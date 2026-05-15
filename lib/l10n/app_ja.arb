@@ -443,5 +443,15 @@
   "homeSymptomCough": "せき",
   "homeSymptomVomit": "嘔吐",
   "homeSymptomRash": "発疹",
-  "homeSymptomInjury": "けが"
+  "homeSymptomInjury": "けが",
+
+  "commonClose": "閉じる",
+  "syncPendingTooltip": "{count}件が同期待ち",
+  "@syncPendingTooltip": { "placeholders": { "count": { "type": "int" } } },
+  "syncPendingTitle": "同期待ち",
+  "syncPendingDetail": "オフライン中に保存した{count}件がアップロード待ちです。",
+  "@syncPendingDetail": { "placeholders": { "count": { "type": "int" } } },
+  "syncPendingHint": "ネットワーク復旧時に自動同期されます。",
+  "syncRetryNow": "今すぐ再試行",
+  "syncRetryDoneToast": "同期を試みました"
 }

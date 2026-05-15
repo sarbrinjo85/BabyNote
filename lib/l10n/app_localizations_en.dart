@@ -1334,4 +1334,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeSymptomInjury => 'Injury';
+
+  @override
+  String get commonClose => 'Close';
+
+  @override
+  String syncPendingTooltip(int count) {
+    return '$count items waiting to sync';
+  }
+
+  @override
+  String get syncPendingTitle => 'Waiting to sync';
+
+  @override
+  String syncPendingDetail(int count) {
+    return '$count records saved offline are waiting to upload.';
+  }
+
+  @override
+  String get syncPendingHint =>
+      'They\'ll sync automatically when you\'re back online.';
+
+  @override
+  String get syncRetryNow => 'Try now';
+
+  @override
+  String get syncRetryDoneToast => 'Sync attempted';
 }

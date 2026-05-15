@@ -1318,4 +1318,29 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get homeSymptomInjury => '상처';
+
+  @override
+  String get commonClose => '닫기';
+
+  @override
+  String syncPendingTooltip(int count) {
+    return '$count개 동기화 대기 중';
+  }
+
+  @override
+  String get syncPendingTitle => '동기화 대기 중';
+
+  @override
+  String syncPendingDetail(int count) {
+    return '오프라인 중에 저장된 $count건이 서버 전송 대기 중이에요.';
+  }
+
+  @override
+  String get syncPendingHint => '네트워크가 연결되면 자동으로 동기화돼요.';
+
+  @override
+  String get syncRetryNow => '지금 다시 시도';
+
+  @override
+  String get syncRetryDoneToast => '동기화 시도했어요';
 }

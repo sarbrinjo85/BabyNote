@@ -2565,6 +2565,48 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'상처'**
   String get homeSymptomInjury;
+
+  /// No description provided for @commonClose.
+  ///
+  /// In ko, this message translates to:
+  /// **'닫기'**
+  String get commonClose;
+
+  /// No description provided for @syncPendingTooltip.
+  ///
+  /// In ko, this message translates to:
+  /// **'{count}개 동기화 대기 중'**
+  String syncPendingTooltip(int count);
+
+  /// No description provided for @syncPendingTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'동기화 대기 중'**
+  String get syncPendingTitle;
+
+  /// No description provided for @syncPendingDetail.
+  ///
+  /// In ko, this message translates to:
+  /// **'오프라인 중에 저장된 {count}건이 서버 전송 대기 중이에요.'**
+  String syncPendingDetail(int count);
+
+  /// No description provided for @syncPendingHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'네트워크가 연결되면 자동으로 동기화돼요.'**
+  String get syncPendingHint;
+
+  /// No description provided for @syncRetryNow.
+  ///
+  /// In ko, this message translates to:
+  /// **'지금 다시 시도'**
+  String get syncRetryNow;
+
+  /// No description provided for @syncRetryDoneToast.
+  ///
+  /// In ko, this message translates to:
+  /// **'동기화 시도했어요'**
+  String get syncRetryDoneToast;
 }
 
 class _AppLocalizationsDelegate

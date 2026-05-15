@@ -443,5 +443,15 @@
   "homeSymptomCough": "Cough",
   "homeSymptomVomit": "Vomit",
   "homeSymptomRash": "Rash",
-  "homeSymptomInjury": "Injury"
+  "homeSymptomInjury": "Injury",
+
+  "commonClose": "Close",
+  "syncPendingTooltip": "{count} items waiting to sync",
+  "@syncPendingTooltip": { "placeholders": { "count": { "type": "int" } } },
+  "syncPendingTitle": "Waiting to sync",
+  "syncPendingDetail": "{count} records saved offline are waiting to upload.",
+  "@syncPendingDetail": { "placeholders": { "count": { "type": "int" } } },
+  "syncPendingHint": "They'll sync automatically when you're back online.",
+  "syncRetryNow": "Try now",
+  "syncRetryDoneToast": "Sync attempted"
 }

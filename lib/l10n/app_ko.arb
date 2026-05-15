@@ -481,5 +481,15 @@
   "homeSymptomCough": "기침",
   "homeSymptomVomit": "구토",
   "homeSymptomRash": "발진",
-  "homeSymptomInjury": "상처"
+  "homeSymptomInjury": "상처",
+
+  "commonClose": "닫기",
+  "syncPendingTooltip": "{count}개 동기화 대기 중",
+  "@syncPendingTooltip": { "placeholders": { "count": { "type": "int" } } },
+  "syncPendingTitle": "동기화 대기 중",
+  "syncPendingDetail": "오프라인 중에 저장된 {count}건이 서버 전송 대기 중이에요.",
+  "@syncPendingDetail": { "placeholders": { "count": { "type": "int" } } },
+  "syncPendingHint": "네트워크가 연결되면 자동으로 동기화돼요.",
+  "syncRetryNow": "지금 다시 시도",
+  "syncRetryDoneToast": "동기화 시도했어요"
 }

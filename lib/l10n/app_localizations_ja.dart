@@ -1317,4 +1317,29 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get homeSymptomInjury => 'けが';
+
+  @override
+  String get commonClose => '閉じる';
+
+  @override
+  String syncPendingTooltip(int count) {
+    return '$count件が同期待ち';
+  }
+
+  @override
+  String get syncPendingTitle => '同期待ち';
+
+  @override
+  String syncPendingDetail(int count) {
+    return 'オフライン中に保存した$count件がアップロード待ちです。';
+  }
+
+  @override
+  String get syncPendingHint => 'ネットワーク復旧時に自動同期されます。';
+
+  @override
+  String get syncRetryNow => '今すぐ再試行';
+
+  @override
+  String get syncRetryDoneToast => '同期を試みました';
 }

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:babynote/l10n/app_localizations.dart';
+import '../../../core/sync/sync_indicator.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/stroked_title.dart';
 import '../../../core/widgets/grid_action_tile.dart';
@@ -122,6 +123,8 @@ class _HomePageState extends ConsumerState<HomePage> {
         // Flutter의 TextStyle.foreground는 fill XOR stroke 둘 중 하나만 지원.
         title: const StrokedTitle('Baby Note'),
         actions: [
+          // 오프라인 큐 indicator — 큐가 비어있으면 0 폭으로 사라짐.
+          const SyncIndicator(),
           // GlobalKey는 Container로 감싸서 위치 계산이 IconButton 외곽 박스에
           // 정확히 매칭되도록 함.
           Container(
