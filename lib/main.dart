@@ -7,6 +7,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'app.dart';
 import 'core/config/env.dart';
 import 'core/notifications/notification_service.dart';
+import 'core/sync/sync_worker.dart';
+import 'core/sync/write_queue.dart';
 import 'features/billing/data/billing_service.dart';
 
 Future<void> main() async {
@@ -32,6 +34,10 @@ Future<void> main() async {
   // 인앱 결제 (RevenueCat) 초기화 — 환경 키 없으면 no-op.
   await BillingService.instance.initialize();
 
+  // 오프라인 쓰기 큐 — sqflite 백킹. WriteQueue.open 한 번만 호출 후
+  // writeQueueProvider 를 override 해서 모든 곳에서 동일 인스턴스 사용.
+  final writeQueue = await WriteQueue.open();
+
   // Sentry는 DSN이 주입돼있을 때만 init.
   // 개발 단계 또는 DSN 미설정 시엔 SentryFlutter.init 건너뛰고 그냥 runApp.
   if (Env.isSentryEnabled) {
@@ -47,7 +53,10 @@ Future<void> main() async {
         // PII (이메일/이름)는 보내지 않음 — auth/privacy 보호
         options.sendDefaultPii = false;
       },
-      appRunner: () => runApp(const ProviderScope(child: BabyNoteApp())),
+      appRunner: () => runApp(ProviderScope(
+        overrides: [writeQueueProvider.overrideWithValue(writeQueue)],
+        child: const _BootSyncWorker(child: BabyNoteApp()),
+      )),
     );
   } else {
     if (kDebugMode) {
@@ -56,6 +65,24 @@ Future<void> main() async {
         'to enable error monitoring.',
       );
     }
-    runApp(const ProviderScope(child: BabyNoteApp()));
+    runApp(ProviderScope(
+      overrides: [writeQueueProvider.overrideWithValue(writeQueue)],
+      child: const _BootSyncWorker(child: BabyNoteApp()),
+    ));
+  }
+}
+
+/// SyncWorker 를 앱 부팅 직후 활성화하는 wrapper.
+/// 별도 위젯으로 빼는 이유: ProviderScope 가 child 빌드 시점에 ConsumerWidget
+/// 안에서 ref.watch(syncWorkerProvider) 호출하면 라이프사이클 보장.
+class _BootSyncWorker extends ConsumerWidget {
+  const _BootSyncWorker({required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // syncWorkerProvider 를 watch 해서 ref 의존성을 등록 → connectivity 구독 시작.
+    ref.watch(syncWorkerProvider);
+    return child;
   }
 }
