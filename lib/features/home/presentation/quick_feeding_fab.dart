@@ -179,9 +179,11 @@ class QuickFeedingFab extends ConsumerWidget {
 
     if (!context.mounted) return;
     final summary = _summary(l10n, created);
-    // 이전 SnackBar 즉시 제거 — 빠르게 여러 번 누르면 큐에 쌓이지 않도록.
+    // 이전 SnackBar 즉시 제거 — clearSnackBars 는 화면 + 큐 모두 비움
+    // (hideCurrentSnackBar 는 화면 한 개만 → 빠른 탭 시 큐가 쌓여 1초씩 줄줄이
+    // 나타나 "안 사라짐"으로 보이는 회귀 픽스).
     ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
+      ..clearSnackBars()
       ..showSnackBar(
         SnackBar(
           content: Text(l10n.fabSaved(summary)),
