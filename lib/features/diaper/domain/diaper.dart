@@ -56,6 +56,7 @@ class Diaper {
 
   Map<String, dynamic> toInsertMap({required String recordedBy}) {
     return {
+      if (id != 'pending') 'id': id,
       'child_id': childId,
       'recorded_by': recordedBy,
       'recorded_at': recordedAt.toUtc().toIso8601String(),

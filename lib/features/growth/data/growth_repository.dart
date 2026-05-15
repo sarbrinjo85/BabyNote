@@ -1,13 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../core/sync/offline_writes.dart';
 import '../../../data/supabase_client_provider.dart';
 import '../domain/growth.dart';
 
 class GrowthRepository {
-  GrowthRepository(this._client);
+  GrowthRepository(this._client, this._ref);
 
   final SupabaseClient _client;
+  final Ref _ref;
 
   Future<Growth> createGrowth({
     required String currentUserId,
@@ -18,29 +20,47 @@ class GrowthRepository {
     int? headCircumferenceMm,
     String? note,
   }) async {
+    final id = genUuid();
     final draft = Growth(
-      id: 'pending',
+      id: id,
       childId: childId,
       measuredAt: measuredAt,
       weightG: weightG,
       heightMm: heightMm,
       headCircumferenceMm: headCircumferenceMm,
       note: note,
+      recordedBy: currentUserId,
     );
-    final inserted = await _client
-        .from('growths')
-        .insert(draft.toInsertMap(recordedBy: currentUserId))
-        .select()
-        .single();
-    return Growth.fromMap(inserted);
+    final payload = draft.toInsertMap(recordedBy: currentUserId);
+
+    return OfflineWrites.execute<Growth>(
+      ref: _ref,
+      table: 'growths',
+      op: 'insert',
+      rowId: id,
+      payload: payload,
+      onlineCall: () async {
+        final r =
+            await _client.from('growths').insert(payload).select().single();
+        return Growth.fromMap(r);
+      },
+      optimisticResult: () => draft,
+    );
   }
 
-  /// 성장 기록 1건 삭제.
   Future<void> deleteGrowth(String id) async {
-    await _client.from('growths').delete().eq('id', id);
+    return OfflineWrites.executeVoid(
+      ref: _ref,
+      table: 'growths',
+      op: 'delete',
+      rowId: id,
+      payload: const {},
+      onlineCall: () async {
+        await _client.from('growths').delete().eq('id', id);
+      },
+    );
   }
 
-  /// 성장 기록 수정 — 측정일/체중/키/머리둘레/메모 모두 변경 가능.
   Future<void> updateGrowth({
     required String id,
     required DateTime measuredAt,
@@ -56,7 +76,16 @@ class GrowthRepository {
       'head_circumference_mm': headCircumferenceMm,
       'note': (note != null && note.trim().isNotEmpty) ? note.trim() : null,
     };
-    await _client.from('growths').update(patch).eq('id', id);
+    return OfflineWrites.executeVoid(
+      ref: _ref,
+      table: 'growths',
+      op: 'update',
+      rowId: id,
+      payload: patch,
+      onlineCall: () async {
+        await _client.from('growths').update(patch).eq('id', id);
+      },
+    );
   }
 
   /// 성장 기록은 차트로도 보여줘야 해서 시간 순서가 중요.
@@ -72,5 +101,5 @@ class GrowthRepository {
 }
 
 final growthRepositoryProvider = Provider<GrowthRepository>((ref) {
-  return GrowthRepository(ref.watch(supabaseClientProvider));
+  return GrowthRepository(ref.watch(supabaseClientProvider), ref);
 });

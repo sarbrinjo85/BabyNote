@@ -55,8 +55,10 @@ class Sleep {
   }
 
   /// 시작 INSERT용 payload — endedAt은 보내지 않음 (NULL = 진행 중).
+  /// id 가 'pending' 이 아니면 포함 (오프라인 큐 — 클라이언트 측 UUID).
   Map<String, dynamic> toStartInsertMap({required String recordedBy}) {
     return {
+      if (id != 'pending') 'id': id,
       'child_id': childId,
       'recorded_by': recordedBy,
       'started_at': startedAt.toUtc().toIso8601String(),

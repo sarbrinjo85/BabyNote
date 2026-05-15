@@ -69,9 +69,11 @@ class Feeding {
   }
 
   /// INSERT용 payload — recorded_by/created_at 등 서버가 채울 컬럼은 제외.
+  /// id 가 'pending' 이 아니면 포함 (오프라인 큐 — 클라이언트 측 UUID).
   /// recorded_by는 호출 측에서 currentUser.id를 따로 넘김.
   Map<String, dynamic> toInsertMap({required String recordedBy}) {
     return {
+      if (id != 'pending') 'id': id,
       'child_id': childId,
       'recorded_by': recordedBy,
       'type': type,

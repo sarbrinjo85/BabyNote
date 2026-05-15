@@ -4,19 +4,26 @@ import 'dart:math';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../core/sync/offline_writes.dart';
 import '../../../data/supabase_client_provider.dart';
 import '../domain/symptom.dart';
 
 /// symptoms 테이블 CRUD + 'symptom-photos' Storage 업로드.
 ///
-/// ── 사진 패턴 ────────────────────────────────────────────────────────
-/// feeding_repository.uploadFeedingPhoto 와 동일:
-///   path = `<userId>/<YYYYMMDD_HHmmss>_<rand>.<ext>`
-///   user_id 폴더 분리 → 11/17 마이그레이션의 Storage RLS 가 본인 폴더만 허용.
+/// ── 오프라인 ─────────────────────────────────────────────────────────
+/// row INSERT/UPDATE/DELETE 는 OfflineWrites 로 큐잉.
+/// 사진 업로드(`uploadSymptomPhoto`)는 큐잉 대상 X — Storage 의 binary 는
+/// 큐 payload 에 담기 어려움. 컨트롤러가 사진 업로드 실패하면 토스트로 알리고
+/// row 만 큐잉 (photoPath null) 하거나 전체 실패시키는 등 결정.
+///
+/// ── 사진 path 규칙 ───────────────────────────────────────────────────
+/// `<userId>/<YYYYMMDD_HHmmss>_<rand>.<ext>` — user_id 폴더 분리로 17 마이그레이션의
+/// Storage RLS 가 본인 폴더만 허용.
 class SymptomRepository {
-  SymptomRepository(this._client);
+  SymptomRepository(this._client, this._ref);
 
   final SupabaseClient _client;
+  final Ref _ref;
 
   Future<Symptom> create({
     required String currentUserId,
@@ -27,35 +34,66 @@ class SymptomRepository {
     String? photoPath,
     String? note,
   }) async {
+    final id = genUuid();
     final draft = Symptom(
-      id: 'pending',
+      id: id,
       childId: childId,
       kind: kind,
       occurredAt: occurredAt,
       severity: severity,
       photoPath: photoPath,
       note: note,
+      recordedBy: currentUserId,
     );
-    final inserted = await _client
-        .from('symptoms')
-        .insert(draft.toInsertMap(recordedBy: currentUserId))
-        .select()
-        .single();
-    return Symptom.fromMap(inserted);
+    final payload = draft.toInsertMap(recordedBy: currentUserId);
+
+    return OfflineWrites.execute<Symptom>(
+      ref: _ref,
+      table: 'symptoms',
+      op: 'insert',
+      rowId: id,
+      payload: payload,
+      onlineCall: () async {
+        final r =
+            await _client.from('symptoms').insert(payload).select().single();
+        return Symptom.fromMap(r);
+      },
+      optimisticResult: () => draft,
+    );
   }
 
   Future<Symptom> update(Symptom symptom) async {
-    final updated = await _client
-        .from('symptoms')
-        .update(symptom.toUpdateMap())
-        .eq('id', symptom.id)
-        .select()
-        .single();
-    return Symptom.fromMap(updated);
+    final payload = symptom.toUpdateMap();
+    return OfflineWrites.execute<Symptom>(
+      ref: _ref,
+      table: 'symptoms',
+      op: 'update',
+      rowId: symptom.id,
+      payload: payload,
+      onlineCall: () async {
+        final r = await _client
+            .from('symptoms')
+            .update(payload)
+            .eq('id', symptom.id)
+            .select()
+            .single();
+        return Symptom.fromMap(r);
+      },
+      optimisticResult: () => symptom,
+    );
   }
 
   Future<void> delete(String id) async {
-    await _client.from('symptoms').delete().eq('id', id);
+    return OfflineWrites.executeVoid(
+      ref: _ref,
+      table: 'symptoms',
+      op: 'delete',
+      rowId: id,
+      payload: const {},
+      onlineCall: () async {
+        await _client.from('symptoms').delete().eq('id', id);
+      },
+    );
   }
 
   Future<List<Symptom>> listRecent(String childId, {int limit = 30}) async {
@@ -84,7 +122,7 @@ class SymptomRepository {
   }
 
   /// 사진을 'symptom-photos' bucket 에 업로드 → Storage path 반환.
-  /// 미리 사용자가 Dashboard에서 'symptom-photos' bucket을 Public 으로 생성해둬야 함.
+  /// 큐잉 대상 아님 — Storage 업로드는 온라인 전용.
   Future<String> uploadSymptomPhoto({
     required String userId,
     required File file,
@@ -117,5 +155,5 @@ class SymptomRepository {
 }
 
 final symptomRepositoryProvider = Provider<SymptomRepository>((ref) {
-  return SymptomRepository(ref.watch(supabaseClientProvider));
+  return SymptomRepository(ref.watch(supabaseClientProvider), ref);
 });

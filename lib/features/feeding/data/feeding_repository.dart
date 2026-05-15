@@ -4,18 +4,26 @@ import 'dart:math';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../core/sync/offline_writes.dart';
 import '../../../data/supabase_client_provider.dart';
 import '../domain/feeding.dart';
 
-/// feedings 테이블 CRUD.
+/// feedings 테이블 CRUD + 사진 업로드.
 ///
 /// RLS 정책(06_rls_policies.sql):
 ///   - INSERT: is_caregiver_of(child_id) AND recorded_by = auth.uid()
 ///   - SELECT: is_caregiver_of(child_id) → 케어기버 모두 같은 자녀의 기록 공유
+///
+/// ── 오프라인 지원 ──────────────────────────────────────────────────────
+/// INSERT/UPDATE/DELETE 는 OfflineWrites 로 감싸져 네트워크 실패 시 큐잉.
+/// 사진 업로드(Supabase Storage)는 큐잉 대상 X — 파일 자체가 binary 라
+/// 큐 payload 에 담기 어려움. 오프라인에서 사진 첨부 시도는 그 자리에서 실패
+/// (사용자에게 노출), 다시 시도 권유.
 class FeedingRepository {
-  FeedingRepository(this._client);
+  FeedingRepository(this._client, this._ref);
 
   final SupabaseClient _client;
+  final Ref _ref;
 
   Future<Feeding> createFeeding({
     required String currentUserId,
@@ -31,8 +39,9 @@ class FeedingRepository {
     String? note,
     String? photoPath,
   }) async {
+    final id = genUuid();
     final draft = Feeding(
-      id: 'pending',
+      id: id,
       childId: childId,
       type: type,
       startedAt: startedAt,
@@ -44,32 +53,34 @@ class FeedingRepository {
       formulaInventoryId: formulaInventoryId,
       note: note,
       photoPath: photoPath,
+      recordedBy: currentUserId,
     );
+    final payload = draft.toInsertMap(recordedBy: currentUserId);
 
-    final inserted = await _client
-        .from('feedings')
-        .insert(draft.toInsertMap(recordedBy: currentUserId))
-        .select()
-        .single();
-
-    return Feeding.fromMap(inserted);
+    return OfflineWrites.execute<Feeding>(
+      ref: _ref,
+      table: 'feedings',
+      op: 'insert',
+      rowId: id,
+      payload: payload,
+      onlineCall: () async {
+        final r = await _client
+            .from('feedings')
+            .insert(payload)
+            .select()
+            .single();
+        return Feeding.fromMap(r);
+      },
+      optimisticResult: () => draft,
+    );
   }
 
   /// 이미지 파일을 feeding-photos bucket에 업로드 → Storage path 반환.
-  ///
-  /// ── 경로 규칙 ────────────────────────────────────────────────────
-  /// `<user_id>/<YYYYMMDD_HHmmss>_<random>.jpg`
-  /// user_id 폴더로 분리하면 RLS 정책으로 본인 폴더만 쓰기 가능 (11 마이그레이션 참조).
-  ///
-  /// ── 반환값 ──────────────────────────────────────────────────────
-  /// Storage 안의 path만 반환. UI에서 표시할 때는
-  /// `supabase.storage.from('feeding-photos').getPublicUrl(path)`로 URL 생성.
-  /// → DB에는 path만 저장(짧음 + bucket 변경 유연).
+  /// 큐잉 대상 아님 — Storage 업로드는 온라인 전용.
   Future<String> uploadFeedingPhoto({
     required String userId,
     required File file,
   }) async {
-    // 파일 확장자 추출 — 못 알아내면 jpg fallback
     final originalPath = file.path.toLowerCase();
     String ext = 'jpg';
     if (originalPath.endsWith('.png')) {
@@ -80,7 +91,6 @@ class FeedingRepository {
       ext = 'heic';
     }
 
-    // 파일명 생성 (충돌 방지: 타임스탬프 + 랜덤)
     final now = DateTime.now();
     final ts =
         '${now.year}${_pad(now.month)}${_pad(now.day)}_${_pad(now.hour)}${_pad(now.minute)}${_pad(now.second)}';
@@ -90,17 +100,13 @@ class FeedingRepository {
     await _client.storage.from('feeding-photos').upload(
           path,
           file,
-          fileOptions: const FileOptions(
-            cacheControl: '3600', // 1시간 캐시
-            upsert: false, // 동명 파일 덮어쓰기 금지
-          ),
+          fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
         );
     return path;
   }
 
   String _pad(int v) => v.toString().padLeft(2, '0');
 
-  /// 특정 자녀의 최근 수유 기록 N건 (최신순).
   Future<List<Feeding>> listRecent(String childId, {int limit = 20}) async {
     final rows = await _client
         .from('feedings')
@@ -111,13 +117,19 @@ class FeedingRepository {
     return rows.map((r) => Feeding.fromMap(r)).toList();
   }
 
-  /// 수유 기록 1건 삭제. RLS는 caregiver만 통과시킴.
   Future<void> deleteFeeding(String id) async {
-    await _client.from('feedings').delete().eq('id', id);
+    return OfflineWrites.executeVoid(
+      ref: _ref,
+      table: 'feedings',
+      op: 'delete',
+      rowId: id,
+      payload: const {},
+      onlineCall: () async {
+        await _client.from('feedings').delete().eq('id', id);
+      },
+    );
   }
 
-  /// 수유 기록 부분 수정. type은 변경 가능 (모유 → 분유 등 오기 정정).
-  /// formulaInventoryId는 일부러 변경 불가 — 자동 연결 로직 보존.
   Future<Feeding> updateFeeding({
     required String id,
     required String type,
@@ -136,16 +148,38 @@ class FeedingRepository {
       'formula_brand': formulaBrand,
       'note': (note != null && note.trim().isNotEmpty) ? note.trim() : null,
     };
-    final updated = await _client
-        .from('feedings')
-        .update(patch)
-        .eq('id', id)
-        .select()
-        .single();
-    return Feeding.fromMap(updated);
+    return OfflineWrites.execute<Feeding>(
+      ref: _ref,
+      table: 'feedings',
+      op: 'update',
+      rowId: id,
+      payload: patch,
+      onlineCall: () async {
+        final r = await _client
+            .from('feedings')
+            .update(patch)
+            .eq('id', id)
+            .select()
+            .single();
+        return Feeding.fromMap(r);
+      },
+      // 오프라인 옵티미스틱 — 호출자가 전달한 필드만으로 임시 Feeding 구성.
+      // startedAt 등 일부 필드는 알 수 없어 minimum 정보로. 실제 sync 후 invalidate.
+      optimisticResult: () => Feeding(
+        id: id,
+        childId: '', // 옵티미스틱 placeholder — invalidate 후 정확히 갱신
+        type: type,
+        startedAt: DateTime.now(),
+        amountMl: amountMl,
+        breastSide: breastSide,
+        foodName: foodName,
+        formulaBrand: formulaBrand,
+        note: note,
+      ),
+    );
   }
 }
 
 final feedingRepositoryProvider = Provider<FeedingRepository>((ref) {
-  return FeedingRepository(ref.watch(supabaseClientProvider));
+  return FeedingRepository(ref.watch(supabaseClientProvider), ref);
 });

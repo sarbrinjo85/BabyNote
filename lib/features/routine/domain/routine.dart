@@ -90,9 +90,13 @@ class Routine {
     );
   }
 
-  /// INSERT payload — id/createdAt 제외.
+  /// INSERT payload — id 가 'pending' 이 아니면 포함 (오프라인 큐 용).
+  /// createdAt/updatedAt 은 서버 default 가 채움.
   Map<String, dynamic> toInsertMap({required String recordedBy}) {
     return {
+      // id 가 클라이언트에서 미리 정해진 경우(오프라인 큐) DB 에 그대로 넘김.
+      // 'pending' sentinel 이면 서버 gen_random_uuid() 가 채움.
+      if (id != 'pending') 'id': id,
       'child_id': childId,
       'recorded_by': recordedBy,
       'kind': kind.dbValue,

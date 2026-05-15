@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../core/sync/offline_writes.dart';
 import '../../../data/supabase_client_provider.dart';
 import '../domain/sleep.dart';
 
@@ -10,49 +11,79 @@ import '../domain/sleep.dart';
 /// 수유는 한 번 INSERT로 끝이지만 수면은 두 단계:
 ///   1) startSleep — INSERT (ended_at = NULL = 진행 중)
 ///   2) endSleep   — UPDATE (ended_at = now)
+///
+/// ── 오프라인 ─────────────────────────────────────────────────────────
+/// 두 단계 다 큐잉 가능. startSleep 시 클라이언트 UUID 발급 → 같은 id 로
+/// endSleep update 큐잉. flush 시 INSERT 가 먼저, 그 다음 UPDATE 가 순서대로
+/// 적용됨 (enqueued_at ASC 순).
 class SleepRepository {
-  SleepRepository(this._client);
+  SleepRepository(this._client, this._ref);
 
   final SupabaseClient _client;
+  final Ref _ref;
 
-  /// 수면 시작.
   Future<Sleep> startSleep({
     required String currentUserId,
     required String childId,
     required String napOrNight,
     String? note,
   }) async {
+    final id = genUuid();
     final draft = Sleep(
-      id: 'pending',
+      id: id,
       childId: childId,
       startedAt: DateTime.now(),
       napOrNight: napOrNight,
       note: note,
+      recordedBy: currentUserId,
     );
-    final inserted = await _client
-        .from('sleeps')
-        .insert(draft.toStartInsertMap(recordedBy: currentUserId))
-        .select()
-        .single();
-    return Sleep.fromMap(inserted);
+    final payload = draft.toStartInsertMap(recordedBy: currentUserId);
+
+    return OfflineWrites.execute<Sleep>(
+      ref: _ref,
+      table: 'sleeps',
+      op: 'insert',
+      rowId: id,
+      payload: payload,
+      onlineCall: () async {
+        final r =
+            await _client.from('sleeps').insert(payload).select().single();
+        return Sleep.fromMap(r);
+      },
+      optimisticResult: () => draft,
+    );
   }
 
   /// 진행 중 수면 종료.
-  ///
-  /// ── update + eq + select 패턴 ────────────────────────────────────
-  /// .update({})는 set 절. .eq()로 WHERE id = $1. .select().single()로
-  /// 변경된 row 받음.
   Future<Sleep> endSleep({
     required String sleepId,
     required DateTime endedAt,
   }) async {
-    final updated = await _client
-        .from('sleeps')
-        .update({'ended_at': endedAt.toUtc().toIso8601String()})
-        .eq('id', sleepId)
-        .select()
-        .single();
-    return Sleep.fromMap(updated);
+    final patch = {'ended_at': endedAt.toUtc().toIso8601String()};
+    return OfflineWrites.execute<Sleep>(
+      ref: _ref,
+      table: 'sleeps',
+      op: 'update',
+      rowId: sleepId,
+      payload: patch,
+      onlineCall: () async {
+        final r = await _client
+            .from('sleeps')
+            .update(patch)
+            .eq('id', sleepId)
+            .select()
+            .single();
+        return Sleep.fromMap(r);
+      },
+      // 옵티미스틱 — child/napOrNight 등은 알 수 없어 invalidate 후 갱신
+      optimisticResult: () => Sleep(
+        id: sleepId,
+        childId: '',
+        startedAt: endedAt.subtract(const Duration(minutes: 30)),
+        endedAt: endedAt,
+        napOrNight: Sleep.classifyNapOrNight(endedAt),
+      ),
+    );
   }
 
   /// 진행 중인 수면 1건 (한 자녀당 1건이라고 가정). 없으면 null.
@@ -61,7 +92,7 @@ class SleepRepository {
         .from('sleeps')
         .select()
         .eq('child_id', childId)
-        .filter('ended_at', 'is', null) // ended_at IS NULL
+        .filter('ended_at', 'is', null)
         .order('started_at', ascending: false)
         .limit(1)
         .maybeSingle();
@@ -69,13 +100,19 @@ class SleepRepository {
     return Sleep.fromMap(row);
   }
 
-  /// 수면 기록 1건 삭제.
   Future<void> deleteSleep(String id) async {
-    await _client.from('sleeps').delete().eq('id', id);
+    return OfflineWrites.executeVoid(
+      ref: _ref,
+      table: 'sleeps',
+      op: 'delete',
+      rowId: id,
+      payload: const {},
+      onlineCall: () async {
+        await _client.from('sleeps').delete().eq('id', id);
+      },
+    );
   }
 
-  /// 수면 기록 수정 — napOrNight + note만 변경 가능.
-  /// 시작/종료 시각은 ongoingSleepProvider 흐름과 충돌 방지 위해 보류.
   Future<void> updateSleep({
     required String id,
     required String napOrNight,
@@ -85,10 +122,18 @@ class SleepRepository {
       'nap_or_night': napOrNight,
       'note': (note != null && note.trim().isNotEmpty) ? note.trim() : null,
     };
-    await _client.from('sleeps').update(patch).eq('id', id);
+    return OfflineWrites.executeVoid(
+      ref: _ref,
+      table: 'sleeps',
+      op: 'update',
+      rowId: id,
+      payload: patch,
+      onlineCall: () async {
+        await _client.from('sleeps').update(patch).eq('id', id);
+      },
+    );
   }
 
-  /// 최근 수면 기록 N건.
   Future<List<Sleep>> listRecent(String childId, {int limit = 20}) async {
     final rows = await _client
         .from('sleeps')
@@ -101,5 +146,5 @@ class SleepRepository {
 }
 
 final sleepRepositoryProvider = Provider<SleepRepository>((ref) {
-  return SleepRepository(ref.watch(supabaseClientProvider));
+  return SleepRepository(ref.watch(supabaseClientProvider), ref);
 });
