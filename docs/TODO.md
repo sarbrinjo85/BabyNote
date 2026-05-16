@@ -157,11 +157,12 @@
 - ▢ 디자인 의견 모은 다음 진행
 
 ### Y14. RecordButtonsGrid 패턴을 routines/symptoms 에도
-▢ | ~2h
+✅ 완료 (2026-05-16)
 
-- ▢ 홈에서 "최근 산책 30분", "최근 발진 어제" 같은 last-record 표시
-- ▢ 기존 RecordButtonsGrid 의 표시 로직을 일반화한 위젯
-- ▢ tiles 6개 (산책/목욕/영양제/간식/기침/구토/발진/상처) — 8개라 4col×2row
+- ✅ GridActionTile 에 subtitle 파라미터 (선택, 9pt 보조 텍스트)
+- ✅ 홈에서 recentRoutines/recentSymptoms 를 kind 별로 집계 → 마지막 시간
+- ✅ TimeAgo 로 "3시간 전" / "어제 18:30" / "3일 전" 등 자연어 표시
+- ✅ 8개 타일 모두 적용 (기록 없으면 subtitle 안 표시)
 
 ---
 
