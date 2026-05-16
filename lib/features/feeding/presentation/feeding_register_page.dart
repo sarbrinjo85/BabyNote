@@ -540,14 +540,16 @@ class _FormulaForm extends ConsumerWidget {
               side: const WidgetStatePropertyAll(
                   BorderSide(color: Color(0xFFA43F45), width: 1.5)),
             );
-            // 미선택 — 외곽선만 옅게, 글자는 진한 코랄로 시인성 확보.
-            // 선택(흰 글자 + 진한 코랄 배경) 대비도 명확함.
+            // 미선택 — 모유 탭 좌/우/양쪽 SegmentedButton 과 완전 동일 배색.
+            //   흰 배경 + #FFB5A7 외곽선 + #A43F45 글자 (w600)
             final unselectedStyle = ButtonStyle(
               minimumSize: const WidgetStatePropertyAll(Size(0, 36)),
               padding: const WidgetStatePropertyAll(
                   EdgeInsets.symmetric(horizontal: Spacing.sm)),
               textStyle: const WidgetStatePropertyAll(
                   TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+              backgroundColor:
+                  const WidgetStatePropertyAll(Colors.white),
               side: const WidgetStatePropertyAll(
                 BorderSide(color: Color(0xFFFFB5A7), width: 1.0),
               ),
