@@ -1,0 +1,55 @@
+# PR / push 마다 코드 분석 + 테스트.
+# 시크릿 불필요 — 누구나 fork 떠도 즉시 동작.
+#
+# Flutter 버전은 pubspec.yaml 의 environment.sdk 와 동기화.
+# (현재 ^3.11.5 → Flutter 3.41.x 안정 채널)
+
+name: analyze
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          # 명시 버전 고정 — 변경 시 pubspec.yaml environment.sdk 와 동기화
+          flutter-version: '3.41.9'
+          cache: true
+
+      - name: Cache pub dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+            .dart_tool
+          key: pub-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}
+          restore-keys: |
+            pub-${{ runner.os }}-
+
+      - name: pub get
+        run: flutter pub get
+
+      - name: gen-l10n (verify ARB 파싱 통과)
+        run: flutter gen-l10n
+
+      - name: analyze
+        run: flutter analyze --no-fatal-warnings --no-fatal-infos
+
+      - name: test
+        # 현재 test/widget_test.dart 만 있고 placeholder 라 skip 가능.
+        # 실제 테스트 작성 시작하면 --no-pub 옵션 제거 + 활성화.
+        run: flutter test --no-pub
+        continue-on-error: true

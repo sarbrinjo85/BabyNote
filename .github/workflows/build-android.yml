@@ -1,0 +1,131 @@
+# Android release AAB 자동 빌드.
+# main push 또는 v* 태그 시 트리거. 결과물(.aab) 은 GitHub Actions artifact 로 업로드.
+# Play Console 자동 업로드 (fastlane / Google Play API) 는 후속 작업 — 현재는 수동 다운로드.
+#
+# ── 필요 시크릿 (Repo Settings → Secrets and variables → Actions) ────
+#   ANDROID_KEYSTORE_BASE64    — babynote-release.jks 를 base64 인코딩한 문자열
+#   KEYSTORE_PASSWORD          — keystore 비밀번호
+#   KEY_PASSWORD               — key alias 비밀번호
+#   KEY_ALIAS                  — babynote
+#   SUPABASE_URL               — production Supabase URL
+#   SUPABASE_ANON_KEY          — production anon key
+#   SENTRY_DSN                 — (선택) prod Sentry DSN
+#   REVENUECAT_ANDROID_KEY     — RevenueCat Android API key
+#
+# 자세한 시크릿 셋업: docs/release/ci_cd.md
+
+name: build-android
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:  # 수동 트리거
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.41.9'
+          cache: true
+
+      - name: Cache pub + Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: build-${{ runner.os }}-${{ hashFiles('pubspec.lock', 'android/gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: |
+            build-${{ runner.os }}-
+
+      - name: pub get
+        run: flutter pub get
+
+      - name: Decode keystore
+        # 시크릿이 비어있으면 빌드 자체는 가능 (debug 서명 fallback) — 출시용 AAB 는 시크릿 필수.
+        if: env.ANDROID_KEYSTORE_BASE64 != ''
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > android/babynote-release.jks
+          ls -la android/babynote-release.jks
+
+      - name: Create key.properties
+        if: env.ANDROID_KEYSTORE_BASE64 != ''
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        run: |
+          cat <<EOF > android/key.properties
+          storePassword=$KEYSTORE_PASSWORD
+          keyPassword=$KEY_PASSWORD
+          keyAlias=$KEY_ALIAS
+          storeFile=babynote-release.jks
+          EOF
+
+      - name: Build AAB
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          REVENUECAT_ANDROID_KEY: ${{ secrets.REVENUECAT_ANDROID_KEY }}
+        run: |
+          flutter build appbundle --release \
+            --dart-define=SUPABASE_URL="$SUPABASE_URL" \
+            --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY" \
+            --dart-define=SENTRY_DSN="$SENTRY_DSN" \
+            --dart-define=REVENUECAT_ANDROID_KEY="$REVENUECAT_ANDROID_KEY" \
+            --dart-define=FLAVOR=prod
+
+      - name: Build debug APK (sideload용)
+        # debug APK 도 같이 만들어 두면 베타 테스터가 빠르게 sideload 가능
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          REVENUECAT_ANDROID_KEY: ${{ secrets.REVENUECAT_ANDROID_KEY }}
+        run: |
+          flutter build apk --release \
+            --dart-define=SUPABASE_URL="$SUPABASE_URL" \
+            --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY" \
+            --dart-define=SENTRY_DSN="$SENTRY_DSN" \
+            --dart-define=REVENUECAT_ANDROID_KEY="$REVENUECAT_ANDROID_KEY" \
+            --dart-define=FLAVOR=prod
+
+      - name: Upload AAB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-aab
+          path: build/app/outputs/bundle/release/app-release.aab
+          retention-days: 30
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 30
+
+      - name: Cleanup keystore
+        if: always()
+        run: |
+          rm -f android/babynote-release.jks android/key.properties

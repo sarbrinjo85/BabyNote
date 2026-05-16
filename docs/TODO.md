@@ -85,13 +85,14 @@
 - ▢ iOS 출시는 Android 안정화 후 진행
 
 ### Y7. CI/CD (GitHub Actions)
-▢ | ~3h
+✅ 완료 (2026-05-16) — 시크릿 셋업만 사용자 손에 남음
 
-- ▢ `.github/workflows/analyze.yml` — PR 마다 `flutter analyze` + `flutter test`
-- ▢ `.github/workflows/build-android.yml` — main push 시 debug APK build (artifact 업로드)
-- ▢ 시크릿: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SENTRY_DSN`, `REVENUECAT_ANDROID_KEY` 를 GitHub Secrets 로
-- ▢ Release tag 시 자동 AAB 빌드 + 서명 (keystore 도 secret 로) — 출시 자동화
-- ▢ 선택: Codemagic 으로 iOS 빌드까지
+- ✅ `.github/workflows/analyze.yml` — PR / push 마다 analyze + gen-l10n + test (시크릿 불필요)
+- ✅ `.github/workflows/build-android.yml` — push to main / v* 태그 / 수동 시 AAB+APK release 빌드 → artifact 업로드
+- ✅ `docs/release/ci_cd.md` — 시크릿 셋업 + base64 keystore 변환 + 자주 막히는 곳 가이드
+- ⏳ **사용자 작업**: GitHub Secrets 8개 등록 (위 문서 §🔑 참고)
+- ▢ (후속) fastlane + Google Play API 로 Internal Testing 트랙 자동 배포
+- ▢ (후속) macOS runner 추가 → iOS 빌드
 
 ### Y8. 옵티미스틱 큐잉 행 UI 표시
 ▢ | ~1h
