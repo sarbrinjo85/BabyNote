@@ -16,6 +16,7 @@ class GridActionTile extends StatelessWidget {
     required this.label,
     required this.onTap,
     this.urgent = false,
+    this.subtitle,
   });
 
   final String emoji;
@@ -23,6 +24,9 @@ class GridActionTile extends StatelessWidget {
   final VoidCallback onTap;
   /// urgent=true면 errorContainer 색으로 강조 (분유 곧 소진 등).
   final bool urgent;
+  /// 라벨 아래 작은 보조 텍스트 — "3시간 전", "어제 30분" 같은 마지막 기록 정보.
+  /// null/빈 문자열이면 표시 안 함 (높이 유지를 위해 빈 영역 placeholder).
+  final String? subtitle;
 
   @override
   Widget build(BuildContext context) {
@@ -57,9 +61,23 @@ class GridActionTile extends StatelessWidget {
                       : theme.colorScheme.onSurface,
                 ),
                 textAlign: TextAlign.center,
-                maxLines: 2,
+                maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
+              if (subtitle != null && subtitle!.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 1),
+                  child: Text(
+                    subtitle!,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontSize: 9,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
             ],
           ),
         ),

@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/sync/sync_indicator.dart';
 import '../../../core/theme/tokens.dart';
+import '../../../core/utils/time_ago.dart';
 import '../../../core/widgets/stroked_title.dart';
 import '../../../core/widgets/grid_action_tile.dart';
 import '../../auth/data/auth_repository.dart';
@@ -15,7 +16,9 @@ import '../../child/presentation/selected_child_provider.dart';
 import '../../family/data/realtime_sync.dart';
 import '../../onboarding/presentation/onboarding_coach.dart';
 import '../../routine/domain/routine.dart';
+import '../../routine/presentation/routine_providers.dart';
 import '../../symptom/domain/symptom.dart';
+import '../../symptom/presentation/symptom_providers.dart';
 import 'child_info_card.dart';
 import 'notification_bell.dart';
 import 'notification_scheduler.dart';
@@ -181,6 +184,40 @@ class _HomePageState extends ConsumerState<HomePage> {
                       data: (children) {
                         if (children.isEmpty) return const SizedBox.shrink();
                         final child = selectedChild ?? children.first;
+
+                        // 루틴/증상 kind 별 마지막 기록 시간 계산.
+                        // recentXProvider 는 30건 limit, kind 8종이라 보통 모두 커버.
+                        final routinesAsync =
+                            ref.watch(recentRoutinesProvider(child.id));
+                        final symptomsAsync =
+                            ref.watch(recentSymptomsProvider(child.id));
+                        final lastRoutineByKind = <RoutineKind, DateTime>{};
+                        final lastSymptomByKind = <SymptomKind, DateTime>{};
+                        routinesAsync.whenData((list) {
+                          for (final r in list) {
+                            final ex = lastRoutineByKind[r.kind];
+                            if (ex == null || r.startedAt.isAfter(ex)) {
+                              lastRoutineByKind[r.kind] = r.startedAt;
+                            }
+                          }
+                        });
+                        symptomsAsync.whenData((list) {
+                          for (final s in list) {
+                            final ex = lastSymptomByKind[s.kind];
+                            if (ex == null || s.occurredAt.isAfter(ex)) {
+                              lastSymptomByKind[s.kind] = s.occurredAt;
+                            }
+                          }
+                        });
+                        String? lastFor(RoutineKind k) {
+                          final dt = lastRoutineByKind[k];
+                          return dt == null ? null : TimeAgo.format(l10n, dt);
+                        }
+                        String? lastSymptomFor(SymptomKind k) {
+                          final dt = lastSymptomByKind[k];
+                          return dt == null ? null : TimeAgo.format(l10n, dt);
+                        }
+
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
@@ -273,6 +310,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                                 GridActionTile(
                                   emoji: RoutineKind.walk.emoji,
                                   label: l10n.homeRoutineWalk,
+                                  subtitle: lastFor(RoutineKind.walk),
                                   onTap: () => context.push(
                                     '/routine/new',
                                     extra: RoutineKind.walk,
@@ -281,6 +319,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                                 GridActionTile(
                                   emoji: RoutineKind.bath.emoji,
                                   label: l10n.homeRoutineBath,
+                                  subtitle: lastFor(RoutineKind.bath),
                                   onTap: () => context.push(
                                     '/routine/new',
                                     extra: RoutineKind.bath,
@@ -289,6 +328,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                                 GridActionTile(
                                   emoji: RoutineKind.supplement.emoji,
                                   label: l10n.homeRoutineSupplement,
+                                  subtitle: lastFor(RoutineKind.supplement),
                                   onTap: () => context.push(
                                     '/routine/new',
                                     extra: RoutineKind.supplement,
@@ -297,6 +337,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                                 GridActionTile(
                                   emoji: RoutineKind.snack.emoji,
                                   label: l10n.homeRoutineSnack,
+                                  subtitle: lastFor(RoutineKind.snack),
                                   onTap: () => context.push(
                                     '/routine/new',
                                     extra: RoutineKind.snack,
@@ -320,6 +361,8 @@ class _HomePageState extends ConsumerState<HomePage> {
                                 GridActionTile(
                                   emoji: SymptomKind.cough.emoji,
                                   label: l10n.homeSymptomCough,
+                                  subtitle:
+                                      lastSymptomFor(SymptomKind.cough),
                                   onTap: () => context.push(
                                     '/symptom/new',
                                     extra: SymptomKind.cough,
@@ -328,6 +371,8 @@ class _HomePageState extends ConsumerState<HomePage> {
                                 GridActionTile(
                                   emoji: SymptomKind.vomit.emoji,
                                   label: l10n.homeSymptomVomit,
+                                  subtitle:
+                                      lastSymptomFor(SymptomKind.vomit),
                                   onTap: () => context.push(
                                     '/symptom/new',
                                     extra: SymptomKind.vomit,
@@ -336,6 +381,8 @@ class _HomePageState extends ConsumerState<HomePage> {
                                 GridActionTile(
                                   emoji: SymptomKind.rash.emoji,
                                   label: l10n.homeSymptomRash,
+                                  subtitle:
+                                      lastSymptomFor(SymptomKind.rash),
                                   onTap: () => context.push(
                                     '/symptom/new',
                                     extra: SymptomKind.rash,
@@ -344,6 +391,8 @@ class _HomePageState extends ConsumerState<HomePage> {
                                 GridActionTile(
                                   emoji: SymptomKind.injury.emoji,
                                   label: l10n.homeSymptomInjury,
+                                  subtitle:
+                                      lastSymptomFor(SymptomKind.injury),
                                   onTap: () => context.push(
                                     '/symptom/new',
                                     extra: SymptomKind.injury,
