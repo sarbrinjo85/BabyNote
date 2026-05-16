@@ -387,6 +387,36 @@ class _BreastForm extends StatelessWidget {
           ],
           selected: {side},
           onSelectionChanged: (s) => onSideChanged(s.first),
+          showSelectedIcon: false,
+          // 분유 빠른선택 버튼과 동일 코랄 배색.
+          style: ButtonStyle(
+            backgroundColor: WidgetStateProperty.resolveWith((states) {
+              if (states.contains(WidgetState.selected)) {
+                return const Color(0xFFD06A5C);
+              }
+              return Colors.white;
+            }),
+            foregroundColor: WidgetStateProperty.resolveWith((states) {
+              if (states.contains(WidgetState.selected)) {
+                return Colors.white;
+              }
+              return const Color(0xFFA43F45);
+            }),
+            side: WidgetStateProperty.resolveWith((states) {
+              if (states.contains(WidgetState.selected)) {
+                return const BorderSide(color: Color(0xFFA43F45), width: 1.5);
+              }
+              return const BorderSide(color: Color(0xFFFFB5A7), width: 1.0);
+            }),
+            textStyle: WidgetStateProperty.resolveWith((states) {
+              return TextStyle(
+                fontSize: 14,
+                fontWeight: states.contains(WidgetState.selected)
+                    ? FontWeight.w800
+                    : FontWeight.w600,
+              );
+            }),
+          ),
         ),
         const SizedBox(height: Spacing.lg),
         TextField(
