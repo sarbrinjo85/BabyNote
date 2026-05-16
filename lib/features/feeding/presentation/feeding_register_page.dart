@@ -510,18 +510,19 @@ class _FormulaForm extends ConsumerWidget {
               side: const WidgetStatePropertyAll(
                   BorderSide(color: Color(0xFFA43F45), width: 1.5)),
             );
-            // 연한 코랄 톤 — 외곽선 + 글자색 모두 옅게. 선택 시 진한 색과 대비 강함.
+            // 미선택 — 외곽선만 옅게, 글자는 진한 코랄로 시인성 확보.
+            // 선택(흰 글자 + 진한 코랄 배경) 대비도 명확함.
             final unselectedStyle = ButtonStyle(
               minimumSize: const WidgetStatePropertyAll(Size(0, 36)),
               padding: const WidgetStatePropertyAll(
                   EdgeInsets.symmetric(horizontal: Spacing.sm)),
-              textStyle:
-                  const WidgetStatePropertyAll(TextStyle(fontSize: 14)),
+              textStyle: const WidgetStatePropertyAll(
+                  TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
               side: const WidgetStatePropertyAll(
-                BorderSide(color: Color(0xFFFFD6CC), width: 1.0),
+                BorderSide(color: Color(0xFFFFB5A7), width: 1.0),
               ),
               foregroundColor:
-                  const WidgetStatePropertyAll(Color(0xFFC98C8F)),
+                  const WidgetStatePropertyAll(Color(0xFFA43F45)),
             );
             return isSelected
                 ? FilledButton(
