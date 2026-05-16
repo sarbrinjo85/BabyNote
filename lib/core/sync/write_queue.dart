@@ -191,3 +191,20 @@ final writeQueueProvider = Provider<WriteQueue>((ref) {
 final writeQueueCountProvider = FutureProvider<int>((ref) async {
   return ref.watch(writeQueueProvider).count();
 });
+
+/// 큐에 있는 모든 row 의 (table, rowId) 쌍 모음 — records 화면이 각 row 가
+/// "동기화 대기 중" 인지 빠르게 lookup 하기 위함.
+///
+/// 키 형식: `"{table}::{rowId}"` (rowId 가 null 이면 제외 — INSERT 인 경우 payload
+/// 에서 'id' 를 꺼냄)
+final writeQueuePendingKeysProvider =
+    FutureProvider<Set<String>>((ref) async {
+  final queue = ref.watch(writeQueueProvider);
+  final items = await queue.listAll();
+  final out = <String>{};
+  for (final w in items) {
+    final id = w.rowId ?? w.payload['id'] as String?;
+    if (id != null) out.add('${w.table}::$id');
+  }
+  return out;
+});

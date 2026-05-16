@@ -95,11 +95,12 @@
 - ▢ (후속) macOS runner 추가 → iOS 빌드
 
 ### Y8. 옵티미스틱 큐잉 행 UI 표시
-▢ | ~1h
+✅ 완료 (2026-05-16)
 
-- ▢ records_page 의 각 row 에 "동기화 대기 중" 배지 (큐에 있는 id 인지 체크)
-- ▢ `writeQueue.listAll()` 의 rowId 들과 화면의 id 매칭
-- ▢ 디자인: 옅은 회색 + ⏳ 아이콘
+- ✅ `writeQueuePendingKeysProvider` (Set\<String\>) — `{table}::{rowId}` 포맷
+- ✅ records_page 의 각 _DailyEvent 가 `isPending` 플래그 보유
+- ✅ _RecordCard 가 isPending 시 옅은 amber 배경 + ☁️⬆️ "동기화 대기 중" 라벨
+- ✅ OfflineWrites/SyncWorker 가 enqueue/flush 후 provider invalidate
 
 ---
 

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:babynote/l10n/app_localizations.dart';
+import '../../../core/sync/write_queue.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/baby_loading.dart';
 import '../../../core/widgets/child_picker_action.dart';
@@ -68,12 +69,15 @@ class _DailyEvent {
     required this.title,
     required this.onLongPress,
     this.onTap,
+    this.isPending = false,
   });
   final DateTime when;
   final String icon;
   final String title;
   final VoidCallback onLongPress;
   final VoidCallback? onTap;
+  /// 큐에 들어있어 아직 서버에 동기화 안 된 row.
+  final bool isPending;
 }
 
 class _DailyTimelineList extends ConsumerWidget {
@@ -116,11 +120,18 @@ class _DailyTimelineList extends ConsumerWidget {
     final routines = asyncRoutines.value ?? const [];
     final symptoms = asyncSymptoms.value ?? const [];
 
+    // 큐잉된 row 의 (table, rowId) 셋. 비행기 모드에서 입력 후 화면에 표시.
+    final pendingKeys =
+        ref.watch(writeQueuePendingKeysProvider).valueOrNull ?? const {};
+    bool isPending(String table, String id) =>
+        pendingKeys.contains('$table::$id');
+
     final events = <_DailyEvent>[
       ...feedings.map((f) => _DailyEvent(
             when: f.startedAt,
             icon: '🍼',
             title: _summarizeFeeding(l10n, f),
+            isPending: isPending('feedings', f.id),
             onTap: () => context.push('/feeding/new', extra: f),
             onLongPress: () => _confirmAndDelete(context, delete: () async {
               await ref.read(feedingRepositoryProvider).deleteFeeding(f.id);
@@ -132,6 +143,7 @@ class _DailyTimelineList extends ConsumerWidget {
             when: s.startedAt,
             icon: '💤',
             title: _summarizeSleep(l10n, s),
+            isPending: isPending('sleeps', s.id),
             onTap: s.isOngoing
                 ? null
                 : () => context.push('/sleep/new', extra: s),
@@ -144,6 +156,7 @@ class _DailyTimelineList extends ConsumerWidget {
             when: d.recordedAt,
             icon: '💩',
             title: _summarizeDiaper(l10n, d),
+            isPending: isPending('diapers', d.id),
             onTap: () => context.push('/diaper/new', extra: d),
             onLongPress: () => _confirmAndDelete(context, delete: () async {
               await ref.read(diaperRepositoryProvider).deleteDiaper(d.id);
@@ -155,6 +168,7 @@ class _DailyTimelineList extends ConsumerWidget {
             when: r.startedAt,
             icon: r.kind.emoji,
             title: _summarizeRoutine(l10n, r),
+            isPending: isPending('routines', r.id),
             onTap: () => context.push('/routine/new', extra: r),
             onLongPress: () => _confirmAndDelete(context, delete: () async {
               await ref.read(routineRepositoryProvider).delete(r.id);
@@ -165,6 +179,7 @@ class _DailyTimelineList extends ConsumerWidget {
             when: s.occurredAt,
             icon: s.kind.emoji,
             title: _summarizeSymptom(l10n, s),
+            isPending: isPending('symptoms', s.id),
             onTap: () => context.push('/symptom/new', extra: s),
             onLongPress: () => _confirmAndDelete(context, delete: () async {
               await ref.read(symptomRepositoryProvider).delete(s.id);
@@ -205,6 +220,7 @@ class _DailyTimelineList extends ConsumerWidget {
               subtitle: _hhmm(e.when),
               onTap: e.onTap,
               onLongPress: e.onLongPress,
+              isPending: e.isPending,
             ),
         ],
       ],
@@ -389,6 +405,7 @@ class _RecordCard extends StatelessWidget {
     required this.subtitle,
     required this.onLongPress,
     this.onTap,
+    this.isPending = false,
   });
 
   final String icon;
@@ -396,11 +413,17 @@ class _RecordCard extends StatelessWidget {
   final String subtitle;
   final VoidCallback onLongPress;
   final VoidCallback? onTap;
+  /// 큐 대기 중 — 옅은 노란 배경 + ⏳ 배지로 시각화.
+  final bool isPending;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Card(
+      // 큐 대기 row 는 옅은 amber 배경으로 차별화.
+      color: isPending
+          ? theme.colorScheme.tertiaryContainer.withValues(alpha: 0.4)
+          : null,
       child: InkWell(
         onTap: onTap,
         onLongPress: onLongPress,
@@ -413,7 +436,32 @@ class _RecordCard extends StatelessWidget {
               Text(icon, style: const TextStyle(fontSize: 24)),
               const SizedBox(width: Spacing.sm),
               Expanded(
-                child: Text(title, style: theme.textTheme.titleSmall),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: theme.textTheme.titleSmall),
+                    if (isPending)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: Row(
+                          children: [
+                            Icon(Icons.cloud_upload_outlined,
+                                size: 12,
+                                color: theme.colorScheme.tertiary),
+                            const SizedBox(width: 3),
+                            Text(
+                              '동기화 대기 중',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                fontSize: 11,
+                                color: theme.colorScheme.tertiary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
               ),
               Text(
                 subtitle,

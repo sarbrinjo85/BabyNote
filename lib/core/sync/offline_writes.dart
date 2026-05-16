@@ -120,7 +120,9 @@ class OfflineWrites {
           rowId: rowId,
           payload: payload,
         );
+    // count + pending key 셋 두 provider 모두 갱신 → UI 즉시 반영
     ref.invalidate(writeQueueCountProvider);
+    ref.invalidate(writeQueuePendingKeysProvider);
   }
 }
 

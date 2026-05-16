@@ -51,8 +51,9 @@ class SyncWorker {
           }
         }
       }
-      // 큐 길이 변경 알림 (sync indicator 업데이트용)
+      // 큐 길이 + pending key 셋 변경 알림 (sync indicator + records 배지 업데이트)
       _ref.invalidate(writeQueueCountProvider);
+      _ref.invalidate(writeQueuePendingKeysProvider);
     } finally {
       _flushing = false;
     }
