@@ -65,14 +65,14 @@
 ## 🟠 2순위 — 출시 직전이지만 미루기 가능
 
 ### Y5. EN/JA 법무문서 번역
-▢ | ~3h
+✅ 완료 (2026-05-16)
 
-- ▢ `docs/privacy_policy_en.md` — 한국어 압축 + 자연스러운 영문
-- ▢ `docs/privacy_policy_ja.md`
-- ▢ `docs/terms_of_service_en.md`
-- ▢ `docs/terms_of_service_ja.md`
-- ▢ `docs/index.md` "준비 중" 링크들 활성화
-- ▢ 일본/영어권 출시 *직전* 까지는 미뤄도 됨
+- ✅ `docs/privacy_policy_en.md` — GDPR/CCPA 친화적 자연스러운 영문
+- ✅ `docs/privacy_policy_ja.md` — 일본 개인정보보호법 + GDPR 언급
+- ✅ `docs/terms_of_service_en.md`
+- ✅ `docs/terms_of_service_ja.md`
+- ✅ `docs/index.md` 활성화 (한·영·일 3개 언어 인덱스)
+- ✅ `docs/release/app_store_metadata.md` URL 6개로 확장 (KR/EN/JA × privacy/terms)
 
 ### Y6. App Store Connect (iOS) 셋업
 ▢ | ~1d | macOS 머신 필요

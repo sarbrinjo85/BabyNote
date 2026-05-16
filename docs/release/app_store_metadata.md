@@ -14,8 +14,12 @@ Play Console / App Store Connect 에 등록할 모든 텍스트의 권역별 템
 - **카테고리 (Primary)**: Parenting (Play) / Lifestyle (App Store)
 - **카테고리 (Secondary)**: Medical
 - **연령 등급**: 만 3세+ (Pegi 3 / ESRB Everyone / 전체이용가)
-- **개인정보처리방침 URL**: `https://sarbrinjo85.github.io/BabyNote/privacy_policy.html` *(GH Pages 설정 후 확정)*
-- **이용약관 URL**: `https://sarbrinjo85.github.io/BabyNote/terms_of_service.html`
+- **개인정보처리방침 URL (KR)**: `https://sarbrinjo85.github.io/BabyNote/privacy_policy.html`
+- **이용약관 URL (KR)**: `https://sarbrinjo85.github.io/BabyNote/terms_of_service.html`
+- **Privacy Policy URL (EN)**: `https://sarbrinjo85.github.io/BabyNote/privacy_policy_en.html`
+- **Terms of Service URL (EN)**: `https://sarbrinjo85.github.io/BabyNote/terms_of_service_en.html`
+- **プライバシーポリシー URL (JA)**: `https://sarbrinjo85.github.io/BabyNote/privacy_policy_ja.html`
+- **利用規約 URL (JA)**: `https://sarbrinjo85.github.io/BabyNote/terms_of_service_ja.html`
 - **지원 이메일**: support.babynote@gmail.com
 - **개발자 표기**: KJFamily
 
