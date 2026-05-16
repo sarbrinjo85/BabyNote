@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../core/config/env.dart';
 import '../../../data/supabase_client_provider.dart';
 
 /// Supabase Auth API를 우리 앱이 쓸 만한 모양으로 감싼 얇은 계층.
@@ -78,21 +80,58 @@ class AuthRepository {
     return user;
   }
 
-  /// Google OAuth 로그인.
+  /// Google Sign-In — native SDK 방식 (선호).
   ///
   /// ── 동작 ─────────────────────────────────────────────────────────
-  /// 외부 브라우저(또는 in-app browser)를 띄워서 Google 로그인 페이지로 보냄.
-  /// 사용자가 인증 끝내면 Google → Supabase callback URL로 redirect → Supabase가
-  /// 토큰 발급 후 우리 앱의 deep link(`com.kjfamily.babynote://auth-callback`)로
-  /// 다시 redirect → 앱이 받아서 supabase_flutter SDK가 세션을 로컬에 저장.
+  /// google_sign_in 패키지가 Google Play Services 의 native 다이얼로그 호출.
+  /// 브라우저 안 거치고 곧바로 계정 선택 → idToken/accessToken 발급.
+  /// 받은 idToken 으로 Supabase.auth.signInWithIdToken 호출 → 세션 발급.
   ///
-  /// 이 메서드 자체는 "외부 페이지 띄우기"만 트리거하고 즉시 반환 (return true).
-  /// 실제 로그인 완료 신호는 onAuthStateChange 스트림에서 signedIn 이벤트로 도착.
-  /// 그래서 호출 측은 이 메서드 결과보다는 currentUserProvider가 갱신되는 걸 봐야 함.
-  Future<bool> signInWithGoogle() {
+  /// 브라우저 OAuth flow (signInWithGoogleViaBrowser) 대비 장점:
+  /// - UX: 브라우저 깜빡임 없음
+  /// - 속도: 자동 계정 매칭으로 1-2단계 단축
+  /// - 안정성: deep link callback 의존 없음
+  ///
+  /// ── 사전 셋업 (docs/release/google_signin.md) ───────────────────
+  /// 1. Google Cloud Console — Android OAuth 2.0 Client ID (앱 SHA-1 등록)
+  /// 2. Google Cloud Console — Web OAuth 2.0 Client ID (Supabase 가 사용)
+  /// 3. Supabase Dashboard → Auth → Providers → Google enable + Web Client ID 입력
+  /// 4. Env.googleServerClientId 에 Web Client ID 주입 (run/dev.json)
+  ///
+  /// ── 에러 케이스 ──────────────────────────────────────────────────
+  /// - 사용자가 다이얼로그 취소: GoogleSignIn 이 null 반환 → 조용히 skip
+  /// - serverClientId 없음: Env 미설정 → 예외 발생, 호출 측에서 토스트
+  /// - Play Services 미설치: PlatformException → 호출 측에서 토스트
+  Future<User?> signInWithGoogle() async {
+    if (Env.googleServerClientId.isEmpty) {
+      throw StateError(
+          'Google Sign-In 이 설정되지 않았어요 — GOOGLE_SERVER_CLIENT_ID 누락.');
+    }
+    final googleSignIn = GoogleSignIn(
+      serverClientId: Env.googleServerClientId,
+      scopes: ['email', 'profile'],
+    );
+    final googleUser = await googleSignIn.signIn();
+    if (googleUser == null) return null; // 사용자가 다이얼로그 취소
+    final auth = await googleUser.authentication;
+    final idToken = auth.idToken;
+    if (idToken == null) {
+      throw StateError('Google 로그인 결과에 idToken 이 없어요.');
+    }
+    final response = await _client.auth.signInWithIdToken(
+      provider: OAuthProvider.google,
+      idToken: idToken,
+      accessToken: auth.accessToken,
+    );
+    return response.user;
+  }
+
+  /// 구 OAuth (브라우저 redirect) flow — fallback.
+  /// 신규 구현은 signInWithGoogle 사용 권장. 이 메서드는 native SDK 가 실패할 때
+  /// (예: Play Services 없는 환경) 대안으로 호출 가능.
+  Future<bool> signInWithGoogleViaBrowser() {
     return _client.auth.signInWithOAuth(
       OAuthProvider.google,
-      // Android/iOS deep link. AndroidManifest의 intent filter와 일치해야 함.
       redirectTo: 'com.kjfamily.babynote://auth-callback',
     );
   }

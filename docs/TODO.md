@@ -116,14 +116,17 @@
 - ▢ 클라이언트 측 `affiliate_repository` 와 연동
 
 ### Y10. Google Sign-In (F-1)
-▢ | ~2h
+✅ 코드 완료 (2026-05-16) — 콘솔 셋업 사용자 손
 
-- ▢ `google_sign_in: ^6.2.2` pubspec 활성화
-- ▢ Firebase Console 또는 Google Cloud Console 에서 OAuth 2.0 클라이언트 ID
-- ▢ Supabase Dashboard → Auth → Providers → Google enable
-- ▢ AuthPage 에 "Google 로 계속" 버튼
-- ▢ Android `android/app/google-services.json` 추가 (gitignore)
-- ▢ Android `applicationId` SHA-1 fingerprint 등록
+- ✅ `google_sign_in: ^6.2.2` pubspec 활성화
+- ✅ `AuthRepository.signInWithGoogle()` — native SDK + signInWithIdToken
+- ✅ `signInWithGoogleViaBrowser()` — fallback 유지
+- ✅ `Env.googleServerClientId` (`GOOGLE_SERVER_CLIENT_ID`)
+- ✅ `auth_page` Google 버튼 — native flow 호출
+- ✅ `build-android.yml` 워크플로 — GOOGLE_SERVER_CLIENT_ID dart-define 추가
+- ✅ `docs/release/google_signin.md` — 상세 셋업 가이드 (SHA-1 / OAuth Client / Supabase)
+- ⏳ **사용자 작업**: 가이드 §1~§4 따라 콘솔 셋업 + run/dev.json 키 주입
+- ⏳ (firebase-messaging 없으면 google-services.json 도 불필요)
 
 ### Y11. Apple Sign-In (F-2)
 ▢ | ~2h | iOS 출시 시 필수

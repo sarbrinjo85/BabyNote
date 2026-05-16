@@ -39,4 +39,16 @@ class Env {
 
   /// 멀티 자녀 entitlement 식별자 (RevenueCat 콘솔에서 동일하게 등록).
   static const billingEntitlement = 'multi_child';
+
+  /// Google Sign-In native SDK 용 Web OAuth 2.0 Client ID.
+  /// Google Cloud Console → Credentials → Web application 의 Client ID 를
+  /// run/dev.json (또는 prod.json) 에 GOOGLE_SERVER_CLIENT_ID 로 주입.
+  ///
+  /// Android 앱은 별도 Android OAuth Client ID 가 필요하지만 그건 SHA-1 등록만
+  /// 하면 되고 코드엔 안 들어감. signInWithIdToken 가 받는 idToken 의 audience
+  /// 는 Web Client ID 라서 그것을 GoogleSignIn 에 serverClientId 로 전달.
+  static const googleServerClientId =
+      String.fromEnvironment('GOOGLE_SERVER_CLIENT_ID');
+
+  static bool get isGoogleSignInEnabled => googleServerClientId.isNotEmpty;
 }

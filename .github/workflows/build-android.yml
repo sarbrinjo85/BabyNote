@@ -88,12 +88,14 @@ jobs:
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
           REVENUECAT_ANDROID_KEY: ${{ secrets.REVENUECAT_ANDROID_KEY }}
+          GOOGLE_SERVER_CLIENT_ID: ${{ secrets.GOOGLE_SERVER_CLIENT_ID }}
         run: |
           flutter build appbundle --release \
             --dart-define=SUPABASE_URL="$SUPABASE_URL" \
             --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY" \
             --dart-define=SENTRY_DSN="$SENTRY_DSN" \
             --dart-define=REVENUECAT_ANDROID_KEY="$REVENUECAT_ANDROID_KEY" \
+            --dart-define=GOOGLE_SERVER_CLIENT_ID="$GOOGLE_SERVER_CLIENT_ID" \
             --dart-define=FLAVOR=prod
 
       - name: Build debug APK (sideload용)
@@ -103,12 +105,14 @@ jobs:
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
           REVENUECAT_ANDROID_KEY: ${{ secrets.REVENUECAT_ANDROID_KEY }}
+          GOOGLE_SERVER_CLIENT_ID: ${{ secrets.GOOGLE_SERVER_CLIENT_ID }}
         run: |
           flutter build apk --release \
             --dart-define=SUPABASE_URL="$SUPABASE_URL" \
             --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY" \
             --dart-define=SENTRY_DSN="$SENTRY_DSN" \
             --dart-define=REVENUECAT_ANDROID_KEY="$REVENUECAT_ANDROID_KEY" \
+            --dart-define=GOOGLE_SERVER_CLIENT_ID="$GOOGLE_SERVER_CLIENT_ID" \
             --dart-define=FLAVOR=prod
 
       - name: Upload AAB artifact

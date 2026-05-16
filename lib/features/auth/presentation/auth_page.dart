@@ -74,8 +74,12 @@ class _AuthPageState extends ConsumerState<AuthPage> {
 
   Future<void> _signInGoogle() async {
     final repo = ref.read(authRepositoryProvider);
-    await _runAuth(() => repo.signInWithGoogle());
-    // Google은 외부 브라우저 → 돌아오면 onAuthStateChange가 트리거 → AuthGate가 화면 전환.
+    await _runAuth(() async {
+      // Native Google Sign-In 다이얼로그 → idToken → Supabase 세션.
+      // 사용자가 다이얼로그 취소하면 null 반환 → 조용히 skip.
+      // 성공 시 onAuthStateChange 가 트리거 → AuthGate 가 화면 전환.
+      await repo.signInWithGoogle();
+    });
   }
 
   @override

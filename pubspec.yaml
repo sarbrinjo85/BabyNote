@@ -97,7 +97,7 @@ dependencies:
   # flutter_line_sdk: ^2.5.0
   # # Social login — global (Phase 5)
   # sign_in_with_apple: ^6.1.4
-  # google_sign_in: ^6.2.2
+  google_sign_in: ^6.2.2
 
 dev_dependencies:
   flutter_test:
