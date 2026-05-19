@@ -60,12 +60,17 @@ jobs:
 
       - name: Decode keystore
         # 시크릿이 비어있으면 빌드 자체는 가능 (debug 서명 fallback) — 출시용 AAB 는 시크릿 필수.
+        # base64 -d -i: invalid (줄바꿈/공백/CR) 문자 무시 → Windows certutil / PowerShell
+        #   복사 시 섞이는 CRLF·헤더라도 통과. tr 로 공백 제거까지 한 번 더 방어.
         if: env.ANDROID_KEYSTORE_BASE64 != ''
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
         run: |
-          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > android/babynote-release.jks
+          echo "$ANDROID_KEYSTORE_BASE64" | tr -d '\r\n ' | base64 -d -i > android/babynote-release.jks
           ls -la android/babynote-release.jks
+          # JKS magic bytes 검증 (앞 4 바이트 = FE ED FE ED). 깨졌으면 명시적으로 fail.
+          head -c 4 android/babynote-release.jks | xxd | grep -q "feed feed" \
+            || { echo "::error::keystore decoded but magic bytes wrong — secret may be corrupt"; exit 1; }
 
       - name: Create key.properties
         if: env.ANDROID_KEYSTORE_BASE64 != ''
