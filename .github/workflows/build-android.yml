@@ -88,13 +88,13 @@ jobs:
             echo "::error::cleaned base64 only $CLEAN_LEN chars — secret was likely truncated on paste"
           fi
           # ── 실제 디코드 ──────────────────────────────────────────────
-          printf %s "$CLEAN" | base64 -d > android/babynote-release.jks
-          ls -la android/babynote-release.jks
+          printf %s "$CLEAN" | base64 -d > android/app/babynote-release.jks
+          ls -la android/app/babynote-release.jks
           # 키스토어 형식 검증.
           #   JKS  : 앞 4 바이트 = FE ED FE ED         → xxd "feedfeed"
           #   PKCS12: 앞 2 바이트 = 30 82 (DER SEQUENCE) → xxd "3082"  (JDK 9+ keytool 기본)
           # Android Gradle 은 둘 다 처리 가능. 형식 자체가 다른 바이너리면 fail.
-          MAGIC=$(head -c 4 android/babynote-release.jks | xxd -p)
+          MAGIC=$(head -c 4 android/app/babynote-release.jks | xxd -p)
           case "$MAGIC" in
             feedfeed*) echo "✅ JKS keystore detected (magic: $MAGIC)" ;;
             3082*)     echo "✅ PKCS12 keystore detected (magic: $MAGIC)" ;;
@@ -166,4 +166,4 @@ jobs:
       - name: Cleanup keystore
         if: always()
         run: |
-          rm -f android/babynote-release.jks android/key.properties
+          rm -f android/app/babynote-release.jks android/key.properties
