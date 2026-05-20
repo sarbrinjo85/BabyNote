@@ -1255,6 +1255,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get routineSectionHome => 'Routine';
 
   @override
+  String get homeFamilyPlanBadge => 'Family Plan active';
+
+  @override
   String get homeRoutineWalk => 'Walk';
 
   @override

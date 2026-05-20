@@ -26,6 +26,8 @@ class OnboardingCoach {
   static final addChildKey = GlobalKey();
   static final bellKey = GlobalKey();
   static final recordButtonsKey = GlobalKey();
+  static final routineSectionKey = GlobalKey();
+  static final symptomSectionKey = GlobalKey();
   static final dataMenuKey = GlobalKey();
   static final medicalMenuKey = GlobalKey();
   static final fabKey = GlobalKey();
@@ -115,9 +117,11 @@ class OnboardingCoach {
           identify: 'add_child',
           keyTarget: OnboardingCoach.addChildKey,
           contents: [
-            textContent('자녀 추가',
-                '여기에서 새로운 자녀를 등록할 수 있어요.\n생년월일과 성별만 있으면 시작!',
-                ContentAlign.bottom),
+            textContent(
+              '자녀 추가',
+              '여기에서 새로운 자녀를 등록할 수 있어요.\n생년월일과 성별만 있으면 시작!',
+              ContentAlign.bottom,
+            ),
           ],
           shape: ShapeLightFocus.Circle,
           radius: 8,
@@ -127,8 +131,11 @@ class OnboardingCoach {
           identify: 'bell',
           keyTarget: OnboardingCoach.bellKey,
           contents: [
-            textContent('알림 종', '다가오는 예방접종이나 분유 부족 같은\n중요 일정을 한눈에 모아 보여드려요.',
-                ContentAlign.bottom),
+            textContent(
+              '알림 종',
+              '다가오는 예방접종이나 분유 부족 같은\n중요 일정을 한눈에 모아 보여드려요.',
+              ContentAlign.bottom,
+            ),
           ],
           shape: ShapeLightFocus.Circle,
         ),
@@ -138,9 +145,42 @@ class OnboardingCoach {
           keyTarget: OnboardingCoach.recordButtonsKey,
           paddingFocus: 0,
           contents: [
-            textContent('오늘의 기록',
-                '수유, 수면, 기저귀, 성장 4가지를 한 탭으로 기록해요.\n각 버튼에 마지막 활동 시간이 함께 표시돼요.',
-                ContentAlign.top, extraOffset: 140),
+            textContent(
+              '오늘의 기록',
+              '수유, 수면, 기저귀, 성장 4가지를 한 탭으로 기록해요.\n각 버튼에 마지막 활동 시간이 함께 표시돼요.',
+              ContentAlign.top,
+              extraOffset: 140,
+            ),
+          ],
+          radius: 14,
+        ),
+      if (OnboardingCoach.routineSectionKey.currentContext != null)
+        TargetFocus(
+          identify: 'routine_section',
+          keyTarget: OnboardingCoach.routineSectionKey,
+          paddingFocus: 0,
+          contents: [
+            textContent(
+              '하루 루틴',
+              '산책·목욕·영양제·간식 같은 매일의 루틴도 한 탭으로 기록해요.\n각 버튼에 마지막 시간이 함께 표시돼요.',
+              ContentAlign.top,
+              extraOffset: 120,
+            ),
+          ],
+          radius: 14,
+        ),
+      if (OnboardingCoach.symptomSectionKey.currentContext != null)
+        TargetFocus(
+          identify: 'symptom_section',
+          keyTarget: OnboardingCoach.symptomSectionKey,
+          paddingFocus: 0,
+          contents: [
+            textContent(
+              '건강 기록',
+              '기침·구토·발진·상처 등 아이의 건강 이상을 빠르게 남겨두세요.\n나중에 병원에서 보여주기 좋아요.',
+              ContentAlign.top,
+              extraOffset: 120,
+            ),
           ],
           radius: 14,
         ),
@@ -150,9 +190,12 @@ class OnboardingCoach {
           keyTarget: OnboardingCoach.dataMenuKey,
           paddingFocus: 0,
           contents: [
-            textContent('데이터/관리',
-                '분유·기저귀 재고 관리, 기록 편집, 성장 통계로 진입해요.',
-                ContentAlign.top, extraOffset: 140),
+            textContent(
+              '데이터/관리',
+              '분유·기저귀 재고 관리, 기록 편집, 성장 통계로 진입해요.',
+              ContentAlign.top,
+              extraOffset: 140,
+            ),
           ],
           radius: 14,
         ),
@@ -162,9 +205,12 @@ class OnboardingCoach {
           keyTarget: OnboardingCoach.medicalMenuKey,
           paddingFocus: 0,
           contents: [
-            textContent('의료',
-                '단골 병원 등록과 예방접종 일정을 한 곳에서 관리해요.',
-                ContentAlign.top, extraOffset: 140),
+            textContent(
+              '의료',
+              '단골 병원 등록과 예방접종 일정을 한 곳에서 관리해요.',
+              ContentAlign.top,
+              extraOffset: 140,
+            ),
           ],
           radius: 14,
         ),
@@ -173,9 +219,11 @@ class OnboardingCoach {
           identify: 'fab',
           keyTarget: OnboardingCoach.fabKey,
           contents: [
-            textContent('간편 수유 입력',
-                '한 번 탭하면 마지막 수유와 같은 양으로 즉시 저장.\n길게 누르면 수유량을 직접 입력할 수 있어요.',
-                ContentAlign.top),
+            textContent(
+              '간편 수유 입력',
+              '한 번 탭하면 마지막 수유와 같은 양으로 즉시 저장.\n길게 누르면 수유량을 직접 입력할 수 있어요.',
+              ContentAlign.top,
+            ),
           ],
           shape: ShapeLightFocus.RRect,
           radius: 30,

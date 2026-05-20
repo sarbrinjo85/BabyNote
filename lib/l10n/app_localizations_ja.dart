@@ -1238,6 +1238,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get routineSectionHome => 'ルーティン';
 
   @override
+  String get homeFamilyPlanBadge => 'ファミリープラン利用中';
+
+  @override
   String get homeRoutineWalk => '散歩';
 
   @override

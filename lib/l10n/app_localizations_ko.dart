@@ -1239,6 +1239,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get routineSectionHome => '루틴';
 
   @override
+  String get homeFamilyPlanBadge => '가족 플랜 이용 중';
+
+  @override
   String get homeRoutineWalk => '산책';
 
   @override

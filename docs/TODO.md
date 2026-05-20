@@ -12,19 +12,21 @@
 ## 🔴 1순위 — 출시 직전 필수
 
 ### Y1. 결제 시스템 콘솔 셋업 + 검증
-▢ | ~6h | 사용자 + 코드 작업 양쪽 | 상세: [release/billing.md](release/billing.md)
+🟡 | ~6h | 사용자 + 코드 작업 양쪽 | 상세: [release/billing.md](release/billing.md)
 
 코드는 이미 있음 (`lib/features/billing/`, `purchases_flutter`,
-`subscriptions` 테이블). 콘솔 셋업 + 환경 키 + 검증만 남음.
+`subscriptions` 테이블). 콘솔 셋업 완료 — 라이센스 테스트만 남음.
 
-- ▢ RevenueCat 계정 생성 + 프로젝트 만들기
-- ▢ Android app 추가 + Google Play 연동
-- ▢ Entitlement `multi_child` 정의
-- ▢ Products `babynote_extra_child_yearly` / `babynote_family_yearly` 생성
-- ▢ Google Play Console — 인앱상품 등록 (각각 ₩19,900/년 / ₩49,900/년)
-- ▢ `run/dev.json` + `run/prod.json` 에 `REVENUECAT_ANDROID_KEY` 추가
-- ▢ Webhook 셋업 (RevenueCat → Supabase Edge Function 또는 직접 callback)
-- ▢ 테스트 결제 (Play Console 테스터 추가 → 라이센스 테스트)
+- ✅ RevenueCat 계정 생성 + 프로젝트 만들기
+- ✅ Android app 추가 + Google Play 연동 (Service Account JSON → Valid)
+- ✅ Entitlement `multi_child` 정의
+- ✅ Products `babynote_extra_child_yearly` / `babynote_family_yearly` 생성
+- ✅ Google Play Console — 인앱상품 등록 (각각 ₩19,900/년 / ₩49,900/년)
+- ✅ `run/dev.json` 에 `REVENUECAT_ANDROID_KEY` 추가 (`goog_...`)
+- ✅ Offering `default` + Current + 2 packages 매핑
+- ✅ 결제 프로필 + 은행 계좌 인증 완료 (2026-05-20)
+- ⏭️ Webhook (Google dev notifications / Pub/Sub) — 출시 후 추가 (선택)
+- 🟡 테스트 결제 (Play Console 라이센스 테스트) ← **지금 진행**
 - ▢ 자녀 추가 시 paywall 게이트 동작 검증
 - ▢ "구매 복원" 버튼 검증
 
@@ -101,6 +103,47 @@
 - ✅ records_page 의 각 _DailyEvent 가 `isPending` 플래그 보유
 - ✅ _RecordCard 가 isPending 시 옅은 amber 배경 + ☁️⬆️ "동기화 대기 중" 라벨
 - ✅ OfflineWrites/SyncWorker 가 enqueue/flush 후 provider invalidate
+
+### Y22. 온보딩 코치 마크에 루틴/건강 섹션 반영
+✅ 완료 (2026-05-20)
+
+- ✅ `onboarding_coach.dart`: `routineSectionKey` + `symptomSectionKey` GlobalKey 추가
+- ✅ `TargetFocus` 2개 신규 — "하루 루틴" / "건강 기록" (records 단계 뒤에 삽입)
+- ✅ `home_page.dart`: 루틴/건강 GridView 를 keyed Container 로 감싸 코치 타겟 부착
+- ✅ flutter analyze 통과 / 검증: `OnboardingCoach.resetForTest()` 후 재표시 확인 권장
+
+### Y23. 가족 플랜 구매/복원 — RevenueCat 회원 연결 누락 (해결)
+✅ 코드 수정 완료 (2026-05-20) — 재빌드 후 검증 필요
+
+근본 원인: `BillingService.logIn()`/`logOut()` 이 정의만 있고 호출되지 않아
+RevenueCat 이 익명 ID 사용 → 구독이 Supabase 회원이 아니라 익명 사용자에 묶임
+→ 복원/계정 간 동기화 어긋남.
+
+- ✅ `main.dart`: 콜드스타트(세션 복원) 시 `BillingService.logIn(restoredUser.id)`
+- ✅ `auth_state_reset_listener.dart`: 로그인 시 `logIn(userId)`, 로그아웃 시 `logOut()`
+- ✅ flutter analyze 통과
+- ⏳ 재빌드 후 검증: RevenueCat Customers 에서 Supabase UID 로 검색되는지 +
+      복원 동작. (구매 페이지 안 뜸 증상은 Play 인앱상품 전파 지연이 유력 — 재현 시 재조사)
+
+### Y24. 법무문서 "기록 데이터" 에 루틴/건강 항목 추가
+✅ 완료 (2026-05-20)
+
+- ✅ `docs/privacy_policy.md` / `_en.md` / `_ja.md` — 기록 데이터에 루틴·건강 추가
+- ✅ `lib/features/legal/presentation/legal_doc_page.dart` — 인앱 개인정보(76) +
+      약관 정의(156) + 서비스 설명(168) 모두 반영
+- ✅ `docs/terms_of_service.md` / `_en.md` / `_ja.md` — 정의 + 서비스 설명 반영
+- ✅ 사진 예시(이유식·발진·상처) KR 문서도 보강
+- ▢ (남음) Play Console **Data Safety** 신고 항목과 일치 확인 — Y2 진행 시
+
+### Y25. 홈 화면에 "가족 플랜 이용 중" 뱃지 표시
+✅ 완료 (2026-05-20)
+
+- ✅ `_FamilyPlanBadge` 위젯 — `Env.isBillingEnabled && hasMultiChildEntitlementProvider`
+      가드 (dev 오표시 방지), 비활성 시 `SizedBox.shrink()`
+- ✅ `home_page.dart`: ChildInfoCard 아래 👑 chip 노출
+- ✅ l10n `homeFamilyPlanBadge` ko/ja/en 추가 + gen-l10n
+- ✅ flutter analyze 통과
+- ▢ (후속) 탭 시 구독 관리 안내 + 설정 "가족 플랜" 진입 시 구독 중 상태 표시
 
 ---
 

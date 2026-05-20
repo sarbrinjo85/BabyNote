@@ -21,7 +21,9 @@ recording childcare information.
 3. **"Child Profile"** — Information about a child (name, date of birth, sex)
    that a Member enters directly.
 4. **"Activity Records"** — Logs of feedings, sleeps, diapers, growth,
-   inventory, pediatricians, and vaccinations.
+   inventory, routines (walks, baths, supplements, snacks), health
+   (symptoms such as cough, vomiting, rash, injury), pediatricians,
+   and vaccinations.
 5. **"Family Plan"** — A paid subscription that includes premium features such
    as unlimited child profiles.
 
@@ -37,6 +39,7 @@ recording childcare information.
 The Service provides:
 
 - Per-child childcare records (feeding / sleep / diaper / growth)
+- Routines (walks, baths, supplements, snacks) and health logs (symptoms such as cough, vomiting, rash, injury)
 - Formula and diaper inventory tracking with depletion alerts
 - Pediatrician registry and vaccination schedule
 - Family sharing (caregiver invites, real-time sync)

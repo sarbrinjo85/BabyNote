@@ -2404,6 +2404,12 @@ abstract class AppLocalizations {
   /// **'루틴'**
   String get routineSectionHome;
 
+  /// No description provided for @homeFamilyPlanBadge.
+  ///
+  /// In ko, this message translates to:
+  /// **'가족 플랜 이용 중'**
+  String get homeFamilyPlanBadge;
+
   /// No description provided for @homeRoutineWalk.
   ///
   /// In ko, this message translates to:

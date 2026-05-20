@@ -416,6 +416,7 @@
   "routineStartedAtLabel": "Time",
   "routineNoteLabel": "Note (optional)",
   "routineSectionHome": "Routine",
+  "homeFamilyPlanBadge": "Family Plan active",
   "homeRoutineWalk": "Walk",
   "homeRoutineBath": "Bath",
   "homeRoutineSupplement": "Supplement",

@@ -5,12 +5,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:babynote/l10n/app_localizations.dart';
+import '../../../core/config/env.dart';
 import '../../../core/sync/sync_indicator.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/utils/time_ago.dart';
 import '../../../core/widgets/stroked_title.dart';
 import '../../../core/widgets/grid_action_tile.dart';
 import '../../auth/data/auth_repository.dart';
+import '../../billing/data/billing_service.dart';
 import '../../child/presentation/child_providers.dart';
 import '../../child/presentation/selected_child_provider.dart';
 import '../../family/data/realtime_sync.dart';
@@ -115,363 +117,432 @@ class _HomePageState extends ConsumerState<HomePage> {
           );
       },
       child: Scaffold(
-      floatingActionButton: selectedChild != null
-          ? Container(
-              key: OnboardingCoach.fabKey,
-              child: QuickFeedingFab(child: selectedChild),
-            )
-          : null,
-      appBar: AppBar(
-        // 글자 fill + stroke 두 겹 — Stack으로 구현.
-        // Flutter의 TextStyle.foreground는 fill XOR stroke 둘 중 하나만 지원.
-        title: const StrokedTitle('Baby Note'),
-        actions: [
-          // 오프라인 큐 indicator — 큐가 비어있으면 0 폭으로 사라짐.
-          const SyncIndicator(),
-          // GlobalKey는 Container로 감싸서 위치 계산이 IconButton 외곽 박스에
-          // 정확히 매칭되도록 함.
-          Container(
-            key: OnboardingCoach.addChildKey,
-            child: IconButton(
-              tooltip: l10n.homeAddChild,
-              icon: const Icon(Icons.person_add_alt_1_outlined),
-              onPressed: () => context.push('/child/new'),
-            ),
-          ),
-          Container(
-            key: OnboardingCoach.bellKey,
-            child: const NotificationBellAction(),
-          ),
-          IconButton(
-            tooltip: l10n.settingsTitle,
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () => context.push('/settings'),
-          ),
-          IconButton(
-            tooltip: l10n.homeLogout,
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await ref.read(authRepositoryProvider).signOut();
-            },
-          ),
-        ],
-      ),
-      body: SafeArea(
-        top: false,
-        child: asyncChildren.maybeWhen(
-              data: (cs) => cs.isEmpty,
-              orElse: () => false,
-            )
-            ? const _OnboardingHero()
-            : ListView(
-                padding: EdgeInsets.zero,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                        Spacing.md, Spacing.sm, Spacing.md, Spacing.md),
-                    child: asyncChildren.when(
-                      loading: () => const Padding(
-                        padding: EdgeInsets.all(Spacing.md),
-                        child: Center(child: BabyLoading()),
-                      ),
-                      error: (err, _) => Card(
-                        color: Theme.of(context).colorScheme.errorContainer,
-                        child: Padding(
-                          padding: const EdgeInsets.all(Spacing.sm),
-                          child: Text(l10n.errorChildrenLoadFailed(err)),
-                        ),
-                      ),
-                      data: (children) {
-                        if (children.isEmpty) return const SizedBox.shrink();
-                        final child = selectedChild ?? children.first;
-
-                        // 루틴/증상 kind 별 마지막 기록 시간 계산.
-                        // recentXProvider 는 30건 limit, kind 8종이라 보통 모두 커버.
-                        final routinesAsync =
-                            ref.watch(recentRoutinesProvider(child.id));
-                        final symptomsAsync =
-                            ref.watch(recentSymptomsProvider(child.id));
-                        final lastRoutineByKind = <RoutineKind, DateTime>{};
-                        final lastSymptomByKind = <SymptomKind, DateTime>{};
-                        routinesAsync.whenData((list) {
-                          for (final r in list) {
-                            final ex = lastRoutineByKind[r.kind];
-                            if (ex == null || r.startedAt.isAfter(ex)) {
-                              lastRoutineByKind[r.kind] = r.startedAt;
-                            }
-                          }
-                        });
-                        symptomsAsync.whenData((list) {
-                          for (final s in list) {
-                            final ex = lastSymptomByKind[s.kind];
-                            if (ex == null || s.occurredAt.isAfter(ex)) {
-                              lastSymptomByKind[s.kind] = s.occurredAt;
-                            }
-                          }
-                        });
-                        String? lastFor(RoutineKind k) {
-                          final dt = lastRoutineByKind[k];
-                          return dt == null ? null : TimeAgo.format(l10n, dt);
-                        }
-                        String? lastSymptomFor(SymptomKind k) {
-                          final dt = lastSymptomByKind[k];
-                          return dt == null ? null : TimeAgo.format(l10n, dt);
-                        }
-
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            // 자녀 picker (2명 이상일 때만)
-                            if (children.length >= 2) ...[
-                              Wrap(
-                                spacing: Spacing.xs,
-                                runSpacing: Spacing.xs,
-                                children: children.map((c) {
-                                  final isSel = (selectedChildId ??
-                                          children.first.id) ==
-                                      c.id;
-                                  return ChoiceChip(
-                                    label: Text(c.name),
-                                    avatar: Icon(
-                                      Icons.child_care,
-                                      size: 18,
-                                      color: isSel
-                                          ? const Color(0xFFA43F45)
-                                          : null,
-                                    ),
-                                    selected: isSel,
-                                    // 선택 시 코랄핑크 파스텔 배경 + 다크 코랄 글자
-                                    selectedColor: const Color(0xFFFFB5A7),
-                                    backgroundColor:
-                                        Theme.of(context).colorScheme.surface,
-                                    labelStyle: TextStyle(
-                                      color: isSel
-                                          ? const Color(0xFFA43F45)
-                                          : Theme.of(context)
-                                              .colorScheme
-                                              .onSurface,
-                                      fontWeight: isSel
-                                          ? FontWeight.w800
-                                          : FontWeight.w600,
-                                    ),
-                                    side: BorderSide(
-                                      color: isSel
-                                          ? const Color(0xFFA43F45)
-                                          : const Color(0x99FFB5A7),
-                                      width: 1.2,
-                                    ),
-                                    showCheckmark: false,
-                                    onSelected: (sel) {
-                                      if (sel) {
-                                        ref
-                                            .read(selectedChildIdProvider
-                                                .notifier)
-                                            .state = c.id;
-                                      }
-                                    },
-                                  );
-                                }).toList(),
-                              ),
-                              const SizedBox(height: Spacing.xs),
-                            ],
-
-                            // 무음 위젯들
-                            NotificationScheduler(child: child),
-                            SleepOngoingNotifier(child: child),
-
-                            // 자녀 정보 + 성장
-                            ChildInfoCard(child: child),
-                            const SizedBox(height: Spacing.xs),
-
-                            // 오늘의 요약 차트
-                            TodaysSummaryChart(childId: child.id),
-                            const SizedBox(height: Spacing.sm),
-
-                            // 메인 기록 4 col — 마지막 활동 시간 + 알림 dot 통합
-                            _SectionLabel(text: l10n.homeTodayRecord),
-                            const SizedBox(height: Spacing.xxs),
-                            Container(
-                              key: OnboardingCoach.recordButtonsKey,
-                              child: RecordButtonsGrid(childId: child.id),
-                            ),
-                            const SizedBox(height: Spacing.sm),
-
-                            // ── 루틴 — 산책/목욕/영양제/간식 ───────────
-                            _SectionLabel(text: l10n.routineSectionHome),
-                            const SizedBox(height: Spacing.xxs),
-                            GridView.count(
-                              crossAxisCount: 4,
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              mainAxisSpacing: Spacing.xs,
-                              crossAxisSpacing: Spacing.xs,
-                              childAspectRatio: 0.9,
-                              children: [
-                                GridActionTile(
-                                  emoji: RoutineKind.walk.emoji,
-                                  label: l10n.homeRoutineWalk,
-                                  subtitle: lastFor(RoutineKind.walk),
-                                  onTap: () => context.push(
-                                    '/routine/new',
-                                    extra: RoutineKind.walk,
-                                  ),
-                                ),
-                                GridActionTile(
-                                  emoji: RoutineKind.bath.emoji,
-                                  label: l10n.homeRoutineBath,
-                                  subtitle: lastFor(RoutineKind.bath),
-                                  onTap: () => context.push(
-                                    '/routine/new',
-                                    extra: RoutineKind.bath,
-                                  ),
-                                ),
-                                GridActionTile(
-                                  emoji: RoutineKind.supplement.emoji,
-                                  label: l10n.homeRoutineSupplement,
-                                  subtitle: lastFor(RoutineKind.supplement),
-                                  onTap: () => context.push(
-                                    '/routine/new',
-                                    extra: RoutineKind.supplement,
-                                  ),
-                                ),
-                                GridActionTile(
-                                  emoji: RoutineKind.snack.emoji,
-                                  label: l10n.homeRoutineSnack,
-                                  subtitle: lastFor(RoutineKind.snack),
-                                  onTap: () => context.push(
-                                    '/routine/new',
-                                    extra: RoutineKind.snack,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: Spacing.sm),
-
-                            // ── 건강 — 기침/구토/발진/상처 ─────────────
-                            _SectionLabel(text: l10n.symptomSectionHome),
-                            const SizedBox(height: Spacing.xxs),
-                            GridView.count(
-                              crossAxisCount: 4,
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              mainAxisSpacing: Spacing.xs,
-                              crossAxisSpacing: Spacing.xs,
-                              childAspectRatio: 0.9,
-                              children: [
-                                GridActionTile(
-                                  emoji: SymptomKind.cough.emoji,
-                                  label: l10n.homeSymptomCough,
-                                  subtitle:
-                                      lastSymptomFor(SymptomKind.cough),
-                                  onTap: () => context.push(
-                                    '/symptom/new',
-                                    extra: SymptomKind.cough,
-                                  ),
-                                ),
-                                GridActionTile(
-                                  emoji: SymptomKind.vomit.emoji,
-                                  label: l10n.homeSymptomVomit,
-                                  subtitle:
-                                      lastSymptomFor(SymptomKind.vomit),
-                                  onTap: () => context.push(
-                                    '/symptom/new',
-                                    extra: SymptomKind.vomit,
-                                  ),
-                                ),
-                                GridActionTile(
-                                  emoji: SymptomKind.rash.emoji,
-                                  label: l10n.homeSymptomRash,
-                                  subtitle:
-                                      lastSymptomFor(SymptomKind.rash),
-                                  onTap: () => context.push(
-                                    '/symptom/new',
-                                    extra: SymptomKind.rash,
-                                  ),
-                                ),
-                                GridActionTile(
-                                  emoji: SymptomKind.injury.emoji,
-                                  label: l10n.homeSymptomInjury,
-                                  subtitle:
-                                      lastSymptomFor(SymptomKind.injury),
-                                  onTap: () => context.push(
-                                    '/symptom/new',
-                                    extra: SymptomKind.injury,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: Spacing.sm),
-
-                            // ── 카테고리 1: 데이터/관리 ──────────────
-                            _SectionLabel(text: l10n.homeSectionData),
-                            const SizedBox(height: Spacing.xxs),
-                            Container(
-                              key: OnboardingCoach.dataMenuKey,
-                              child: GridView.count(
-                                crossAxisCount: 4,
-                                shrinkWrap: true,
-                                physics:
-                                    const NeverScrollableScrollPhysics(),
-                                mainAxisSpacing: Spacing.xs,
-                                crossAxisSpacing: Spacing.xs,
-                                childAspectRatio: 0.9,
-                                children: [
-                                  GridActionTile(
-                                    emoji: '📦',
-                                    label: l10n.homeInventory,
-                                    onTap: () => context.push('/inventory'),
-                                  ),
-                                  GridActionTile(
-                                    emoji: '📋',
-                                    label: l10n.recordsEntryHome,
-                                    onTap: () => context.push('/records'),
-                                  ),
-                                  GridActionTile(
-                                    emoji: '📊',
-                                    label: l10n.statsEntryHome,
-                                    onTap: () => context.push('/stats'),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: Spacing.sm),
-
-                            // ── 카테고리 2: 의료 ────────────────────
-                            _SectionLabel(text: l10n.homeSectionMedical),
-                            const SizedBox(height: Spacing.xxs),
-                            Container(
-                              key: OnboardingCoach.medicalMenuKey,
-                              child: GridView.count(
-                                crossAxisCount: 4,
-                                shrinkWrap: true,
-                                physics:
-                                    const NeverScrollableScrollPhysics(),
-                                mainAxisSpacing: Spacing.xs,
-                                crossAxisSpacing: Spacing.xs,
-                                childAspectRatio: 0.9,
-                                children: [
-                                  GridActionTile(
-                                    emoji: '🏥',
-                                    label: l10n.homeHospitalEntry,
-                                    onTap: () => context.push('/hospital'),
-                                ),
-                                GridActionTile(
-                                  emoji: '💉',
-                                  label: l10n.homeVaccineEntry,
-                                  onTap: () => context.push('/vaccine'),
-                                ),
-                              ],
-                            ),
-                            ),
-                            const SizedBox(height: Spacing.lg),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
-                ],
+        floatingActionButton: selectedChild != null
+            ? Container(
+                key: OnboardingCoach.fabKey,
+                child: QuickFeedingFab(child: selectedChild),
+              )
+            : null,
+        appBar: AppBar(
+          // 글자 fill + stroke 두 겹 — Stack으로 구현.
+          // Flutter의 TextStyle.foreground는 fill XOR stroke 둘 중 하나만 지원.
+          title: const StrokedTitle('Baby Note'),
+          actions: [
+            // 오프라인 큐 indicator — 큐가 비어있으면 0 폭으로 사라짐.
+            const SyncIndicator(),
+            // GlobalKey는 Container로 감싸서 위치 계산이 IconButton 외곽 박스에
+            // 정확히 매칭되도록 함.
+            Container(
+              key: OnboardingCoach.addChildKey,
+              child: IconButton(
+                tooltip: l10n.homeAddChild,
+                icon: const Icon(Icons.person_add_alt_1_outlined),
+                onPressed: () => context.push('/child/new'),
               ),
+            ),
+            Container(
+              key: OnboardingCoach.bellKey,
+              child: const NotificationBellAction(),
+            ),
+            IconButton(
+              tooltip: l10n.settingsTitle,
+              icon: const Icon(Icons.settings_outlined),
+              onPressed: () => context.push('/settings'),
+            ),
+            IconButton(
+              tooltip: l10n.homeLogout,
+              icon: const Icon(Icons.logout),
+              onPressed: () async {
+                await ref.read(authRepositoryProvider).signOut();
+              },
+            ),
+          ],
+        ),
+        body: SafeArea(
+          top: false,
+          child:
+              asyncChildren.maybeWhen(
+                data: (cs) => cs.isEmpty,
+                orElse: () => false,
+              )
+              ? const _OnboardingHero()
+              : ListView(
+                  padding: EdgeInsets.zero,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        Spacing.md,
+                        Spacing.sm,
+                        Spacing.md,
+                        Spacing.md,
+                      ),
+                      child: asyncChildren.when(
+                        loading: () => const Padding(
+                          padding: EdgeInsets.all(Spacing.md),
+                          child: Center(child: BabyLoading()),
+                        ),
+                        error: (err, _) => Card(
+                          color: Theme.of(context).colorScheme.errorContainer,
+                          child: Padding(
+                            padding: const EdgeInsets.all(Spacing.sm),
+                            child: Text(l10n.errorChildrenLoadFailed(err)),
+                          ),
+                        ),
+                        data: (children) {
+                          if (children.isEmpty) return const SizedBox.shrink();
+                          final child = selectedChild ?? children.first;
+
+                          // 루틴/증상 kind 별 마지막 기록 시간 계산.
+                          // recentXProvider 는 30건 limit, kind 8종이라 보통 모두 커버.
+                          final routinesAsync = ref.watch(
+                            recentRoutinesProvider(child.id),
+                          );
+                          final symptomsAsync = ref.watch(
+                            recentSymptomsProvider(child.id),
+                          );
+                          final lastRoutineByKind = <RoutineKind, DateTime>{};
+                          final lastSymptomByKind = <SymptomKind, DateTime>{};
+                          routinesAsync.whenData((list) {
+                            for (final r in list) {
+                              final ex = lastRoutineByKind[r.kind];
+                              if (ex == null || r.startedAt.isAfter(ex)) {
+                                lastRoutineByKind[r.kind] = r.startedAt;
+                              }
+                            }
+                          });
+                          symptomsAsync.whenData((list) {
+                            for (final s in list) {
+                              final ex = lastSymptomByKind[s.kind];
+                              if (ex == null || s.occurredAt.isAfter(ex)) {
+                                lastSymptomByKind[s.kind] = s.occurredAt;
+                              }
+                            }
+                          });
+                          String? lastFor(RoutineKind k) {
+                            final dt = lastRoutineByKind[k];
+                            return dt == null ? null : TimeAgo.format(l10n, dt);
+                          }
+
+                          String? lastSymptomFor(SymptomKind k) {
+                            final dt = lastSymptomByKind[k];
+                            return dt == null ? null : TimeAgo.format(l10n, dt);
+                          }
+
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              // 자녀 picker (2명 이상일 때만)
+                              if (children.length >= 2) ...[
+                                Wrap(
+                                  spacing: Spacing.xs,
+                                  runSpacing: Spacing.xs,
+                                  children: children.map((c) {
+                                    final isSel =
+                                        (selectedChildId ??
+                                            children.first.id) ==
+                                        c.id;
+                                    return ChoiceChip(
+                                      label: Text(c.name),
+                                      avatar: Icon(
+                                        Icons.child_care,
+                                        size: 18,
+                                        color: isSel
+                                            ? const Color(0xFFA43F45)
+                                            : null,
+                                      ),
+                                      selected: isSel,
+                                      // 선택 시 코랄핑크 파스텔 배경 + 다크 코랄 글자
+                                      selectedColor: const Color(0xFFFFB5A7),
+                                      backgroundColor: Theme.of(
+                                        context,
+                                      ).colorScheme.surface,
+                                      labelStyle: TextStyle(
+                                        color: isSel
+                                            ? const Color(0xFFA43F45)
+                                            : Theme.of(
+                                                context,
+                                              ).colorScheme.onSurface,
+                                        fontWeight: isSel
+                                            ? FontWeight.w800
+                                            : FontWeight.w600,
+                                      ),
+                                      side: BorderSide(
+                                        color: isSel
+                                            ? const Color(0xFFA43F45)
+                                            : const Color(0x99FFB5A7),
+                                        width: 1.2,
+                                      ),
+                                      showCheckmark: false,
+                                      onSelected: (sel) {
+                                        if (sel) {
+                                          ref
+                                                  .read(
+                                                    selectedChildIdProvider
+                                                        .notifier,
+                                                  )
+                                                  .state =
+                                              c.id;
+                                        }
+                                      },
+                                    );
+                                  }).toList(),
+                                ),
+                                const SizedBox(height: Spacing.xs),
+                              ],
+
+                              // 무음 위젯들
+                              NotificationScheduler(child: child),
+                              SleepOngoingNotifier(child: child),
+
+                              // 자녀 정보 + 성장
+                              ChildInfoCard(child: child),
+                              // 가족 플랜 활성 시에만 뜨는 뱃지 (구매 가치 가시화)
+                              const _FamilyPlanBadge(),
+                              const SizedBox(height: Spacing.xs),
+
+                              // 오늘의 요약 차트
+                              TodaysSummaryChart(childId: child.id),
+                              const SizedBox(height: Spacing.sm),
+
+                              // 메인 기록 4 col — 마지막 활동 시간 + 알림 dot 통합
+                              _SectionLabel(text: l10n.homeTodayRecord),
+                              const SizedBox(height: Spacing.xxs),
+                              Container(
+                                key: OnboardingCoach.recordButtonsKey,
+                                child: RecordButtonsGrid(childId: child.id),
+                              ),
+                              const SizedBox(height: Spacing.sm),
+
+                              // ── 루틴 — 산책/목욕/영양제/간식 ───────────
+                              _SectionLabel(text: l10n.routineSectionHome),
+                              const SizedBox(height: Spacing.xxs),
+                              Container(
+                                key: OnboardingCoach.routineSectionKey,
+                                child: GridView.count(
+                                  crossAxisCount: 4,
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  mainAxisSpacing: Spacing.xs,
+                                  crossAxisSpacing: Spacing.xs,
+                                  childAspectRatio: 0.9,
+                                  children: [
+                                    GridActionTile(
+                                      emoji: RoutineKind.walk.emoji,
+                                      label: l10n.homeRoutineWalk,
+                                      subtitle: lastFor(RoutineKind.walk),
+                                      onTap: () => context.push(
+                                        '/routine/new',
+                                        extra: RoutineKind.walk,
+                                      ),
+                                    ),
+                                    GridActionTile(
+                                      emoji: RoutineKind.bath.emoji,
+                                      label: l10n.homeRoutineBath,
+                                      subtitle: lastFor(RoutineKind.bath),
+                                      onTap: () => context.push(
+                                        '/routine/new',
+                                        extra: RoutineKind.bath,
+                                      ),
+                                    ),
+                                    GridActionTile(
+                                      emoji: RoutineKind.supplement.emoji,
+                                      label: l10n.homeRoutineSupplement,
+                                      subtitle: lastFor(RoutineKind.supplement),
+                                      onTap: () => context.push(
+                                        '/routine/new',
+                                        extra: RoutineKind.supplement,
+                                      ),
+                                    ),
+                                    GridActionTile(
+                                      emoji: RoutineKind.snack.emoji,
+                                      label: l10n.homeRoutineSnack,
+                                      subtitle: lastFor(RoutineKind.snack),
+                                      onTap: () => context.push(
+                                        '/routine/new',
+                                        extra: RoutineKind.snack,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: Spacing.sm),
+
+                              // ── 건강 — 기침/구토/발진/상처 ─────────────
+                              _SectionLabel(text: l10n.symptomSectionHome),
+                              const SizedBox(height: Spacing.xxs),
+                              Container(
+                                key: OnboardingCoach.symptomSectionKey,
+                                child: GridView.count(
+                                  crossAxisCount: 4,
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  mainAxisSpacing: Spacing.xs,
+                                  crossAxisSpacing: Spacing.xs,
+                                  childAspectRatio: 0.9,
+                                  children: [
+                                    GridActionTile(
+                                      emoji: SymptomKind.cough.emoji,
+                                      label: l10n.homeSymptomCough,
+                                      subtitle: lastSymptomFor(
+                                        SymptomKind.cough,
+                                      ),
+                                      onTap: () => context.push(
+                                        '/symptom/new',
+                                        extra: SymptomKind.cough,
+                                      ),
+                                    ),
+                                    GridActionTile(
+                                      emoji: SymptomKind.vomit.emoji,
+                                      label: l10n.homeSymptomVomit,
+                                      subtitle: lastSymptomFor(
+                                        SymptomKind.vomit,
+                                      ),
+                                      onTap: () => context.push(
+                                        '/symptom/new',
+                                        extra: SymptomKind.vomit,
+                                      ),
+                                    ),
+                                    GridActionTile(
+                                      emoji: SymptomKind.rash.emoji,
+                                      label: l10n.homeSymptomRash,
+                                      subtitle: lastSymptomFor(
+                                        SymptomKind.rash,
+                                      ),
+                                      onTap: () => context.push(
+                                        '/symptom/new',
+                                        extra: SymptomKind.rash,
+                                      ),
+                                    ),
+                                    GridActionTile(
+                                      emoji: SymptomKind.injury.emoji,
+                                      label: l10n.homeSymptomInjury,
+                                      subtitle: lastSymptomFor(
+                                        SymptomKind.injury,
+                                      ),
+                                      onTap: () => context.push(
+                                        '/symptom/new',
+                                        extra: SymptomKind.injury,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: Spacing.sm),
+
+                              // ── 카테고리 1: 데이터/관리 ──────────────
+                              _SectionLabel(text: l10n.homeSectionData),
+                              const SizedBox(height: Spacing.xxs),
+                              Container(
+                                key: OnboardingCoach.dataMenuKey,
+                                child: GridView.count(
+                                  crossAxisCount: 4,
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  mainAxisSpacing: Spacing.xs,
+                                  crossAxisSpacing: Spacing.xs,
+                                  childAspectRatio: 0.9,
+                                  children: [
+                                    GridActionTile(
+                                      emoji: '📦',
+                                      label: l10n.homeInventory,
+                                      onTap: () => context.push('/inventory'),
+                                    ),
+                                    GridActionTile(
+                                      emoji: '📋',
+                                      label: l10n.recordsEntryHome,
+                                      onTap: () => context.push('/records'),
+                                    ),
+                                    GridActionTile(
+                                      emoji: '📊',
+                                      label: l10n.statsEntryHome,
+                                      onTap: () => context.push('/stats'),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: Spacing.sm),
+
+                              // ── 카테고리 2: 의료 ────────────────────
+                              _SectionLabel(text: l10n.homeSectionMedical),
+                              const SizedBox(height: Spacing.xxs),
+                              Container(
+                                key: OnboardingCoach.medicalMenuKey,
+                                child: GridView.count(
+                                  crossAxisCount: 4,
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  mainAxisSpacing: Spacing.xs,
+                                  crossAxisSpacing: Spacing.xs,
+                                  childAspectRatio: 0.9,
+                                  children: [
+                                    GridActionTile(
+                                      emoji: '🏥',
+                                      label: l10n.homeHospitalEntry,
+                                      onTap: () => context.push('/hospital'),
+                                    ),
+                                    GridActionTile(
+                                      emoji: '💉',
+                                      label: l10n.homeVaccineEntry,
+                                      onTap: () => context.push('/vaccine'),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: Spacing.lg),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+        ),
       ),
+    );
+  }
+}
+
+/// 가족 플랜(멀티 자녀 entitlement) 활성 시에만 표시되는 작은 뱃지.
+///
+/// 빌링 비활성(dev: 키 없음) 환경에서는 hasMultiChildEntitlementProvider 가
+/// 항상 true 를 반환하므로, Env.isBillingEnabled 로 한 번 더 가드해서 개발 중
+/// 오표시를 방지한다. 활성이 아니면 SizedBox.shrink() (공간 차지 X).
+class _FamilyPlanBadge extends ConsumerWidget {
+  const _FamilyPlanBadge();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (!Env.isBillingEnabled) return const SizedBox.shrink();
+    final active = ref.watch(hasMultiChildEntitlementProvider);
+    if (!active) return const SizedBox.shrink();
+    final l10n = AppLocalizations.of(context);
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Padding(
+        padding: const EdgeInsets.only(top: Spacing.xs),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFF1D6),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: const Color(0xFFE0B25C)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('👑', style: TextStyle(fontSize: 13)),
+              const SizedBox(width: 4),
+              Text(
+                l10n.homeFamilyPlanBadge,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF8A6D1B),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -487,9 +558,9 @@ class _SectionLabel extends StatelessWidget {
     return Text(
       text,
       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-            fontWeight: FontWeight.w600,
-          ),
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+        fontWeight: FontWeight.w600,
+      ),
     );
   }
 }
@@ -548,4 +619,3 @@ class _OnboardingHero extends StatelessWidget {
     );
   }
 }
-

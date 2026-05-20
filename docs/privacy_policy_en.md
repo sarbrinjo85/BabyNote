@@ -20,6 +20,8 @@ how it is used, and how it is protected.
 
 ### Activity Records
 - Feedings / sleeps / diapers / growth measurements / formula and diaper inventory
+- Routines (walks, baths, supplements, snacks)
+- Health records (symptoms such as cough, vomiting, rash, injury)
 - Pediatrician profile, vaccination schedule
 - Photos you attach (e.g., solid food, rash, injury)
 

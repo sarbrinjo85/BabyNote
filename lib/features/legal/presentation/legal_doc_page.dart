@@ -31,7 +31,10 @@ class LegalDocPage extends StatelessWidget {
               await Clipboard.setData(ClipboardData(text: content));
               if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(duration: Duration(seconds: 1), content: Text('전체 내용을 복사했어요')),
+                const SnackBar(
+                  duration: Duration(seconds: 1),
+                  content: Text('전체 내용을 복사했어요'),
+                ),
               );
             },
           ),
@@ -44,10 +47,7 @@ class LegalDocPage extends StatelessWidget {
           children: [
             SelectableText(
               content,
-              style: const TextStyle(
-                fontSize: 14,
-                height: 1.6,
-              ),
+              style: const TextStyle(fontSize: 14, height: 1.6),
             ),
             const SizedBox(height: Spacing.xl),
           ],
@@ -74,8 +74,10 @@ BabyNote는 사용자의 개인정보 보호를 매우 중요하게 생각하며
 
 기록 데이터
 • 수유 / 수면 / 기저귀 / 성장 측정 / 분유·기저귀 재고
+• 루틴 (산책·목욕·영양제·간식)
+• 건강 기록 (기침·구토·발진·상처 등 증상)
 • 단골 병원, 예방접종 일정
-• 사용자가 첨부한 사진 (이유식 등)
+• 사용자가 첨부한 사진 (이유식, 발진, 상처 등)
 
 자동 수집
 • 디바이스 식별자(앱 로그인 세션 유지용)
@@ -153,7 +155,7 @@ const _terms = '''이용약관
 1. "서비스": BabyNote 모바일 앱 및 관련 부가 기능 일체
 2. "회원": 본 약관에 동의하고 회원가입을 완료한 자
 3. "자녀 정보": 회원이 직접 등록하는 자녀의 이름·생년월일·성별 등 정보
-4. "기록 데이터": 수유, 수면, 기저귀, 성장, 재고, 병원, 예방접종 등의 기록
+4. "기록 데이터": 수유, 수면, 기저귀, 성장, 재고, 루틴(산책·목욕·영양제·간식), 건강(기침·구토·발진·상처 등 증상), 병원, 예방접종 등의 기록
 5. "가족 플랜": 자녀 무제한 추가 등 부가 기능을 포함하는 유료 구독
 
 제3조 (회원가입 및 계정)
@@ -166,6 +168,7 @@ const _terms = '''이용약관
 
 서비스는 다음 기능을 제공합니다.
 • 자녀별 양육 기록(수유/수면/기저귀/성장)
+• 루틴(산책·목욕·영양제·간식) 및 건강(기침·구토·발진·상처 등 증상) 기록
 • 분유·기저귀 재고 관리 및 자동 잔량 알림
 • 단골 병원 등록 및 예방접종 일정 관리
 • 가족 공유(보호자 초대, 실시간 동기화)
