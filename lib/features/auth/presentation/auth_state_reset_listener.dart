@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../billing/data/billing_service.dart';
 import '../../child/presentation/selected_child_provider.dart';
 import 'auth_providers.dart';
 
@@ -27,11 +31,20 @@ class AuthStateResetListener extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // ref.listen은 build 도중 setState 발생 안 시킴 — listener로 안전.
-    ref.listen<dynamic>(currentUserProvider, (previous, next) {
-      // user 있다가 없어졌을 때만 reset (signedOut).
-      // signedIn은 reset 불필요 — 새 user면 selectedChildId가 null인 게 default.
-      if (previous != null && next == null) {
+    ref.listen<User?>(currentUserProvider, (previous, next) {
+      final prevId = previous?.id;
+      final nextId = next?.id;
+      if (prevId != null && nextId == null) {
+        // signedOut — 사용자별 ephemeral state reset.
+        // signedIn은 reset 불필요 — 새 user면 selectedChildId가 null인 게 default.
         ref.read(selectedChildIdProvider.notifier).state = null;
+        // RevenueCat 도 익명 사용자로 전환 (다음 회원의 구독과 섞이지 않게).
+        unawaited(BillingService.instance.logOut());
+      } else if (nextId != null && prevId != nextId) {
+        // signedIn 또는 계정 변경 — RevenueCat appUserId 를 Supabase userId 로 연결.
+        // 이 호출이 없으면 구독이 익명 ID 에 묶여 "구매 복원"이 회원 계정과
+        // 어긋남. (콜드 스타트 초기 연결은 main.dart 에서 처리.)
+        unawaited(BillingService.instance.logIn(nextId));
       }
     });
     return child;

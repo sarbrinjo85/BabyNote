@@ -34,6 +34,17 @@ Future<void> main() async {
   // 인앱 결제 (RevenueCat) 초기화 — 환경 키 없으면 no-op.
   await BillingService.instance.initialize();
 
+  // 세션이 이미 복원돼 있으면(콜드 스타트) RevenueCat appUserId 를 Supabase
+  // userId 로 즉시 연결 → entitlement(가족 플랜)이 익명 ID 가 아니라 회원
+  // 계정에 묶이고, 재설치/기기 변경 후에도 같은 계정 로그인으로 복원됨.
+  // 런타임 로그인/로그아웃 전이는 AuthStateResetListener 가 처리.
+  if (Env.isConfigured) {
+    final restoredUser = Supabase.instance.client.auth.currentUser;
+    if (restoredUser != null) {
+      await BillingService.instance.logIn(restoredUser.id);
+    }
+  }
+
   // 오프라인 쓰기 큐 — sqflite 백킹. WriteQueue.open 한 번만 호출 후
   // writeQueueProvider 를 override 해서 모든 곳에서 동일 인스턴스 사용.
   final writeQueue = await WriteQueue.open();
@@ -53,10 +64,12 @@ Future<void> main() async {
         // PII (이메일/이름)는 보내지 않음 — auth/privacy 보호
         options.sendDefaultPii = false;
       },
-      appRunner: () => runApp(ProviderScope(
-        overrides: [writeQueueProvider.overrideWithValue(writeQueue)],
-        child: const _BootSyncWorker(child: BabyNoteApp()),
-      )),
+      appRunner: () => runApp(
+        ProviderScope(
+          overrides: [writeQueueProvider.overrideWithValue(writeQueue)],
+          child: const _BootSyncWorker(child: BabyNoteApp()),
+        ),
+      ),
     );
   } else {
     if (kDebugMode) {
@@ -65,10 +78,12 @@ Future<void> main() async {
         'to enable error monitoring.',
       );
     }
-    runApp(ProviderScope(
-      overrides: [writeQueueProvider.overrideWithValue(writeQueue)],
-      child: const _BootSyncWorker(child: BabyNoteApp()),
-    ));
+    runApp(
+      ProviderScope(
+        overrides: [writeQueueProvider.overrideWithValue(writeQueue)],
+        child: const _BootSyncWorker(child: BabyNoteApp()),
+      ),
+    );
   }
 }
 
