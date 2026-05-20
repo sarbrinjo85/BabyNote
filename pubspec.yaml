@@ -2,7 +2,7 @@ name: babynote
 description: "Global baby-care recording app (KR/JP/EN). Flutter + Supabase."
 publish_to: 'none'
 
-version: 1.0.0+1
+version: 1.0.0+2
 
 environment:
   sdk: ^3.11.5
