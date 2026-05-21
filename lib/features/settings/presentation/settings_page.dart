@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/widgets/baby_loading.dart';
 import '../../onboarding/presentation/onboarding_coach.dart';
@@ -24,54 +25,71 @@ class SettingsPage extends ConsumerStatefulWidget {
 class _SettingsPageState extends ConsumerState<SettingsPage> {
   bool _exporting = false;
 
+  /// 실제 빌드 버전 — "1.0.0 (4)" 형태. package_info_plus 로 런타임 조회.
+  /// 하드코딩 대신 실제 versionName(version) + versionCode(buildNumber) 노출 →
+  /// 내부 테스트에서 어떤 빌드가 설치됐는지 한눈에 확인 가능.
+  String _appVersion = '';
+
+  @override
+  void initState() {
+    super.initState();
+    PackageInfo.fromPlatform().then((info) {
+      if (!mounted) return;
+      setState(() => _appVersion = '${info.version} (${info.buildNumber})');
+    });
+  }
+
   ExportLabels _labelsFor(AppLocalizations l10n) => ExportLabels(
-        feeding: l10n.summaryFeeding,
-        sleep: l10n.summarySleep,
-        diaper: l10n.summaryDiaper,
-        growth: l10n.summaryGrowth,
-        breast: l10n.feedingTabBreast,
-        formula: l10n.feedingTabFormula,
-        solid: l10n.feedingTabSolid,
-        breastLeft: l10n.feedingBreastLeft,
-        breastRight: l10n.feedingBreastRight,
-        breastBoth: l10n.feedingBreastBoth,
-        nap: l10n.sleepNap,
-        night: l10n.sleepNight,
-        ongoing: l10n.sleepNapInProgress, // 일반 진행중 표시
-        pee: l10n.diaperPee,
-        poop: l10n.diaperPoop,
-        peeAndPoop: l10n.diaperBoth,
-        yellow: l10n.diaperColorYellow,
-        brown: l10n.diaperColorBrown,
-        green: l10n.diaperColorGreen,
-        black: l10n.diaperColorBlack,
-        red: l10n.diaperColorRed,
-        white: l10n.diaperColorWhite,
-        unknown: l10n.diaperColorUnknown,
-        loose: l10n.diaperLoose,
-        normal: l10n.diaperNormal,
-        firm: l10n.diaperFirm,
-        small: l10n.diaperSmall,
-        large: l10n.diaperLarge,
-        walk: l10n.routineKindWalk,
-        bath: l10n.routineKindBath,
-        supplement: l10n.routineKindSupplement,
-        snack: l10n.routineKindSnack,
-        cough: l10n.symptomKindCough,
-        vomit: l10n.symptomKindVomit,
-        rash: l10n.symptomKindRash,
-        injury: l10n.symptomKindInjury,
-        mild: l10n.symptomSeverityMild,
-        moderate: l10n.symptomSeverityModerate,
-        severe: l10n.symptomSeveritySevere,
-      );
+    feeding: l10n.summaryFeeding,
+    sleep: l10n.summarySleep,
+    diaper: l10n.summaryDiaper,
+    growth: l10n.summaryGrowth,
+    breast: l10n.feedingTabBreast,
+    formula: l10n.feedingTabFormula,
+    solid: l10n.feedingTabSolid,
+    breastLeft: l10n.feedingBreastLeft,
+    breastRight: l10n.feedingBreastRight,
+    breastBoth: l10n.feedingBreastBoth,
+    nap: l10n.sleepNap,
+    night: l10n.sleepNight,
+    ongoing: l10n.sleepNapInProgress, // 일반 진행중 표시
+    pee: l10n.diaperPee,
+    poop: l10n.diaperPoop,
+    peeAndPoop: l10n.diaperBoth,
+    yellow: l10n.diaperColorYellow,
+    brown: l10n.diaperColorBrown,
+    green: l10n.diaperColorGreen,
+    black: l10n.diaperColorBlack,
+    red: l10n.diaperColorRed,
+    white: l10n.diaperColorWhite,
+    unknown: l10n.diaperColorUnknown,
+    loose: l10n.diaperLoose,
+    normal: l10n.diaperNormal,
+    firm: l10n.diaperFirm,
+    small: l10n.diaperSmall,
+    large: l10n.diaperLarge,
+    walk: l10n.routineKindWalk,
+    bath: l10n.routineKindBath,
+    supplement: l10n.routineKindSupplement,
+    snack: l10n.routineKindSnack,
+    cough: l10n.symptomKindCough,
+    vomit: l10n.symptomKindVomit,
+    rash: l10n.symptomKindRash,
+    injury: l10n.symptomKindInjury,
+    mild: l10n.symptomSeverityMild,
+    moderate: l10n.symptomSeverityModerate,
+    severe: l10n.symptomSeveritySevere,
+  );
 
   Future<void> _onExport() async {
     final l10n = AppLocalizations.of(context);
     final children = ref.read(myChildrenProvider).valueOrNull ?? const [];
     if (children.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.commonRegisterChildFirst)),
+        SnackBar(
+          duration: const Duration(seconds: 1),
+          content: Text(l10n.commonRegisterChildFirst),
+        ),
       );
       return;
     }
@@ -79,14 +97,17 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
     setState(() => _exporting = true);
     try {
-      await ref.read(exportServiceProvider).exportChildToCsv(
-            child: child,
-            labels: _labelsFor(l10n),
-          );
+      await ref
+          .read(exportServiceProvider)
+          .exportChildToCsv(child: child, labels: _labelsFor(l10n));
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.errorFailed(e))));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          duration: const Duration(seconds: 1),
+          content: Text(l10n.errorFailed(e)),
+        ),
+      );
     } finally {
       if (mounted) setState(() => _exporting = false);
     }
@@ -124,9 +145,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 await OnboardingCoach.markUnseenForNextLaunch();
                 if (!context.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('다음 앱 재실행 시 도움말이 다시 표시됩니다'),
-                  ),
+                  const SnackBar(content: Text('다음 앱 재실행 시 도움말이 다시 표시됩니다')),
                 );
               },
             ),
@@ -134,16 +153,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             // ── 테마 모드 섹션 ──────────────────────────────────
             Text(
               l10n.settingsTheme,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: Spacing.xs),
             Text(
               l10n.settingsThemeHelp,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: Spacing.sm),
             asyncMode.when(
@@ -179,16 +198,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             // ── 데이터 내보내기 섹션 ────────────────────────────
             Text(
               l10n.settingsExport,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: Spacing.xs),
             Text(
               l10n.settingsExportHelp,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: Spacing.sm),
             FilledButton.icon(
@@ -200,9 +219,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.share),
-              label: Text(_exporting
-                  ? l10n.settingsExportInProgress
-                  : l10n.settingsExportCsv),
+              label: Text(
+                _exporting
+                    ? l10n.settingsExportInProgress
+                    : l10n.settingsExportCsv,
+              ),
               style: FilledButton.styleFrom(
                 minimumSize: const Size.fromHeight(TouchTarget.standard),
               ),
@@ -212,9 +233,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             const SizedBox(height: Spacing.xl),
             Text(
               l10n.familyTitle,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: Spacing.sm),
             ListTile(
@@ -263,7 +284,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.info_outline),
               title: const Text('앱 버전'),
-              trailing: const Text('1.0.0'),
+              trailing: Text(_appVersion.isEmpty ? '…' : _appVersion),
               onTap: null,
             ),
           ],
@@ -279,10 +300,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final uri = Uri(
       scheme: 'mailto',
       path: address,
-      query: Uri(queryParameters: {
-        'subject': 'BabyNote 문의',
-        'body': '안녕하세요,\n\n[문의 내용을 적어주세요]\n\n--\n앱 버전: 1.0.0\n',
-      }).query,
+      query: Uri(
+        queryParameters: {
+          'subject': 'BabyNote 문의',
+          'body': '안녕하세요,\n\n[문의 내용을 적어주세요]\n\n--\n앱 버전: 1.0.0\n',
+        },
+      ).query,
     );
     final launched = await canLaunchUrl(uri) && await launchUrl(uri);
     if (!context.mounted) return;
@@ -291,9 +314,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       await Clipboard.setData(const ClipboardData(text: address));
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('메일 앱을 열 수 없어 주소를 복사했어요: $address'),
-        ),
+        const SnackBar(content: Text('메일 앱을 열 수 없어 주소를 복사했어요: $address')),
       );
     }
   }
