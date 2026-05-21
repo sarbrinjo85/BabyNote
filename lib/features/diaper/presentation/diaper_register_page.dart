@@ -24,8 +24,7 @@ class DiaperRegisterPage extends ConsumerStatefulWidget {
   final Diaper? editing;
 
   @override
-  ConsumerState<DiaperRegisterPage> createState() =>
-      _DiaperRegisterPageState();
+  ConsumerState<DiaperRegisterPage> createState() => _DiaperRegisterPageState();
 }
 
 class _DiaperRegisterPageState extends ConsumerState<DiaperRegisterPage> {
@@ -62,9 +61,13 @@ class _DiaperRegisterPageState extends ConsumerState<DiaperRegisterPage> {
 
   Future<void> _submit(String childId) async {
     final l10n = AppLocalizations.of(context);
-    final noteText = _noteCtrl.text.trim().isEmpty ? null : _noteCtrl.text.trim();
+    final noteText = _noteCtrl.text.trim().isEmpty
+        ? null
+        : _noteCtrl.text.trim();
     if (_isEdit) {
-      await ref.read(diaperCreationControllerProvider.notifier).saveEdit(
+      await ref
+          .read(diaperCreationControllerProvider.notifier)
+          .saveEdit(
             childId: childId,
             id: widget.editing!.id,
             type: _type,
@@ -80,7 +83,9 @@ class _DiaperRegisterPageState extends ConsumerState<DiaperRegisterPage> {
         if (list.isNotEmpty) diaperInventoryId = list.first.id;
       });
 
-      await ref.read(diaperCreationControllerProvider.notifier).create(
+      await ref
+          .read(diaperCreationControllerProvider.notifier)
+          .create(
             childId: childId,
             type: _type,
             color: _color,
@@ -95,14 +100,23 @@ class _DiaperRegisterPageState extends ConsumerState<DiaperRegisterPage> {
     state.when(
       data: (_) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(duration: const Duration(seconds: 1), content: Text(_isEdit ? l10n.recordEditSaved : l10n.diaperSavedToast)),
+          SnackBar(
+            duration: const Duration(seconds: 1),
+            content: Text(
+              _isEdit ? l10n.recordEditSaved : l10n.diaperSavedToast,
+            ),
+          ),
         );
         context.pop();
       },
       loading: () {},
       error: (err, _) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.errorFailed(err))));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            duration: const Duration(seconds: 1),
+            content: Text(l10n.errorFailed(err)),
+          ),
+        );
       },
     );
   }
@@ -121,7 +135,8 @@ class _DiaperRegisterPageState extends ConsumerState<DiaperRegisterPage> {
       ),
       body: asyncChildren.when(
         loading: () => const Center(child: BabyLoading()),
-        error: (err, _) => Center(child: Text(l10n.errorChildrenLoadFailed(err))),
+        error: (err, _) =>
+            Center(child: Text(l10n.errorChildrenLoadFailed(err))),
         data: (children) {
           if (children.isEmpty) return _NoChildPlaceholder();
           final child = _isEdit
@@ -133,8 +148,9 @@ class _DiaperRegisterPageState extends ConsumerState<DiaperRegisterPage> {
           final isAbnormal =
               _color == 'red' || _color == 'black' || _color == 'white';
 
-          final asyncActiveDiaper =
-              ref.watch(activeDiaperInventoriesProvider(child.id));
+          final asyncActiveDiaper = ref.watch(
+            activeDiaperInventoriesProvider(child.id),
+          );
           final activeDiaper = asyncActiveDiaper.maybeWhen(
             data: (list) => list.isEmpty ? null : list.first,
             orElse: () => null,
@@ -149,8 +165,10 @@ class _DiaperRegisterPageState extends ConsumerState<DiaperRegisterPage> {
                   children: [
                     const Icon(Icons.child_care),
                     const SizedBox(width: Spacing.xs),
-                    Text(child.name,
-                        style: Theme.of(context).textTheme.titleMedium),
+                    Text(
+                      child.name,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
                   ],
                 ),
                 const SizedBox(height: Spacing.md),
@@ -159,9 +177,7 @@ class _DiaperRegisterPageState extends ConsumerState<DiaperRegisterPage> {
                 Card(
                   color: activeDiaper != null
                       ? Theme.of(context).colorScheme.primaryContainer
-                      : Theme.of(context)
-                          .colorScheme
-                          .surfaceContainerHighest,
+                      : Theme.of(context).colorScheme.surfaceContainerHighest,
                   child: Padding(
                     padding: const EdgeInsets.all(Spacing.sm),
                     child: activeDiaper != null
@@ -173,38 +189,39 @@ class _DiaperRegisterPageState extends ConsumerState<DiaperRegisterPage> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(l10n.feedingInUse,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .labelMedium),
+                                    Text(
+                                      l10n.feedingInUse,
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.labelMedium,
+                                    ),
                                     Text(
                                       '${activeDiaper.size} · ${activeDiaper.brand ?? ""}'
                                           .trim()
                                           .replaceAll(RegExp(r'·\s*$'), ''),
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleSmall,
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.titleSmall,
                                     ),
                                   ],
                                 ),
                               ),
-                              Text(l10n.feedingAutoSubtract,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodySmall
-                                      ?.copyWith(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .onSurfaceVariant)),
+                              Text(
+                                l10n.feedingAutoSubtract,
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant,
+                                    ),
+                              ),
                             ],
                           )
                         : Row(
                             children: [
                               const Icon(Icons.inventory_2_outlined),
                               const SizedBox(width: Spacing.sm),
-                              Expanded(
-                                child: Text(l10n.diaperNoActivePack),
-                              ),
+                              Expanded(child: Text(l10n.diaperNoActivePack)),
                             ],
                           ),
                   ),
@@ -212,7 +229,10 @@ class _DiaperRegisterPageState extends ConsumerState<DiaperRegisterPage> {
                 const SizedBox(height: Spacing.lg),
 
                 // ── 종류 ────────────────────────────────────────────
-                Text(l10n.diaperType, style: Theme.of(context).textTheme.labelLarge),
+                Text(
+                  l10n.diaperType,
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
                 const SizedBox(height: Spacing.xs),
                 SegmentedButton<String>(
                   segments: [
@@ -233,13 +253,15 @@ class _DiaperRegisterPageState extends ConsumerState<DiaperRegisterPage> {
                     ),
                   ],
                   selected: {_type},
-                  onSelectionChanged: (s) =>
-                      setState(() => _type = s.first),
+                  onSelectionChanged: (s) => setState(() => _type = s.first),
                 ),
 
                 if (_showColorAndConsistency) ...[
                   const SizedBox(height: Spacing.lg),
-                  Text(l10n.diaperColor, style: Theme.of(context).textTheme.labelLarge),
+                  Text(
+                    l10n.diaperColor,
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
                   const SizedBox(height: Spacing.xs),
                   Wrap(
                     spacing: Spacing.xs,
@@ -267,9 +289,9 @@ class _DiaperRegisterPageState extends ConsumerState<DiaperRegisterPage> {
                               child: Text(
                                 l10n.diaperColorAbnormalWarn,
                                 style: TextStyle(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onErrorContainer,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onErrorContainer,
                                 ),
                               ),
                             ),
@@ -279,28 +301,53 @@ class _DiaperRegisterPageState extends ConsumerState<DiaperRegisterPage> {
                     ),
                   ],
                   const SizedBox(height: Spacing.lg),
-                  Text(l10n.diaperConsistency, style: Theme.of(context).textTheme.labelLarge),
+                  Text(
+                    l10n.diaperConsistency,
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
                   const SizedBox(height: Spacing.xs),
                   SegmentedButton<String>(
                     emptySelectionAllowed: true,
                     segments: [
-                      ButtonSegment(value: 'loose', label: Text(l10n.diaperLoose)),
-                      ButtonSegment(value: 'normal', label: Text(l10n.diaperNormal)),
-                      ButtonSegment(value: 'firm', label: Text(l10n.diaperFirm)),
+                      ButtonSegment(
+                        value: 'loose',
+                        label: Text(l10n.diaperLoose),
+                      ),
+                      ButtonSegment(
+                        value: 'normal',
+                        label: Text(l10n.diaperNormal),
+                      ),
+                      ButtonSegment(
+                        value: 'firm',
+                        label: Text(l10n.diaperFirm),
+                      ),
                     ],
                     selected: _consistency == null ? {} : {_consistency!},
                     onSelectionChanged: (s) => setState(
-                        () => _consistency = s.isEmpty ? null : s.first),
+                      () => _consistency = s.isEmpty ? null : s.first,
+                    ),
                   ),
                   const SizedBox(height: Spacing.lg),
-                  Text(l10n.diaperAmount, style: Theme.of(context).textTheme.labelLarge),
+                  Text(
+                    l10n.diaperAmount,
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
                   const SizedBox(height: Spacing.xs),
                   SegmentedButton<String>(
                     emptySelectionAllowed: true,
                     segments: [
-                      ButtonSegment(value: 'small', label: Text(l10n.diaperSmall)),
-                      ButtonSegment(value: 'normal', label: Text(l10n.diaperNormal)),
-                      ButtonSegment(value: 'large', label: Text(l10n.diaperLarge)),
+                      ButtonSegment(
+                        value: 'small',
+                        label: Text(l10n.diaperSmall),
+                      ),
+                      ButtonSegment(
+                        value: 'normal',
+                        label: Text(l10n.diaperNormal),
+                      ),
+                      ButtonSegment(
+                        value: 'large',
+                        label: Text(l10n.diaperLarge),
+                      ),
                     ],
                     selected: _amount == null ? {} : {_amount!},
                     onSelectionChanged: (s) =>
@@ -328,11 +375,10 @@ class _DiaperRegisterPageState extends ConsumerState<DiaperRegisterPage> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.check),
-                  label: Text(isLoading
-                      ? l10n.commonSaving
-                      : (_isEdit ? l10n.commonSave : l10n.commonRegister)),
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size.fromHeight(TouchTarget.huge),
+                  label: Text(
+                    isLoading
+                        ? l10n.commonSaving
+                        : (_isEdit ? l10n.commonSave : l10n.commonRegister),
                   ),
                 ),
               ],
@@ -352,14 +398,14 @@ class _ColorOption {
 }
 
 List<_ColorOption> _colorOptions(AppLocalizations l10n) => [
-      _ColorOption('yellow', l10n.diaperColorYellow, '🟡'),
-      _ColorOption('brown', l10n.diaperColorBrown, '🟤'),
-      _ColorOption('green', l10n.diaperColorGreen, '🟢'),
-      _ColorOption('black', l10n.diaperColorBlack, '⚫'),
-      _ColorOption('red', l10n.diaperColorRed, '🔴'),
-      _ColorOption('white', l10n.diaperColorWhite, '⚪'),
-      _ColorOption('unknown', l10n.diaperColorUnknown, '❓'),
-    ];
+  _ColorOption('yellow', l10n.diaperColorYellow, '🟡'),
+  _ColorOption('brown', l10n.diaperColorBrown, '🟤'),
+  _ColorOption('green', l10n.diaperColorGreen, '🟢'),
+  _ColorOption('black', l10n.diaperColorBlack, '⚫'),
+  _ColorOption('red', l10n.diaperColorRed, '🔴'),
+  _ColorOption('white', l10n.diaperColorWhite, '⚪'),
+  _ColorOption('unknown', l10n.diaperColorUnknown, '❓'),
+];
 
 class _NoChildPlaceholder extends StatelessWidget {
   @override

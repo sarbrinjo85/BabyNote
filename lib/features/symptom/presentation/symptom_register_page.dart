@@ -353,9 +353,6 @@ class _SymptomRegisterPageState extends ConsumerState<SymptomRegisterPage> {
                   label: Text(
                     _isEdit ? l10n.recordEditSaved : l10n.symptomTitle,
                   ),
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size.fromHeight(TouchTarget.comfortable),
-                  ),
                 ),
               ],
             ),

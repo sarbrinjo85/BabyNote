@@ -55,7 +55,9 @@ class _SleepRegisterPageState extends ConsumerState<SleepRegisterPage> {
   }
 
   Future<void> _saveEdit(String childId) async {
-    await ref.read(sleepControllerProvider.notifier).saveEdit(
+    await ref
+        .read(sleepControllerProvider.notifier)
+        .saveEdit(
           childId: childId,
           id: widget.editing!.id,
           napOrNight: _napOrNight,
@@ -67,20 +69,29 @@ class _SleepRegisterPageState extends ConsumerState<SleepRegisterPage> {
     state.when(
       data: (_) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.recordEditSaved)),
+          SnackBar(
+            duration: const Duration(seconds: 1),
+            content: Text(l10n.recordEditSaved),
+          ),
         );
         context.pop();
       },
       loading: () {},
       error: (err, _) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.errorFailed(err))));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            duration: const Duration(seconds: 1),
+            content: Text(l10n.errorFailed(err)),
+          ),
+        );
       },
     );
   }
 
   Future<void> _start(String childId) async {
-    await ref.read(sleepControllerProvider.notifier).startSleep(
+    await ref
+        .read(sleepControllerProvider.notifier)
+        .startSleep(
           childId: childId,
           napOrNight: _napOrNight,
           note: _noteCtrl.text.trim().isEmpty ? null : _noteCtrl.text.trim(),
@@ -91,37 +102,50 @@ class _SleepRegisterPageState extends ConsumerState<SleepRegisterPage> {
     state.when(
       data: (_) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.sleepStartedToast)),
+          SnackBar(
+            duration: const Duration(seconds: 1),
+            content: Text(l10n.sleepStartedToast),
+          ),
         );
         // 시작 후엔 그대로 같은 화면 유지 (진행 중 카드로 자동 전환)
       },
       loading: () {},
       error: (err, _) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.errorFailed(err))));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            duration: const Duration(seconds: 1),
+            content: Text(l10n.errorFailed(err)),
+          ),
+        );
       },
     );
   }
 
   Future<void> _end(String childId, String sleepId) async {
-    await ref.read(sleepControllerProvider.notifier).endSleep(
-          childId: childId,
-          sleepId: sleepId,
-        );
+    await ref
+        .read(sleepControllerProvider.notifier)
+        .endSleep(childId: childId, sleepId: sleepId);
     if (!mounted) return;
     final l10n = AppLocalizations.of(context);
     final state = ref.read(sleepControllerProvider);
     state.when(
       data: (_) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.sleepFinishedToast)),
+          SnackBar(
+            duration: const Duration(seconds: 1),
+            content: Text(l10n.sleepFinishedToast),
+          ),
         );
         context.pop();
       },
       loading: () {},
       error: (err, _) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.errorFailed(err))));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            duration: const Duration(seconds: 1),
+            content: Text(l10n.errorFailed(err)),
+          ),
+        );
       },
     );
   }
@@ -141,7 +165,8 @@ class _SleepRegisterPageState extends ConsumerState<SleepRegisterPage> {
       ),
       body: asyncChildren.when(
         loading: () => const Center(child: BabyLoading()),
-        error: (err, _) => Center(child: Text(l10n.errorChildrenLoadFailed(err))),
+        error: (err, _) =>
+            Center(child: Text(l10n.errorChildrenLoadFailed(err))),
         data: (children) {
           if (children.isEmpty) return _NoChildPlaceholder();
           final child = _isEdit
@@ -162,8 +187,7 @@ class _SleepRegisterPageState extends ConsumerState<SleepRegisterPage> {
                   napOrNight: _napOrNight,
                   noteCtrl: _noteCtrl,
                   isLoading: isLoading,
-                  onNapOrNightChanged: (v) =>
-                      setState(() => _napOrNight = v),
+                  onNapOrNightChanged: (v) => setState(() => _napOrNight = v),
                   onStart: () => _saveEdit(child.id),
                   submitLabel: l10n.commonSave,
                 ),
@@ -179,9 +203,9 @@ class _SleepRegisterPageState extends ConsumerState<SleepRegisterPage> {
             child: Padding(
               padding: const EdgeInsets.all(Spacing.md),
               child: asyncOngoing.when(
-                loading: () =>
-                    const Center(child: BabyLoading()),
-                error: (err, _) => Center(child: Text(l10n.sleepInProgressLoadFailure(err))),
+                loading: () => const Center(child: BabyLoading()),
+                error: (err, _) =>
+                    Center(child: Text(l10n.sleepInProgressLoadFailure(err))),
                 data: (ongoing) {
                   if (ongoing == null) {
                     return _StartForm(
@@ -228,6 +252,7 @@ class _StartForm extends StatelessWidget {
   final bool isLoading;
   final ValueChanged<String> onNapOrNightChanged;
   final VoidCallback onStart;
+
   /// 편집 모드 등에서 버튼 라벨을 다르게 하고 싶을 때. null이면 기본 "잠들었어요".
   final String? submitLabel;
 
@@ -240,8 +265,7 @@ class _StartForm extends StatelessWidget {
           children: [
             const Icon(Icons.child_care),
             const SizedBox(width: Spacing.xs),
-            Text(childName,
-                style: Theme.of(context).textTheme.titleMedium),
+            Text(childName, style: Theme.of(context).textTheme.titleMedium),
           ],
         ),
         const SizedBox(height: Spacing.lg),
@@ -274,11 +298,10 @@ class _StartForm extends StatelessWidget {
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
               : Icon(submitLabel != null ? Icons.save : Icons.bedtime),
-          label: Text(isLoading
-              ? (submitLabel != null ? l10n.commonSaving : l10n.sleepStarting)
-              : (submitLabel ?? l10n.sleepGoToSleep)),
-          style: FilledButton.styleFrom(
-            minimumSize: const Size.fromHeight(TouchTarget.huge),
+          label: Text(
+            isLoading
+                ? (submitLabel != null ? l10n.commonSaving : l10n.sleepStarting)
+                : (submitLabel ?? l10n.sleepGoToSleep),
           ),
         ),
       ],
@@ -331,8 +354,8 @@ class _OngoingCard extends StatelessWidget {
                             ? l10n.sleepNightInProgress
                             : l10n.sleepNapInProgress,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              color: cs.onPrimaryContainer,
-                            ),
+                          color: cs.onPrimaryContainer,
+                        ),
                       ),
                     ),
                   ],
@@ -343,14 +366,13 @@ class _OngoingCard extends StatelessWidget {
                   value: _formatTime(sleep.startedAt),
                 ),
                 const SizedBox(height: Spacing.xs),
-                _Row(
-                  label: l10n.sleepElapsed,
-                  value: elapsedText,
-                ),
+                _Row(label: l10n.sleepElapsed, value: elapsedText),
                 const SizedBox(height: Spacing.xs),
                 _Row(
                   label: l10n.sleepKindLabel,
-                  value: sleep.napOrNight == 'night' ? l10n.sleepNight : l10n.sleepNap,
+                  value: sleep.napOrNight == 'night'
+                      ? l10n.sleepNight
+                      : l10n.sleepNap,
                 ),
               ],
             ),
@@ -367,9 +389,6 @@ class _OngoingCard extends StatelessWidget {
                 )
               : const Icon(Icons.alarm),
           label: Text(isLoading ? l10n.sleepFinishing : l10n.sleepWakeUp),
-          style: FilledButton.styleFrom(
-            minimumSize: const Size.fromHeight(TouchTarget.huge),
-          ),
         ),
       ],
     );

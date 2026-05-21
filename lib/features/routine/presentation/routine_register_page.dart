@@ -324,9 +324,6 @@ class _RoutineRegisterPageState extends ConsumerState<RoutineRegisterPage> {
                   label: Text(
                     _isEdit ? l10n.recordEditSaved : l10n.routineTitle,
                   ),
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size.fromHeight(TouchTarget.comfortable),
-                  ),
                 ),
               ],
             ),

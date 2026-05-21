@@ -18,8 +18,7 @@ class GrowthRegisterPage extends ConsumerStatefulWidget {
   final Growth? editing;
 
   @override
-  ConsumerState<GrowthRegisterPage> createState() =>
-      _GrowthRegisterPageState();
+  ConsumerState<GrowthRegisterPage> createState() => _GrowthRegisterPageState();
 }
 
 class _GrowthRegisterPageState extends ConsumerState<GrowthRegisterPage> {
@@ -76,13 +75,18 @@ class _GrowthRegisterPageState extends ConsumerState<GrowthRegisterPage> {
 
     if (w == null && h == null && hd == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.growthAtLeastOneRequired)),
+        SnackBar(
+          duration: const Duration(seconds: 1),
+          content: Text(l10n.growthAtLeastOneRequired),
+        ),
       );
       return;
     }
 
     if (_isEdit) {
-      await ref.read(growthCreationControllerProvider.notifier).saveEdit(
+      await ref
+          .read(growthCreationControllerProvider.notifier)
+          .saveEdit(
             childId: childId,
             id: widget.editing!.id,
             measuredAt: _measuredAt,
@@ -92,7 +96,9 @@ class _GrowthRegisterPageState extends ConsumerState<GrowthRegisterPage> {
             note: _note.trim().isEmpty ? null : _note.trim(),
           );
     } else {
-      await ref.read(growthCreationControllerProvider.notifier).create(
+      await ref
+          .read(growthCreationControllerProvider.notifier)
+          .create(
             childId: childId,
             measuredAt: _measuredAt,
             weightG: w == null ? null : (w * 1000).round(),
@@ -107,14 +113,23 @@ class _GrowthRegisterPageState extends ConsumerState<GrowthRegisterPage> {
     state.when(
       data: (_) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(duration: const Duration(seconds: 1), content: Text(_isEdit ? l10n.recordEditSaved : l10n.growthSavedToast)),
+          SnackBar(
+            duration: const Duration(seconds: 1),
+            content: Text(
+              _isEdit ? l10n.recordEditSaved : l10n.growthSavedToast,
+            ),
+          ),
         );
         context.pop();
       },
       loading: () {},
       error: (err, _) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(duration: const Duration(seconds: 1), content: Text(l10n.errorFailed(err))));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            duration: const Duration(seconds: 1),
+            content: Text(l10n.errorFailed(err)),
+          ),
+        );
       },
     );
   }
@@ -133,7 +148,8 @@ class _GrowthRegisterPageState extends ConsumerState<GrowthRegisterPage> {
       ),
       body: asyncChildren.when(
         loading: () => const Center(child: BabyLoading()),
-        error: (err, _) => Center(child: Text(l10n.errorChildrenLoadFailed(err))),
+        error: (err, _) =>
+            Center(child: Text(l10n.errorChildrenLoadFailed(err))),
         data: (children) {
           if (children.isEmpty) return _NoChildPlaceholder();
           final child = _isEdit
@@ -154,8 +170,10 @@ class _GrowthRegisterPageState extends ConsumerState<GrowthRegisterPage> {
                     children: [
                       const Icon(Icons.child_care),
                       const SizedBox(width: Spacing.xs),
-                      Text(child.name,
-                          style: Theme.of(context).textTheme.titleMedium),
+                      Text(
+                        child.name,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
                     ],
                   ),
                   const SizedBox(height: Spacing.lg),
@@ -178,8 +196,9 @@ class _GrowthRegisterPageState extends ConsumerState<GrowthRegisterPage> {
                       hintText: l10n.growthWeightHint,
                       suffixText: 'kg',
                     ),
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                     validator: (v) => _validateRange(l10n, v, 0.5, 30, 'kg'),
                     onSaved: (v) => _weightKg = v ?? '',
                   ),
@@ -192,8 +211,9 @@ class _GrowthRegisterPageState extends ConsumerState<GrowthRegisterPage> {
                       hintText: l10n.growthHeightHint,
                       suffixText: 'cm',
                     ),
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                     validator: (v) => _validateRange(l10n, v, 30, 150, 'cm'),
                     onSaved: (v) => _heightCm = v ?? '',
                   ),
@@ -206,8 +226,9 @@ class _GrowthRegisterPageState extends ConsumerState<GrowthRegisterPage> {
                       hintText: l10n.growthHeadHint,
                       suffixText: 'cm',
                     ),
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                     validator: (v) => _validateRange(l10n, v, 25, 60, 'cm'),
                     onSaved: (v) => _headCm = v ?? '',
                   ),
@@ -230,16 +251,13 @@ class _GrowthRegisterPageState extends ConsumerState<GrowthRegisterPage> {
                         ? const SizedBox(
                             width: 18,
                             height: 18,
-                            child:
-                                CircularProgressIndicator(strokeWidth: 2),
+                            child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : const Icon(Icons.check),
-                    label: Text(isLoading
-                        ? l10n.commonSaving
-                        : (_isEdit ? l10n.commonSave : l10n.commonRegister)),
-                    style: FilledButton.styleFrom(
-                      minimumSize:
-                          const Size.fromHeight(TouchTarget.huge),
+                    label: Text(
+                      isLoading
+                          ? l10n.commonSaving
+                          : (_isEdit ? l10n.commonSave : l10n.commonRegister),
                     ),
                   ),
                 ],
@@ -251,7 +269,13 @@ class _GrowthRegisterPageState extends ConsumerState<GrowthRegisterPage> {
     );
   }
 
-  String? _validateRange(AppLocalizations l10n, String? v, double min, double max, String unit) {
+  String? _validateRange(
+    AppLocalizations l10n,
+    String? v,
+    double min,
+    double max,
+    String unit,
+  ) {
     if (v == null || v.isEmpty) return null;
     final n = double.tryParse(v);
     if (n == null) return l10n.commonNumberOnly;
