@@ -28,11 +28,7 @@ import 'routine_providers.dart';
 /// - 신규 + initialKind 전달됨: 해당 kind 선택
 /// - 신규 + initialKind 없음: walk(산책) 기본값
 class RoutineRegisterPage extends ConsumerStatefulWidget {
-  const RoutineRegisterPage({
-    super.key,
-    this.editing,
-    this.initialKind,
-  });
+  const RoutineRegisterPage({super.key, this.editing, this.initialKind});
 
   final Routine? editing;
   final RoutineKind? initialKind;
@@ -58,8 +54,9 @@ class _RoutineRegisterPageState extends ConsumerState<RoutineRegisterPage> {
     if (e != null) {
       _kind = e.kind;
       _startedAt = e.startedAt;
-      _durationCtrl =
-          TextEditingController(text: e.durationMin?.toString() ?? '');
+      _durationCtrl = TextEditingController(
+        text: e.durationMin?.toString() ?? '',
+      );
       _itemNameCtrl = TextEditingController(text: e.itemName ?? '');
       _noteCtrl = TextEditingController(text: e.note ?? '');
     } else {
@@ -122,7 +119,9 @@ class _RoutineRegisterPageState extends ConsumerState<RoutineRegisterPage> {
           .read(routineControllerProvider.notifier)
           .saveEdit(routine: updated);
     } else {
-      await ref.read(routineControllerProvider.notifier).create(
+      await ref
+          .read(routineControllerProvider.notifier)
+          .create(
             childId: childId,
             kind: _kind,
             startedAt: _startedAt,
@@ -139,7 +138,8 @@ class _RoutineRegisterPageState extends ConsumerState<RoutineRegisterPage> {
           SnackBar(
             duration: const Duration(seconds: 1),
             content: Text(
-                _isEdit ? l10n.recordEditSaved : l10n.routineSavedToast),
+              _isEdit ? l10n.recordEditSaved : l10n.routineSavedToast,
+            ),
           ),
         );
         context.pop();
@@ -211,33 +211,54 @@ class _RoutineRegisterPageState extends ConsumerState<RoutineRegisterPage> {
                   children: [
                     const Icon(Icons.child_care),
                     const SizedBox(width: Spacing.xs),
-                    Text(child.name,
-                        style: Theme.of(context).textTheme.titleMedium),
+                    Text(
+                      child.name,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
                   ],
                 ),
                 const SizedBox(height: Spacing.md),
 
-                // ── kind 토글 (편집 모드면 잠금) ──────────────────
-                Wrap(
-                  spacing: Spacing.xs,
-                  runSpacing: Spacing.xs,
+                // ── kind 토글 (편집 모드면 잠금) — 4종 한 줄 ───────
+                Row(
                   children: RoutineKind.values.map((k) {
                     final selected = k == _kind;
-                    return ChoiceChip(
-                      label: Text('${k.emoji} ${_kindLabel(l10n, k)}'),
-                      selected: selected,
-                      onSelected: _isEdit
-                          ? null
-                          : (sel) {
-                              if (sel) setState(() => _kind = k);
-                            },
-                      selectedColor: const Color(0xFFFFB5A7),
-                      labelStyle: TextStyle(
-                        fontWeight:
-                            selected ? FontWeight.w800 : FontWeight.w600,
-                        color: selected
-                            ? const Color(0xFFA43F45)
-                            : Theme.of(context).colorScheme.onSurface,
+                    return Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 2),
+                        child: ChoiceChip(
+                          label: SizedBox(
+                            width: double.infinity,
+                            child: Text(
+                              '${k.emoji} ${_kindLabel(l10n, k)}',
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontWeight: selected
+                                    ? FontWeight.w800
+                                    : FontWeight.w600,
+                                color: selected
+                                    ? const Color(0xFFA43F45)
+                                    : Theme.of(context).colorScheme.onSurface,
+                              ),
+                            ),
+                          ),
+                          labelPadding: const EdgeInsets.symmetric(
+                            horizontal: 1,
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 4,
+                            vertical: 6,
+                          ),
+                          selected: selected,
+                          onSelected: _isEdit
+                              ? null
+                              : (sel) {
+                                  if (sel) setState(() => _kind = k);
+                                },
+                          selectedColor: const Color(0xFFFFB5A7),
+                        ),
                       ),
                     );
                   }).toList(),
@@ -300,9 +321,9 @@ class _RoutineRegisterPageState extends ConsumerState<RoutineRegisterPage> {
                 FilledButton.icon(
                   onPressed: isLoading ? null : () => _submit(child.id),
                   icon: const Icon(Icons.save),
-                  label: Text(_isEdit
-                      ? l10n.recordEditSaved
-                      : l10n.routineTitle),
+                  label: Text(
+                    _isEdit ? l10n.recordEditSaved : l10n.routineTitle,
+                  ),
                   style: FilledButton.styleFrom(
                     minimumSize: const Size.fromHeight(TouchTarget.comfortable),
                   ),

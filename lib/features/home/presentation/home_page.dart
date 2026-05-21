@@ -218,15 +218,19 @@ class _HomePageState extends ConsumerState<HomePage> {
                               }
                             }
                           });
-                          String? lastFor(RoutineKind k) {
-                            final dt = lastRoutineByKind[k];
-                            return dt == null ? null : TimeAgo.format(l10n, dt);
-                          }
-
-                          String? lastSymptomFor(SymptomKind k) {
-                            final dt = lastSymptomByKind[k];
-                            return dt == null ? null : TimeAgo.format(l10n, dt);
-                          }
+                          // 통합 버튼 subtitle 용 — 종류 무관 가장 최근 1건.
+                          DateTime? maxOrNull(Iterable<DateTime> ds) =>
+                              ds.isEmpty
+                              ? null
+                              : ds.reduce((a, b) => a.isAfter(b) ? a : b);
+                          final lastRoutineOverall = maxOrNull(
+                            lastRoutineByKind.values,
+                          );
+                          final lastSymptomOverall = maxOrNull(
+                            lastSymptomByKind.values,
+                          );
+                          String? agoOrNull(DateTime? dt) =>
+                              dt == null ? null : TimeAgo.format(l10n, dt);
 
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -313,115 +317,41 @@ class _HomePageState extends ConsumerState<HomePage> {
                               ),
                               const SizedBox(height: Spacing.sm),
 
-                              // ── 루틴 — 산책/목욕/영양제/간식 ───────────
-                              _SectionLabel(text: l10n.routineSectionHome),
-                              const SizedBox(height: Spacing.xxs),
-                              Container(
-                                key: OnboardingCoach.routineSectionKey,
-                                child: GridView.count(
-                                  crossAxisCount: 4,
-                                  shrinkWrap: true,
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  mainAxisSpacing: Spacing.xs,
-                                  crossAxisSpacing: Spacing.xs,
-                                  childAspectRatio: 0.9,
+                              // ── 루틴 · 건강 — 큰 버튼 2개로 통합 ────────
+                              // 산책/목욕/… 8개 타일을 "루틴" / "건강" 큰 버튼
+                              // 2개로 묶어 홈을 단순화. 종류 선택은 등록 화면의
+                              // kind 토글에서 진행. 코치 마크 키는 그대로 유지.
+                              SizedBox(
+                                height: 84,
+                                child: Row(
                                   children: [
-                                    GridActionTile(
-                                      emoji: RoutineKind.walk.emoji,
-                                      label: l10n.homeRoutineWalk,
-                                      subtitle: lastFor(RoutineKind.walk),
-                                      onTap: () => context.push(
-                                        '/routine/new',
-                                        extra: RoutineKind.walk,
+                                    Expanded(
+                                      child: Container(
+                                        key: OnboardingCoach.routineSectionKey,
+                                        child: GridActionTile(
+                                          emoji: '🧸',
+                                          label: l10n.routineSectionHome,
+                                          subtitle: agoOrNull(
+                                            lastRoutineOverall,
+                                          ),
+                                          onTap: () =>
+                                              context.push('/routine/new'),
+                                        ),
                                       ),
                                     ),
-                                    GridActionTile(
-                                      emoji: RoutineKind.bath.emoji,
-                                      label: l10n.homeRoutineBath,
-                                      subtitle: lastFor(RoutineKind.bath),
-                                      onTap: () => context.push(
-                                        '/routine/new',
-                                        extra: RoutineKind.bath,
-                                      ),
-                                    ),
-                                    GridActionTile(
-                                      emoji: RoutineKind.supplement.emoji,
-                                      label: l10n.homeRoutineSupplement,
-                                      subtitle: lastFor(RoutineKind.supplement),
-                                      onTap: () => context.push(
-                                        '/routine/new',
-                                        extra: RoutineKind.supplement,
-                                      ),
-                                    ),
-                                    GridActionTile(
-                                      emoji: RoutineKind.snack.emoji,
-                                      label: l10n.homeRoutineSnack,
-                                      subtitle: lastFor(RoutineKind.snack),
-                                      onTap: () => context.push(
-                                        '/routine/new',
-                                        extra: RoutineKind.snack,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: Spacing.sm),
-
-                              // ── 건강 — 기침/구토/발진/상처 ─────────────
-                              _SectionLabel(text: l10n.symptomSectionHome),
-                              const SizedBox(height: Spacing.xxs),
-                              Container(
-                                key: OnboardingCoach.symptomSectionKey,
-                                child: GridView.count(
-                                  crossAxisCount: 4,
-                                  shrinkWrap: true,
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  mainAxisSpacing: Spacing.xs,
-                                  crossAxisSpacing: Spacing.xs,
-                                  childAspectRatio: 0.9,
-                                  children: [
-                                    GridActionTile(
-                                      emoji: SymptomKind.cough.emoji,
-                                      label: l10n.homeSymptomCough,
-                                      subtitle: lastSymptomFor(
-                                        SymptomKind.cough,
-                                      ),
-                                      onTap: () => context.push(
-                                        '/symptom/new',
-                                        extra: SymptomKind.cough,
-                                      ),
-                                    ),
-                                    GridActionTile(
-                                      emoji: SymptomKind.vomit.emoji,
-                                      label: l10n.homeSymptomVomit,
-                                      subtitle: lastSymptomFor(
-                                        SymptomKind.vomit,
-                                      ),
-                                      onTap: () => context.push(
-                                        '/symptom/new',
-                                        extra: SymptomKind.vomit,
-                                      ),
-                                    ),
-                                    GridActionTile(
-                                      emoji: SymptomKind.rash.emoji,
-                                      label: l10n.homeSymptomRash,
-                                      subtitle: lastSymptomFor(
-                                        SymptomKind.rash,
-                                      ),
-                                      onTap: () => context.push(
-                                        '/symptom/new',
-                                        extra: SymptomKind.rash,
-                                      ),
-                                    ),
-                                    GridActionTile(
-                                      emoji: SymptomKind.injury.emoji,
-                                      label: l10n.homeSymptomInjury,
-                                      subtitle: lastSymptomFor(
-                                        SymptomKind.injury,
-                                      ),
-                                      onTap: () => context.push(
-                                        '/symptom/new',
-                                        extra: SymptomKind.injury,
+                                    const SizedBox(width: Spacing.xs),
+                                    Expanded(
+                                      child: Container(
+                                        key: OnboardingCoach.symptomSectionKey,
+                                        child: GridActionTile(
+                                          emoji: '🌡️',
+                                          label: l10n.symptomSectionHome,
+                                          subtitle: agoOrNull(
+                                            lastSymptomOverall,
+                                          ),
+                                          onTap: () =>
+                                              context.push('/symptom/new'),
+                                        ),
                                       ),
                                     ),
                                   ],

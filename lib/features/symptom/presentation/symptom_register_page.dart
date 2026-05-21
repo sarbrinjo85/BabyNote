@@ -24,11 +24,7 @@ import 'symptom_providers.dart';
 /// 저장 버튼 → SymptomController.create 가 internally 업로드 후 path 저장.
 /// 저장 실패 시 토스트.
 class SymptomRegisterPage extends ConsumerStatefulWidget {
-  const SymptomRegisterPage({
-    super.key,
-    this.editing,
-    this.initialKind,
-  });
+  const SymptomRegisterPage({super.key, this.editing, this.initialKind});
 
   final Symptom? editing;
   final SymptomKind? initialKind;
@@ -126,12 +122,13 @@ class _SymptomRegisterPageState extends ConsumerState<SymptomRegisterPage> {
         recordedBy: widget.editing!.recordedBy,
         createdAt: widget.editing!.createdAt,
       );
-      await ref.read(symptomControllerProvider.notifier).saveEdit(
-            symptom: updatedBase,
-            newPhotoFile: _newPhoto,
-          );
+      await ref
+          .read(symptomControllerProvider.notifier)
+          .saveEdit(symptom: updatedBase, newPhotoFile: _newPhoto);
     } else {
-      await ref.read(symptomControllerProvider.notifier).create(
+      await ref
+          .read(symptomControllerProvider.notifier)
+          .create(
             childId: childId,
             kind: _kind,
             occurredAt: _occurredAt,
@@ -148,7 +145,8 @@ class _SymptomRegisterPageState extends ConsumerState<SymptomRegisterPage> {
           SnackBar(
             duration: const Duration(seconds: 1),
             content: Text(
-                _isEdit ? l10n.recordEditSaved : l10n.symptomSavedToast),
+              _isEdit ? l10n.recordEditSaved : l10n.symptomSavedToast,
+            ),
           ),
         );
         context.pop();
@@ -230,33 +228,55 @@ class _SymptomRegisterPageState extends ConsumerState<SymptomRegisterPage> {
                   children: [
                     const Icon(Icons.child_care),
                     const SizedBox(width: Spacing.xs),
-                    Text(child.name,
-                        style: Theme.of(context).textTheme.titleMedium),
+                    Text(
+                      child.name,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
                   ],
                 ),
                 const SizedBox(height: Spacing.md),
 
                 // ── kind 토글 ────────────────────────────────────
-                Wrap(
-                  spacing: Spacing.xs,
-                  runSpacing: Spacing.xs,
+                // 4종 한 줄 표시
+                Row(
                   children: SymptomKind.values.map((k) {
                     final selected = k == _kind;
-                    return ChoiceChip(
-                      label: Text('${k.emoji} ${_kindLabel(l10n, k)}'),
-                      selected: selected,
-                      onSelected: _isEdit
-                          ? null
-                          : (sel) {
-                              if (sel) setState(() => _kind = k);
-                            },
-                      selectedColor: const Color(0xFFFFB5A7),
-                      labelStyle: TextStyle(
-                        fontWeight:
-                            selected ? FontWeight.w800 : FontWeight.w600,
-                        color: selected
-                            ? const Color(0xFFA43F45)
-                            : Theme.of(context).colorScheme.onSurface,
+                    return Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 2),
+                        child: ChoiceChip(
+                          label: SizedBox(
+                            width: double.infinity,
+                            child: Text(
+                              '${k.emoji} ${_kindLabel(l10n, k)}',
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontWeight: selected
+                                    ? FontWeight.w800
+                                    : FontWeight.w600,
+                                color: selected
+                                    ? const Color(0xFFA43F45)
+                                    : Theme.of(context).colorScheme.onSurface,
+                              ),
+                            ),
+                          ),
+                          labelPadding: const EdgeInsets.symmetric(
+                            horizontal: 1,
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 4,
+                            vertical: 6,
+                          ),
+                          selected: selected,
+                          onSelected: _isEdit
+                              ? null
+                              : (sel) {
+                                  if (sel) setState(() => _kind = k);
+                                },
+                          selectedColor: const Color(0xFFFFB5A7),
+                        ),
                       ),
                     );
                   }).toList(),
@@ -279,8 +299,10 @@ class _SymptomRegisterPageState extends ConsumerState<SymptomRegisterPage> {
                 const SizedBox(height: Spacing.sm),
 
                 // ── severity 선택 ────────────────────────────────
-                Text(l10n.symptomSeverityLabel,
-                    style: Theme.of(context).textTheme.labelLarge),
+                Text(
+                  l10n.symptomSeverityLabel,
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
                 const SizedBox(height: Spacing.xxs),
                 Wrap(
                   spacing: Spacing.xs,
@@ -299,8 +321,10 @@ class _SymptomRegisterPageState extends ConsumerState<SymptomRegisterPage> {
 
                 // ── 사진 (발진/상처만) ────────────────────────────
                 if (_kind.supportsPhoto) ...[
-                  Text(l10n.symptomPhotoLabel,
-                      style: Theme.of(context).textTheme.labelLarge),
+                  Text(
+                    l10n.symptomPhotoLabel,
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
                   const SizedBox(height: Spacing.xxs),
                   _PhotoPickerCard(
                     newPhoto: _newPhoto,
@@ -326,9 +350,9 @@ class _SymptomRegisterPageState extends ConsumerState<SymptomRegisterPage> {
                 FilledButton.icon(
                   onPressed: isLoading ? null : () => _submit(child.id),
                   icon: const Icon(Icons.save),
-                  label: Text(_isEdit
-                      ? l10n.recordEditSaved
-                      : l10n.symptomTitle),
+                  label: Text(
+                    _isEdit ? l10n.recordEditSaved : l10n.symptomTitle,
+                  ),
                   style: FilledButton.styleFrom(
                     minimumSize: const Size.fromHeight(TouchTarget.comfortable),
                   ),
@@ -373,11 +397,7 @@ class _PhotoPickerCard extends StatelessWidget {
             if (hasNew)
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: Image.file(
-                  newPhoto!,
-                  height: 180,
-                  fit: BoxFit.cover,
-                ),
+                child: Image.file(newPhoto!, height: 180, fit: BoxFit.cover),
               )
             else if (hasExisting)
               ListTile(
@@ -392,9 +412,8 @@ class _PhotoPickerCard extends StatelessWidget {
                   child: Text(
                     l10n.symptomPhotoPick,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color:
-                              Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ),
               ),

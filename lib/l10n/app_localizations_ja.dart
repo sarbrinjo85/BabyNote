@@ -1164,7 +1164,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get settingsExportHelp =>
-      '現在のお子さまの全記録(授乳・睡眠・おむつ・成長)をCSVで書き出します。診察やバックアップに使えます。';
+      '現在のお子さまの全記録(授乳・睡眠・おむつ・成長・ルーティン・健康)をCSVで書き出します。診察やバックアップに使えます。';
 
   @override
   String get settingsExportCsv => 'CSVで共有';

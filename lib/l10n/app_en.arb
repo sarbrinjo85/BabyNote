@@ -390,7 +390,7 @@
   "themeDark": "Dark",
 
   "settingsExport": "Export data",
-  "settingsExportHelp": "Export the selected child's records (feeding, sleep, diapers, growth) as CSV. Useful for doctor visits or backup.",
+  "settingsExportHelp": "Export the selected child's records (feeding, sleep, diapers, growth, routines, health) as CSV. Useful for doctor visits or backup.",
   "settingsExportCsv": "Share as CSV",
   "settingsExportInProgress": "Preparing…",
 

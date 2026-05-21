@@ -1165,7 +1165,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get settingsExportHelp =>
-      '현재 자녀의 모든 기록(수유·수면·기저귀·성장)을 CSV로 내보내요. 의사 진료나 백업에 사용할 수 있어요.';
+      '현재 자녀의 모든 기록(수유·수면·기저귀·성장·루틴·건강)을 CSV로 내보내요. 의사 진료나 백업에 사용할 수 있어요.';
 
   @override
   String get settingsExportCsv => 'CSV로 공유';

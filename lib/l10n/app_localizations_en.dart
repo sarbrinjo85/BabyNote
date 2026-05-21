@@ -1180,7 +1180,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsExportHelp =>
-      'Export the selected child\'s records (feeding, sleep, diapers, growth) as CSV. Useful for doctor visits or backup.';
+      'Export the selected child\'s records (feeding, sleep, diapers, growth, routines, health) as CSV. Useful for doctor visits or backup.';
 
   @override
   String get settingsExportCsv => 'Share as CSV';

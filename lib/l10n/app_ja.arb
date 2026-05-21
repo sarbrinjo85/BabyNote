@@ -390,7 +390,7 @@
   "themeDark": "ダーク",
 
   "settingsExport": "データのエクスポート",
-  "settingsExportHelp": "現在のお子さまの全記録(授乳・睡眠・おむつ・成長)をCSVで書き出します。診察やバックアップに使えます。",
+  "settingsExportHelp": "現在のお子さまの全記録(授乳・睡眠・おむつ・成長・ルーティン・健康)をCSVで書き出します。診察やバックアップに使えます。",
   "settingsExportCsv": "CSVで共有",
   "settingsExportInProgress": "準備中…",
 

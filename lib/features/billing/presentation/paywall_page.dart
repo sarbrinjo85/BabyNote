@@ -49,12 +49,18 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
     if (info != null && svc.hasMultiChildEntitlement(info)) {
       ref.invalidate(customerInfoProvider);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(duration: Duration(seconds: 1), content: Text('구매가 완료되었어요. 가족 플랜이 활성화됐습니다.')),
+        const SnackBar(
+          duration: Duration(seconds: 1),
+          content: Text('구매가 완료되었어요. 가족 플랜이 활성화됐습니다.'),
+        ),
       );
       if (mounted) context.pop(true);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(duration: Duration(seconds: 1), content: Text('결제가 완료되지 않았어요.')),
+        const SnackBar(
+          duration: Duration(seconds: 1),
+          content: Text('결제가 완료되지 않았어요.'),
+        ),
       );
     }
   }
@@ -68,7 +74,10 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
     final ok = svc.hasMultiChildEntitlement(info);
     ref.invalidate(customerInfoProvider);
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(duration: const Duration(seconds: 1), content: Text(ok ? '구매가 복원됐어요.' : '복원할 구매가 없어요.')),
+      SnackBar(
+        duration: const Duration(seconds: 1),
+        content: Text(ok ? '구매가 복원됐어요.' : '복원할 구매가 없어요.'),
+      ),
     );
     if (ok && mounted) context.pop(true);
   }
@@ -98,8 +107,7 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
                   Center(
                     child: Column(
                       children: [
-                        const Text('👨‍👩‍👧',
-                            style: TextStyle(fontSize: 56)),
+                        const Text('👨‍👩‍👧', style: TextStyle(fontSize: 56)),
                         const SizedBox(height: Spacing.sm),
                         Text(
                           '둘째부터는 가족 플랜으로',
@@ -108,9 +116,20 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
                             color: const Color(0xFFA43F45),
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 6),
+                        // 1줄: "첫째는 무료" 강조
                         Text(
-                          '첫째는 평생 무료. 둘째부터 자녀를 추가하려면 가족 플랜이 필요해요.',
+                          '첫째는 평생 무료',
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: const Color(0xFFD06A5C),
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        // 2줄: 보조 안내
+                        Text(
+                          '둘째부터 자녀를 추가하려면 가족 플랜이 필요해요',
                           textAlign: TextAlign.center,
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
@@ -157,30 +176,59 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
                       ),
                     )
                   else
-                    ...List.generate(
-                      _offering!.availablePackages.length,
-                      (i) {
-                        final pkg = _offering!.availablePackages[i];
-                        final product = pkg.storeProduct;
-                        return Padding(
-                          padding:
-                              const EdgeInsets.only(bottom: Spacing.sm),
-                          child: _PackageCard(
-                            title: product.title,
-                            description: product.description,
-                            price: product.priceString,
-                            onPressed: _purchasing
-                                ? null
-                                : () => _purchase(pkg),
-                          ),
-                        );
-                      },
-                    ),
+                    ...List.generate(_offering!.availablePackages.length, (i) {
+                      final pkg = _offering!.availablePackages[i];
+                      final product = pkg.storeProduct;
+                      // 가족팩(babynote_family_yearly) 카드 위에 추천 라벨.
+                      // Android base plan 접미사(:p1y) 포함될 수 있어 contains 매칭.
+                      final isFamily = product.identifier.contains('family');
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: Spacing.sm),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            if (isFamily)
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  left: 4,
+                                  bottom: 4,
+                                ),
+                                child: Text(
+                                  '👍 자녀가 2명 이상이면 가족팩이 더 좋아요',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    color: const Color(0xFFD06A5C),
+                                  ),
+                                ),
+                              ),
+                            _PackageCard(
+                              title: product.title,
+                              description: product.description,
+                              price: product.priceString,
+                              onPressed: _purchasing
+                                  ? null
+                                  : () => _purchase(pkg),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
 
                   const SizedBox(height: Spacing.md),
+                  // 구매 복원이 환불로 오해되지 않게 명확히 안내.
+                  Text(
+                    '이미 구매하셨다면 우측 상단 "구매 복원"을 눌러주세요. '
+                    '복원은 환불이 아니라, 기기 변경·재설치 시 구독을 다시 '
+                    '불러오는 기능이에요.',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: Spacing.xs),
                   Text(
                     '결제는 Google Play / App Store를 통해 처리됩니다. '
-                    '구독은 언제든 스토어에서 해지할 수 있어요.',
+                    '구독 해지·환불은 각 스토어에서 진행할 수 있어요.',
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
@@ -239,10 +287,12 @@ class _PackageCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        )),
+                    Text(
+                      title,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
                     if (description.isNotEmpty)
                       Text(
                         description,
