@@ -172,9 +172,9 @@ class _HomePageState extends ConsumerState<HomePage> {
                     Padding(
                       padding: const EdgeInsets.fromLTRB(
                         Spacing.md,
+                        Spacing.xs,
+                        Spacing.md,
                         Spacing.sm,
-                        Spacing.md,
-                        Spacing.md,
                       ),
                       child: asyncChildren.when(
                         loading: () => const Padding(
@@ -306,7 +306,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
                               // 오늘의 요약 차트
                               TodaysSummaryChart(childId: child.id),
-                              const SizedBox(height: Spacing.sm),
+                              const SizedBox(height: Spacing.xs),
 
                               // 메인 기록 4 col — 마지막 활동 시간 + 알림 dot 통합
                               _SectionLabel(text: l10n.homeTodayRecord),
@@ -315,49 +315,41 @@ class _HomePageState extends ConsumerState<HomePage> {
                                 key: OnboardingCoach.recordButtonsKey,
                                 child: RecordButtonsGrid(childId: child.id),
                               ),
-                              const SizedBox(height: Spacing.sm),
+                              const SizedBox(height: Spacing.xs),
 
                               // ── 루틴 · 건강 — 큰 버튼 2개로 통합 ────────
                               // 산책/목욕/… 8개 타일을 "루틴" / "건강" 큰 버튼
                               // 2개로 묶어 홈을 단순화. 종류 선택은 등록 화면의
                               // kind 토글에서 진행. 코치 마크 키는 그대로 유지.
                               SizedBox(
-                                height: 84,
+                                height: 52,
                                 child: Row(
                                   children: [
                                     Expanded(
-                                      child: Container(
+                                      child: _CompactActionButton(
                                         key: OnboardingCoach.routineSectionKey,
-                                        child: GridActionTile(
-                                          emoji: '🧸',
-                                          label: l10n.routineSectionHome,
-                                          subtitle: agoOrNull(
-                                            lastRoutineOverall,
-                                          ),
-                                          onTap: () =>
-                                              context.push('/routine/new'),
-                                        ),
+                                        emoji: '🧸',
+                                        label: l10n.routineSectionHome,
+                                        subtitle: agoOrNull(lastRoutineOverall),
+                                        onTap: () =>
+                                            context.push('/routine/new'),
                                       ),
                                     ),
                                     const SizedBox(width: Spacing.xs),
                                     Expanded(
-                                      child: Container(
+                                      child: _CompactActionButton(
                                         key: OnboardingCoach.symptomSectionKey,
-                                        child: GridActionTile(
-                                          emoji: '🌡️',
-                                          label: l10n.symptomSectionHome,
-                                          subtitle: agoOrNull(
-                                            lastSymptomOverall,
-                                          ),
-                                          onTap: () =>
-                                              context.push('/symptom/new'),
-                                        ),
+                                        emoji: '🌡️',
+                                        label: l10n.symptomSectionHome,
+                                        subtitle: agoOrNull(lastSymptomOverall),
+                                        onTap: () =>
+                                            context.push('/symptom/new'),
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                              const SizedBox(height: Spacing.sm),
+                              const SizedBox(height: Spacing.xs),
 
                               // ── 카테고리 1: 데이터/관리 ──────────────
                               _SectionLabel(text: l10n.homeSectionData),
@@ -390,7 +382,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                                   ],
                                 ),
                               ),
-                              const SizedBox(height: Spacing.sm),
+                              const SizedBox(height: Spacing.xs),
 
                               // ── 카테고리 2: 의료 ────────────────────
                               _SectionLabel(text: l10n.homeSectionMedical),
@@ -418,7 +410,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                                   ],
                                 ),
                               ),
-                              const SizedBox(height: Spacing.lg),
+                              const SizedBox(height: Spacing.xs),
                             ],
                           );
                         },
@@ -470,6 +462,75 @@ class _FamilyPlanBadge extends ConsumerWidget {
                   color: Color(0xFF8A6D1B),
                 ),
               ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 루틴/건강용 컴팩트 가로 버튼 — [이모지 라벨 (마지막시간)] 한 줄, 낮은 높이.
+/// 부모 SizedBox(height) 가 높이를 결정하고, Card 가 그 높이를 채운다.
+/// 코치 마크 타겟이 되도록 key 를 그대로 전달받는다.
+class _CompactActionButton extends StatelessWidget {
+  const _CompactActionButton({
+    super.key,
+    required this.emoji,
+    required this.label,
+    required this.onTap,
+    this.subtitle,
+  });
+
+  final String emoji;
+  final String label;
+  final String? subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card(
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: Radii.brMd,
+        side: BorderSide(
+          color: BrandColors.seed.withValues(alpha: 0.6),
+          width: 1.2,
+        ),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: Radii.brMd,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(emoji, style: const TextStyle(fontSize: 20)),
+              const SizedBox(width: 6),
+              Flexible(
+                child: Text(
+                  label,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              if (subtitle != null && subtitle!.isNotEmpty) ...[
+                const SizedBox(width: 6),
+                Text(
+                  subtitle!,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontSize: 9,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ],
           ),
         ),
