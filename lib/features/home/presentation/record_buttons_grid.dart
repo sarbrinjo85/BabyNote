@@ -5,15 +5,12 @@ import 'package:go_router/go_router.dart';
 import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/utils/time_ago.dart';
-import '../../diaper/domain/diaper.dart';
 import '../../diaper/presentation/diaper_providers.dart';
-import '../../feeding/domain/feeding.dart';
 import '../../feeding/presentation/feeding_providers.dart';
 import '../../growth/domain/growth.dart';
 import '../../growth/presentation/growth_providers.dart';
 import '../../inventory/presentation/diaper_inventory_providers.dart';
 import '../../inventory/presentation/formula_inventory_providers.dart';
-import '../../sleep/domain/sleep.dart';
 import '../../sleep/presentation/sleep_providers.dart';
 
 /// 4종 메인 기록 통합 그리드 — 큰 이모지 + 라벨 + 마지막 활동 시간/요약.
@@ -50,11 +47,38 @@ class RecordButtonsGrid extends ConsumerWidget {
       orElse: () => null,
     );
 
+    // ── 오늘 합계 집계 (기존 "오늘의 요약" 차트를 버튼에 통합) ───────
+    final now = DateTime.now();
+    final start = DateTime(now.year, now.month, now.day);
+    int feedCount = 0;
+    int feedMl = 0;
+    asyncFeedings.whenData((l) {
+      for (final f in l) {
+        if (f.startedAt.isAfter(start)) {
+          feedCount++;
+          feedMl += f.amountMl ?? 0;
+        }
+      }
+    });
+    int sleepMinutes = 0;
+    asyncSleeps.whenData((l) {
+      for (final s in l) {
+        if (s.startedAt.isAfter(start) && s.endedAt != null) {
+          sleepMinutes += s.endedAt!.difference(s.startedAt).inMinutes;
+        }
+      }
+    });
+    int diaperCount = 0;
+    asyncDiapers.whenData((l) {
+      for (final d in l) {
+        if (d.recordedAt.isAfter(start)) diaperCount++;
+      }
+    });
+
     // ── 알림 조건 계산 (각 type별) ────────────────────────────────
     // 수유: 활성 분유 통의 expectedDaysLeft < 3 → urgent
     bool feedingAlert = false;
-    final asyncActives =
-        ref.watch(activeFormulaInventoriesProvider(childId));
+    final asyncActives = ref.watch(activeFormulaInventoriesProvider(childId));
     asyncActives.whenData((list) {
       for (final inv in list) {
         final stats = ref.read(formulaInventoryStatsProvider(inv));
@@ -71,8 +95,7 @@ class RecordButtonsGrid extends ConsumerWidget {
 
     // 기저귀: 사이즈업 14일 이내
     bool diaperAlert = false;
-    final asyncForecast =
-        ref.watch(diaperSizeUpForecastProvider(childId));
+    final asyncForecast = ref.watch(diaperSizeUpForecastProvider(childId));
     asyncForecast.whenData((f) {
       if (f != null && f.nextSize != null && f.daysToSizeUp <= 14) {
         diaperAlert = true;
@@ -85,8 +108,7 @@ class RecordButtonsGrid extends ConsumerWidget {
       // 자녀 등록 후 7일 이상이면 첫 측정 권유 — 단순히 항상 alert
       growthAlert = true;
     } else {
-      final daysSince =
-          DateTime.now().difference(lastGrowth.measuredAt).inDays;
+      final daysSince = DateTime.now().difference(lastGrowth.measuredAt).inDays;
       if (daysSince >= 7) growthAlert = true;
     }
 
@@ -96,51 +118,50 @@ class RecordButtonsGrid extends ConsumerWidget {
       physics: const NeverScrollableScrollPhysics(),
       mainAxisSpacing: Spacing.xs,
       crossAxisSpacing: Spacing.xs,
-      childAspectRatio: 0.78, // 세로로 더 길게 — overflow 방지
+      childAspectRatio: 0.74, // 오늘합계+마지막시간 2줄 → 세로 더 길게
       children: [
         _Tile(
           emoji: '🍼',
           label: l10n.summaryFeeding,
-          // 수유는 시간 + 양을 한 줄에 합쳐서 표시: "3시간전 120ml"
-          summary: lastFeeding == null
+          // 오늘 합계: "오늘 6회 · 360ml"
+          today: feedMl > 0
+              ? '${l10n.homeTodayCount(feedCount)} · ${feedMl}ml'
+              : l10n.homeTodayCount(feedCount),
+          // 마지막: "3시간 전"
+          last: lastFeeding == null
               ? null
-              : '${TimeAgo.format(l10n, lastFeeding.startedAt)} '
-                  '${_summarizeFeeding(l10n, lastFeeding)}',
-          time: null,
+              : TimeAgo.format(l10n, lastFeeding.startedAt),
           alert: feedingAlert,
           onTap: () => context.push('/feeding/new'),
         ),
         _Tile(
           emoji: '💤',
-          // 수면 진행 중일 때 라벨을 "수면중"으로 변경
           label: sleepInProgress ? l10n.summarySleeping : l10n.summarySleep,
-          summary: lastSleep == null
+          today: l10n.homeTodaySleep(_formatDuration(sleepMinutes)),
+          last: lastSleep == null
               ? null
-              : '${TimeAgo.format(l10n, lastSleep.startedAt)} '
-                  '${_summarizeSleep(l10n, lastSleep)}',
-          time: null,
-          info: sleepInProgress, // 진행 중 표시 (urgent X, info O)
+              : TimeAgo.format(l10n, lastSleep.startedAt),
+          info: sleepInProgress,
           onTap: () => context.push('/sleep/new'),
         ),
         _Tile(
           emoji: '💩',
           label: l10n.summaryDiaper,
-          summary: lastDiaper == null
+          today: l10n.homeTodayCount(diaperCount),
+          last: lastDiaper == null
               ? null
-              : '${TimeAgo.format(l10n, lastDiaper.recordedAt)} '
-                  '${_summarizeDiaper(l10n, lastDiaper)}',
-          time: null,
+              : TimeAgo.format(l10n, lastDiaper.recordedAt),
           alert: diaperAlert,
           onTap: () => context.push('/diaper/new'),
         ),
         _Tile(
           emoji: '📏',
           label: l10n.summaryGrowth,
-          summary: lastGrowth == null
+          // 성장은 오늘 합계 개념이 없어 최신 측정값 표시
+          today: lastGrowth == null ? '—' : _summarizeGrowth(lastGrowth),
+          last: lastGrowth == null
               ? null
-              : '${TimeAgo.format(l10n, lastGrowth.measuredAt)} '
-                  '${_summarizeGrowth(lastGrowth)}',
-          time: null,
+              : TimeAgo.format(l10n, lastGrowth.measuredAt),
           alert: growthAlert,
           onTap: () => context.push('/growth/new'),
         ),
@@ -148,39 +169,13 @@ class RecordButtonsGrid extends ConsumerWidget {
     );
   }
 
-  String _summarizeFeeding(AppLocalizations l10n, Feeding f) {
-    switch (f.type) {
-      case 'breast':
-        return f.amountMl != null ? '${f.amountMl}ml' : l10n.feedingTabBreast;
-      case 'formula':
-        return f.amountMl != null ? '${f.amountMl}ml' : l10n.feedingTabFormula;
-      case 'solid':
-        return l10n.feedingTabSolid;
-      default:
-        return f.type;
-    }
-  }
-
-  String _summarizeSleep(AppLocalizations l10n, Sleep s) {
-    if (s.isOngoing) {
-      return s.napOrNight == 'night'
-          ? l10n.sleepNightInProgress
-          : l10n.sleepNapInProgress;
-    }
-    final mins = s.elapsedMinutes(s.endedAt!);
-    if (mins < 60) return '${mins}m';
-    final h = mins ~/ 60;
-    final m = mins % 60;
-    return m == 0 ? '${h}h' : '${h}h${m}m';
-  }
-
-  String _summarizeDiaper(AppLocalizations l10n, Diaper d) {
-    return switch (d.type) {
-      'pee' => l10n.diaperPee,
-      'poop' => l10n.diaperPoop,
-      'both' => l10n.diaperBoth,
-      _ => d.type,
-    };
+  String _formatDuration(int minutes) {
+    if (minutes == 0) return '0';
+    final h = minutes ~/ 60;
+    final m = minutes % 60;
+    if (h == 0) return '${m}m';
+    if (m == 0) return '${h}h';
+    return '${h}h ${m}m';
   }
 
   String _summarizeGrowth(Growth g) {
@@ -198,36 +193,38 @@ class _Tile extends StatelessWidget {
   const _Tile({
     required this.emoji,
     required this.label,
-    required this.summary,
-    required this.time,
+    required this.today,
+    required this.last,
     required this.onTap,
     this.alert = false,
     this.info = false,
-    this.summaryMaxLines = 2,
   });
   final String emoji;
   final String label;
-  final String? summary;
-  final String? time;
+
+  /// 오늘 합계 — "오늘 6회 · 360ml" / "오늘 14h" / 성장은 최신 측정값.
+  final String today;
+
+  /// 마지막 기록 상대시간 — "3시간 전". 기록 없으면 null → "—".
+  final String? last;
   final VoidCallback onTap;
+
   /// 빨간 강조 — 분유 곧 소진, 사이즈업 임박, 성장 주간 알림 등.
   final bool alert;
+
   /// 정보 강조 (진행 중 등) — 카드 색상 secondary로.
   final bool info;
-  /// summary 텍스트 최대 줄 수 (기본 1).
-  final int summaryMaxLines;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final empty = summary == null;
     return Card(
       margin: EdgeInsets.zero,
       color: alert
           ? theme.colorScheme.errorContainer
           : info
-              ? theme.colorScheme.secondaryContainer
-              : null,
+          ? theme.colorScheme.secondaryContainer
+          : null,
       // 코랄핑크 톤의 옅은 테두리 — 자녀/그리드 카드와 시각적 일관성
       shape: RoundedRectangleBorder(
         borderRadius: Radii.brMd,
@@ -243,59 +240,59 @@ class _Tile extends StatelessWidget {
           children: [
             Positioned.fill(
               child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 6),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(emoji, style: const TextStyle(fontSize: 26)),
-                  const SizedBox(height: 1),
-                  Text(
-                    label,
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      fontSize: 11,
-                      color: alert
-                          ? theme.colorScheme.onErrorContainer
-                          : info
-                              ? theme.colorScheme.onSecondaryContainer
-                              : null,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 1),
-                  Text(
-                    empty ? '—' : summary!,
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: alert
-                          ? theme.colorScheme.onErrorContainer
-                          : empty
-                              ? theme.colorScheme.onSurfaceVariant
-                              : theme.colorScheme.primary,
-                    ),
-                    maxLines: summaryMaxLines,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  if (time != null)
+                padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 6),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(emoji, style: const TextStyle(fontSize: 24)),
+                    const SizedBox(height: 1),
                     Text(
-                      time!,
+                      label,
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        fontSize: 11,
+                        color: alert
+                            ? theme.colorScheme.onErrorContainer
+                            : info
+                            ? theme.colorScheme.onSecondaryContainer
+                            : null,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 1),
+                    // 오늘 합계 (강조)
+                    Text(
+                      today,
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: alert
+                            ? theme.colorScheme.onErrorContainer
+                            : theme.colorScheme.primary,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    // 마지막 기록 시간 (보조)
+                    Text(
+                      last ?? '—',
                       textAlign: TextAlign.center,
                       style: theme.textTheme.bodySmall?.copyWith(
                         fontSize: 9,
                         color: alert
-                            ? theme.colorScheme.onErrorContainer
-                                .withValues(alpha: 0.8)
+                            ? theme.colorScheme.onErrorContainer.withValues(
+                                alpha: 0.8,
+                              )
                             : theme.colorScheme.onSurfaceVariant,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                ],
-              ),
+                  ],
+                ),
               ),
             ),
             // 우상단 알림 dot — alert 또는 info 시

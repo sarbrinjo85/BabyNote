@@ -169,6 +169,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeTodayRecord => 'Today\'s record';
 
   @override
+  String homeTodayCount(int count) {
+    return 'Today $count';
+  }
+
+  @override
+  String homeTodaySleep(String duration) {
+    return 'Today $duration';
+  }
+
+  @override
   String get homeInventory => 'Inventory';
 
   @override

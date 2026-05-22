@@ -382,6 +382,18 @@ abstract class AppLocalizations {
   /// **'오늘의 기록'**
   String get homeTodayRecord;
 
+  /// No description provided for @homeTodayCount.
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘 {count}회'**
+  String homeTodayCount(int count);
+
+  /// No description provided for @homeTodaySleep.
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘 {duration}'**
+  String homeTodaySleep(String duration);
+
   /// No description provided for @homeInventory.
   ///
   /// In ko, this message translates to:

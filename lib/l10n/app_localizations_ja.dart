@@ -168,6 +168,16 @@ class AppLocalizationsJa extends AppLocalizations {
   String get homeTodayRecord => '今日の記録';
 
   @override
+  String homeTodayCount(int count) {
+    return '今日 $count回';
+  }
+
+  @override
+  String homeTodaySleep(String duration) {
+    return '今日 $duration';
+  }
+
+  @override
   String get homeInventory => '在庫管理';
 
   @override

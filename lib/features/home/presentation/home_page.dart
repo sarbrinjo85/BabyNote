@@ -8,7 +8,6 @@ import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/config/env.dart';
 import '../../../core/sync/sync_indicator.dart';
 import '../../../core/theme/tokens.dart';
-import '../../../core/utils/time_ago.dart';
 import '../../../core/widgets/stroked_title.dart';
 import '../../../core/widgets/grid_action_tile.dart';
 import '../../auth/data/auth_repository.dart';
@@ -27,7 +26,6 @@ import 'notification_scheduler.dart';
 import 'quick_feeding_fab.dart';
 import 'record_buttons_grid.dart';
 import 'sleep_ongoing_notifier.dart';
-import 'todays_summary_chart.dart';
 
 /// 홈 화면 — 한 화면에 핵심 정보 모두 노출 (스크롤 최소화).
 ///
@@ -192,7 +190,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                           if (children.isEmpty) return const SizedBox.shrink();
                           final child = selectedChild ?? children.first;
 
-                          // 루틴/증상 kind 별 마지막 기록 시간 계산.
+                          // 루틴/건강 종류별 "오늘" 횟수 — 큰 버튼 안에 표시.
                           // recentXProvider 는 30건 limit, kind 8종이라 보통 모두 커버.
                           final routinesAsync = ref.watch(
                             recentRoutinesProvider(child.id),
@@ -200,37 +198,30 @@ class _HomePageState extends ConsumerState<HomePage> {
                           final symptomsAsync = ref.watch(
                             recentSymptomsProvider(child.id),
                           );
-                          final lastRoutineByKind = <RoutineKind, DateTime>{};
-                          final lastSymptomByKind = <SymptomKind, DateTime>{};
+                          final now = DateTime.now();
+                          final todayStart = DateTime(
+                            now.year,
+                            now.month,
+                            now.day,
+                          );
+                          final routineTodayCount = <RoutineKind, int>{};
+                          final symptomTodayCount = <SymptomKind, int>{};
                           routinesAsync.whenData((list) {
                             for (final r in list) {
-                              final ex = lastRoutineByKind[r.kind];
-                              if (ex == null || r.startedAt.isAfter(ex)) {
-                                lastRoutineByKind[r.kind] = r.startedAt;
+                              if (r.startedAt.isAfter(todayStart)) {
+                                routineTodayCount[r.kind] =
+                                    (routineTodayCount[r.kind] ?? 0) + 1;
                               }
                             }
                           });
                           symptomsAsync.whenData((list) {
                             for (final s in list) {
-                              final ex = lastSymptomByKind[s.kind];
-                              if (ex == null || s.occurredAt.isAfter(ex)) {
-                                lastSymptomByKind[s.kind] = s.occurredAt;
+                              if (s.occurredAt.isAfter(todayStart)) {
+                                symptomTodayCount[s.kind] =
+                                    (symptomTodayCount[s.kind] ?? 0) + 1;
                               }
                             }
                           });
-                          // 통합 버튼 subtitle 용 — 종류 무관 가장 최근 1건.
-                          DateTime? maxOrNull(Iterable<DateTime> ds) =>
-                              ds.isEmpty
-                              ? null
-                              : ds.reduce((a, b) => a.isAfter(b) ? a : b);
-                          final lastRoutineOverall = maxOrNull(
-                            lastRoutineByKind.values,
-                          );
-                          final lastSymptomOverall = maxOrNull(
-                            lastSymptomByKind.values,
-                          );
-                          String? agoOrNull(DateTime? dt) =>
-                              dt == null ? null : TimeAgo.format(l10n, dt);
 
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -291,7 +282,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                                     );
                                   }).toList(),
                                 ),
-                                const SizedBox(height: Spacing.xs),
+                                const SizedBox(height: Spacing.xxs),
                               ],
 
                               // 무음 위젯들
@@ -302,13 +293,10 @@ class _HomePageState extends ConsumerState<HomePage> {
                               ChildInfoCard(child: child),
                               // 가족 플랜 활성 시에만 뜨는 뱃지 (구매 가치 가시화)
                               const _FamilyPlanBadge(),
-                              const SizedBox(height: Spacing.xs),
+                              const SizedBox(height: Spacing.xxs),
 
-                              // 오늘의 요약 차트
-                              TodaysSummaryChart(childId: child.id),
-                              const SizedBox(height: Spacing.xs),
-
-                              // 메인 기록 4 col — 마지막 활동 시간 + 알림 dot 통합
+                              // 메인 기록 4 col — 오늘 합계 + 마지막 활동 통합
+                              // (기존 "오늘의 요약" 차트를 각 버튼에 흡수)
                               _SectionLabel(text: l10n.homeTodayRecord),
                               const SizedBox(height: Spacing.xxs),
                               Container(
@@ -322,26 +310,78 @@ class _HomePageState extends ConsumerState<HomePage> {
                               // 2개로 묶어 홈을 단순화. 종류 선택은 등록 화면의
                               // kind 토글에서 진행. 코치 마크 키는 그대로 유지.
                               SizedBox(
-                                height: 52,
+                                height: 128,
                                 child: Row(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
                                   children: [
                                     Expanded(
-                                      child: _CompactActionButton(
+                                      child: _KindBreakdownButton(
                                         key: OnboardingCoach.routineSectionKey,
                                         emoji: '🧸',
                                         label: l10n.routineSectionHome,
-                                        subtitle: agoOrNull(lastRoutineOverall),
+                                        items: [
+                                          (
+                                            l10n.homeRoutineWalk,
+                                            routineTodayCount[RoutineKind
+                                                    .walk] ??
+                                                0,
+                                          ),
+                                          (
+                                            l10n.homeRoutineBath,
+                                            routineTodayCount[RoutineKind
+                                                    .bath] ??
+                                                0,
+                                          ),
+                                          (
+                                            l10n.homeRoutineSupplement,
+                                            routineTodayCount[RoutineKind
+                                                    .supplement] ??
+                                                0,
+                                          ),
+                                          (
+                                            l10n.homeRoutineSnack,
+                                            routineTodayCount[RoutineKind
+                                                    .snack] ??
+                                                0,
+                                          ),
+                                        ],
                                         onTap: () =>
                                             context.push('/routine/new'),
                                       ),
                                     ),
                                     const SizedBox(width: Spacing.xs),
                                     Expanded(
-                                      child: _CompactActionButton(
+                                      child: _KindBreakdownButton(
                                         key: OnboardingCoach.symptomSectionKey,
                                         emoji: '🌡️',
                                         label: l10n.symptomSectionHome,
-                                        subtitle: agoOrNull(lastSymptomOverall),
+                                        items: [
+                                          (
+                                            l10n.homeSymptomCough,
+                                            symptomTodayCount[SymptomKind
+                                                    .cough] ??
+                                                0,
+                                          ),
+                                          (
+                                            l10n.homeSymptomVomit,
+                                            symptomTodayCount[SymptomKind
+                                                    .vomit] ??
+                                                0,
+                                          ),
+                                          (
+                                            l10n.homeSymptomRash,
+                                            symptomTodayCount[SymptomKind
+                                                    .rash] ??
+                                                0,
+                                          ),
+                                          (
+                                            l10n.homeSymptomInjury,
+                                            symptomTodayCount[SymptomKind
+                                                    .injury] ??
+                                                0,
+                                          ),
+                                        ],
                                         onTap: () =>
                                             context.push('/symptom/new'),
                                       ),
@@ -470,22 +510,50 @@ class _FamilyPlanBadge extends ConsumerWidget {
   }
 }
 
-/// 루틴/건강용 컴팩트 가로 버튼 — [이모지 라벨 (마지막시간)] 한 줄, 낮은 높이.
+/// 루틴/건강용 큰 버튼 — 헤더(이모지+라벨) + 종류별 오늘 횟수 2×2.
 /// 부모 SizedBox(height) 가 높이를 결정하고, Card 가 그 높이를 채운다.
-/// 코치 마크 타겟이 되도록 key 를 그대로 전달받는다.
-class _CompactActionButton extends StatelessWidget {
-  const _CompactActionButton({
+/// items 는 (종류 라벨, 오늘 횟수) 4개. 코치 마크 타겟 key 를 그대로 전달받는다.
+class _KindBreakdownButton extends StatelessWidget {
+  const _KindBreakdownButton({
     super.key,
     required this.emoji,
     required this.label,
+    required this.items,
     required this.onTap,
-    this.subtitle,
   });
 
   final String emoji;
   final String label;
-  final String? subtitle;
+  final List<(String, int)> items;
   final VoidCallback onTap;
+
+  Widget _cell(ThemeData theme, (String, int) it) {
+    final has = it.$2 > 0;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Flexible(
+          child: Text(
+            it.$1,
+            style: theme.textTheme.bodySmall?.copyWith(fontSize: 11),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        const SizedBox(width: 4),
+        Text(
+          '${it.$2}',
+          style: theme.textTheme.bodySmall?.copyWith(
+            fontSize: 13,
+            fontWeight: FontWeight.w800,
+            color: has
+                ? theme.colorScheme.primary
+                : theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -503,34 +571,51 @@ class _CompactActionButton extends StatelessWidget {
         onTap: onTap,
         borderRadius: Radii.brMd,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(emoji, style: const TextStyle(fontSize: 20)),
-              const SizedBox(width: 6),
-              Flexible(
-                child: Text(
-                  label,
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    fontWeight: FontWeight.w700,
+              // 헤더
+              Row(
+                children: [
+                  Text(emoji, style: const TextStyle(fontSize: 18)),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      label,
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                ],
+              ),
+              const SizedBox(height: 6),
+              const Divider(height: 1),
+              // 종류별 오늘 횟수 (2×2)
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(child: _cell(theme, items[0])),
+                        const SizedBox(width: 10),
+                        Expanded(child: _cell(theme, items[1])),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Expanded(child: _cell(theme, items[2])),
+                        const SizedBox(width: 10),
+                        Expanded(child: _cell(theme, items[3])),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-              if (subtitle != null && subtitle!.isNotEmpty) ...[
-                const SizedBox(width: 6),
-                Text(
-                  subtitle!,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontSize: 9,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
             ],
           ),
         ),

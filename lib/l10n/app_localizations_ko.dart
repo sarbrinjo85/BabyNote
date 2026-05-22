@@ -168,6 +168,16 @@ class AppLocalizationsKo extends AppLocalizations {
   String get homeTodayRecord => '오늘의 기록';
 
   @override
+  String homeTodayCount(int count) {
+    return '오늘 $count회';
+  }
+
+  @override
+  String homeTodaySleep(String duration) {
+    return '오늘 $duration';
+  }
+
+  @override
   String get homeInventory => '재고 관리';
 
   @override
