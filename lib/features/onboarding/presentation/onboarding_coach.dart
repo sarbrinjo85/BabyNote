@@ -62,6 +62,10 @@ class OnboardingCoach {
   static Future<void> maybeShow(BuildContext context) async {
     if (_dismissedThisSession) return;
     if (await hasSeen()) return;
+    // AppBar 액션(SyncIndicator 는 큐 flush 시 0폭으로 줄고, 알림 종은 async 로
+    // 배지 폭이 바뀜)이 안정된 뒤에 위치를 캡처해야 하이라이트가 올바른 아이콘에
+    // 붙는다. 한 프레임 + 짧은 지연으로 레이아웃을 settle 시킨 뒤 표시.
+    await Future.delayed(const Duration(milliseconds: 450));
     if (!context.mounted) return;
     show(context);
   }

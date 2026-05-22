@@ -232,7 +232,26 @@ paywall 상품 목록(`paywall_page.dart:160-178`, `availablePackages` 루프)�
       → 큰 버튼 subtitle 에 "가장 최근 루틴 N시간 전" 식으로 대표 1개만 표시 검토
 - ▢ 메인 기록(수유/수면/기저귀/성장) 4타일은 그대로 둘지, 전체 레이아웃 톤 함께 점검
 
-<!-- 추가 항목은 U6, U7 … 으로 아래에 누적 -->
+### U8. 코치 마크 하이라이트 위치 어긋남 (자녀추가→설정)
+🟡 | 조사+수정 | 발견: 2026-05-22 (기기 검증 필요)
+
+홈 도움말 코치 마크에서 "자녀 추가" 설명의 하이라이트 원이 실제 자녀추가
+아이콘이 아니라 **설정 아이콘**을 비춤 (오른쪽으로 밀림).
+
+분석:
+- 각 GlobalKey 는 정확히 1개 위젯에 부착됨 (중복 없음) — 키 문제 아님
+- AppBar actions: [SyncIndicator(0~가변폭)] [addChild] [bell] [settings] [logout]
+- 의심: `SyncIndicator` 가 코치 표시 시점에 폭이 있다가 큐 flush 후 0폭으로 줄면
+      오른쪽 아이콘들이 좌측 이동 → 캡처된 하이라이트 위치가 오른쪽(설정)으로 어긋남
+- 또는 `NotificationBellAction` async 폭 변동 / tutorial_coach_mark AppBar 좌표 이슈
+
+시도한 수정:
+- ▢ `onboarding_coach.dart maybeShow`: 레이아웃 안정 후 캡처하도록 표시 전 지연 추가
+- ▢ (대안) SyncIndicator 를 고정폭/IconButton 형태로 → 레이아웃 변동 제거
+- ▢ (대안) 코치 표시 중 위치 재계산 / 라이브러리 옵션 점검
+- ▢ **기기에서 재검증 필수** (배포 후 도움말 다시 보기로 확인)
+
+<!-- 추가 항목은 U9, U10 … 으로 아래에 누적 -->
 
 ---
 
