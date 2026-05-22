@@ -251,7 +251,24 @@ paywall 상품 목록(`paywall_page.dart:160-178`, `availablePackages` 루프)�
 - ▢ (대안) 코치 표시 중 위치 재계산 / 라이브러리 옵션 점검
 - ▢ **기기에서 재검증 필수** (배포 후 도움말 다시 보기로 확인)
 
-<!-- 추가 항목은 U9, U10 … 으로 아래에 누적 -->
+### U11. Google 로그인 — 정식 출시 전 차단 이슈 ⛔
+🔴 | 출시 차단 | 발견: 2026-05-23
+
+`GOOGLE_SERVER_CLIENT_ID` 미설정으로 프로덕션 빌드에서 Google 로그인 버튼이
+"설정되지 않았어요" 에러. 정식 출시 심사 시 리뷰어가 버튼을 누르면 **반려 위험**.
+둘 중 하나 필수 (정식 출시 전):
+
+- ▢ **(A) Google 로그인 작동시키기** — `docs/release/google_signin.md` 가이드대로
+      GCP OAuth Client(Android+Web) + SHA-1(Play App Signing 키) + Supabase provider
+      + GitHub Secret `GOOGLE_SERVER_CLIENT_ID` 등록 → 빌드워크플로 이미 dart-define 함
+- ▢ **(B) 또는 Google 버튼 임시 숨김** — `auth_page.dart` 에서 Google 버튼 조건부
+      숨김(`Env.isGoogleSignInEnabled` 가 false 면 숨김). 가장 빠르고 안전.
+- ▢ Data Safety 의 계정 생성 방법: 현재 **이메일/비밀번호만** (OAuth 미체크) — Google
+      작동시키면 OAuth 추가
+
+> 내부 테스트는 무관. **프로덕션 트랙 출시 전** 반드시 처리.
+
+<!-- 추가 항목은 U12 … 으로 아래에 누적 -->
 
 ---
 
