@@ -57,7 +57,7 @@ Future<void> main() async {
         options.dsn = Env.sentryDsn;
         // 환경 구분 — Sentry UI에서 dev vs production 필터링
         options.environment = kDebugMode ? 'debug' : 'production';
-        options.release = 'babynote@1.0.0+4'; // pubspec version과 일치
+        options.release = 'babynote@1.0.0+5'; // pubspec version과 일치
         // 에러 발생 시 스택 트레이스 + breadcrumbs 자동 capture
         // 트래픽 적을 땐 100%, production 사용자 많아지면 0.1로 낮춤
         options.tracesSampleRate = kDebugMode ? 1.0 : 0.2;
