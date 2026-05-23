@@ -251,22 +251,20 @@ paywall 상품 목록(`paywall_page.dart:160-178`, `availablePackages` 루프)�
 - ▢ (대안) 코치 표시 중 위치 재계산 / 라이브러리 옵션 점검
 - ▢ **기기에서 재검증 필수** (배포 후 도움말 다시 보기로 확인)
 
-### U11. Google 로그인 — 정식 출시 전 차단 이슈 ⛔
-🔴 | 출시 차단 | 발견: 2026-05-23
+### U11. Google 로그인 활성화 (A 경로) ✅
+🟡 | 콘솔 셋업 완료 — v6 빌드 검증 대기 | 2026-05-23
 
-`GOOGLE_SERVER_CLIENT_ID` 미설정으로 프로덕션 빌드에서 Google 로그인 버튼이
-"설정되지 않았어요" 에러. 정식 출시 심사 시 리뷰어가 버튼을 누르면 **반려 위험**.
-둘 중 하나 필수 (정식 출시 전):
+프로덕션에서 Google 로그인 에러였던 차단 이슈 → **활성화(A)** 로 해결.
 
-- ▢ **(A) Google 로그인 작동시키기** — `docs/release/google_signin.md` 가이드대로
-      GCP OAuth Client(Android+Web) + SHA-1(Play App Signing 키) + Supabase provider
-      + GitHub Secret `GOOGLE_SERVER_CLIENT_ID` 등록 → 빌드워크플로 이미 dart-define 함
-- ▢ **(B) 또는 Google 버튼 임시 숨김** — `auth_page.dart` 에서 Google 버튼 조건부
-      숨김(`Env.isGoogleSignInEnabled` 가 false 면 숨김). 가장 빠르고 안전.
-- ▢ Data Safety 의 계정 생성 방법: 현재 **이메일/비밀번호만** (OAuth 미체크) — Google
-      작동시키면 OAuth 추가
-
-> 내부 테스트는 무관. **프로덕션 트랙 출시 전** 반드시 처리.
+- ✅ Play 앱 서명 키 SHA-1: `EC:71:14:81:79:19:25:5F:31:73:47:E2:5D:D5:D0:BF:F9:F9:6E:27`
+- ✅ GCP Android OAuth Client (패키지 `com.kjfamily.babynote` + 위 SHA-1, 앱 소유권 확인)
+      ID `307307409758-4hi6knn867eb3l4uvf8j0hj6ablje3fq...`
+- ✅ GCP Web OAuth Client (`307307409758-k7igqt6pnco4hjbqlf1lchrq34nf4g7d...`) = `GOOGLE_SERVER_CLIENT_ID`
+- ✅ Supabase Google provider ON + Client ID 설정
+- ✅ GitHub Secret `GOOGLE_SERVER_CLIENT_ID` 등록 (빌드워크플로가 dart-define 주입)
+- ⏳ **검증**: v6 push→빌드→내부테스트 업로드→Play 설치본에서 Google 로그인 동작
+      (로컬 debug 빌드는 debug SHA-1 미등록이라 안 됨 — Play 빌드에서 테스트)
+- ⏳ Data Safety 계정 생성 방법에 **OAuth** 추가 (작동 확인 후)
 
 <!-- 추가 항목은 U12 … 으로 아래에 누적 -->
 
