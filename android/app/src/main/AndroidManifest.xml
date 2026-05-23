@@ -1,11 +1,19 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <!-- 로컬 알림 권한 (Android 13+ 런타임 권한 필요) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
-    <!-- 정확한 시각 알림 (Android 12+) — 분유 잔량/접종 임박 등 예약된 시점 알림 -->
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
-    <uses-permission android:name="android.permission.USE_EXACT_ALARM"/>
     <!-- 부팅 후 알림 재등록 -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+
+    <!-- 정확 알람 권한 제거: BabyNote 의 핵심 기능은 캘린더/알람 시계가 아니므로
+         USE_EXACT_ALARM 사용 불가 (Google Play 정책). 알림은 모두
+         inexactAllowWhileIdle 로 스케줄하므로 정확 알람이 필요 없음.
+         flutter_local_notifications 가 자체 매니페스트에서 머지하는 권한까지
+         tools:node="remove" 로 최종 병합 결과에서 확실히 제거. -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"
+        tools:node="remove"/>
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM"
+        tools:node="remove"/>
 
     <application
         android:label="BABY NOTE"
