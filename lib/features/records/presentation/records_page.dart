@@ -228,19 +228,29 @@ class _DailyTimelineList extends ConsumerWidget {
   }
 }
 
-String _dateKey(DateTime d) =>
-    '${d.year}-${_two(d.month)}-${_two(d.day)}';
+// Supabase timestamptz 는 UTC DateTime 으로 파싱되므로, 표시 전 반드시
+// .toLocal() 로 변환해야 함 (안 하면 KST 기준 9시간 어긋남 — 그룹핑/시각 둘 다).
+String _dateKey(DateTime d) {
+  final l = d.toLocal();
+  return '${l.year}-${_two(l.month)}-${_two(l.day)}';
+}
+
 String _two(int v) => v.toString().padLeft(2, '0');
-String _hhmm(DateTime d) => '${_two(d.hour)}:${_two(d.minute)}';
+
+String _hhmm(DateTime d) {
+  final l = d.toLocal();
+  return '${_two(l.hour)}:${_two(l.minute)}';
+}
 
 String _formatDateHeader(DateTime d) {
+  final l = d.toLocal();
   final now = DateTime.now();
   final today = DateTime(now.year, now.month, now.day);
-  final that = DateTime(d.year, d.month, d.day);
+  final that = DateTime(l.year, l.month, l.day);
   final diff = today.difference(that).inDays;
-  if (diff == 0) return '오늘 (${d.year}.${_two(d.month)}.${_two(d.day)})';
-  if (diff == 1) return '어제 (${d.year}.${_two(d.month)}.${_two(d.day)})';
-  return '${d.year}.${_two(d.month)}.${_two(d.day)}';
+  if (diff == 0) return '오늘 (${l.year}.${_two(l.month)}.${_two(l.day)})';
+  if (diff == 1) return '어제 (${l.year}.${_two(l.month)}.${_two(l.day)})';
+  return '${l.year}.${_two(l.month)}.${_two(l.day)}';
 }
 
 // ─────────────────────────────────────────────────────────────────────────
