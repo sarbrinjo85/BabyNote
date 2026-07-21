@@ -128,11 +128,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           padding: const EdgeInsets.all(Spacing.md),
           children: [
             // ── 가족 플랜 / 구독 ─────────────────────────────────
-            // 구독 중이면 상태를 subtitle 로 노출 — paywall 이 "이용 중" 화면
-            // (구독 관리 진입)으로 동작. dev 오표시 방지 Env 가드는 뱃지와 동일.
+            // 구독 중이면 플랜명을 subtitle 로 노출 — paywall 이 "이용 중" 화면
+            // (구독 관리/업그레이드)으로 동작. dev 오표시 방지 Env 가드는 뱃지와 동일.
             Builder(builder: (context) {
-              final subscribed = Env.isBillingEnabled &&
-                  ref.watch(hasMultiChildEntitlementProvider);
+              final svc = ref.read(billingServiceProvider);
+              final info = ref.watch(customerInfoProvider).valueOrNull;
+              final product =
+                  Env.isBillingEnabled ? svc.activeProductId(info) : null;
+              final subscribed = product != null;
+              final planName =
+                  (product?.contains('family') ?? false) ? '가족팩' : '추가 자녀팩';
               return ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: Icon(
@@ -141,8 +146,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 ),
                 title: const Text('가족 플랜'),
                 subtitle: Text(subscribed
-                    ? '👑 구독 중 · 구독 관리 보기'
-                    : '자녀 무제한 추가 + 가족 공유'),
+                    ? '👑 $planName 구독 중 · 구독 관리 보기'
+                    : '둘째부터 자녀 추가 + 가족 공유'),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => context.push('/paywall'),
               );

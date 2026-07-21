@@ -270,7 +270,26 @@ paywall 상품 목록(`paywall_page.dart:160-178`, `availablePackages` 루프)�
       (로컬 debug 빌드는 debug SHA-1 미등록이라 안 됨 — Play 빌드에서 테스트)
 - ⏳ Data Safety 계정 생성 방법에 **OAuth** 추가 (작동 확인 후)
 
-<!-- 추가 항목은 U12 … 으로 아래에 누적 -->
+### U12. 플랜별 자녀 수 한도 구분 (추가 자녀팩 2명 / 가족팩 무제한)
+✅ 완료 (2026-05-27, v1.0.0+8)
+
+발견: paywall 게이트가 entitlement 불리언만 확인 → ₩19,900 추가 자녀팩만
+사도 자녀 무제한 등록 가능 (₩49,900 가족팩 구매 유인 소멸).
+
+- ✅ `BillingService.activeProductId()` / `maxChildren()` — entitlement 의
+      productIdentifier 로 판별 (미구독 1 / extra_child 2 / family 무제한, dev 무제한)
+- ✅ `child_register_page` 게이트: `children.length >= maxChildren` 비교로 교체 +
+      `customerInfoProvider.future` await (콜드스타트 구독자 오탐 레이스 해소) +
+      구매 후 한도 재확인
+- ✅ paywall: 구독 중 화면이 플랜명 표시 ("추가 자녀팩/가족팩 이용 중") +
+      추가 자녀팩이면 가족팩 업그레이드 카드 (`GoogleProductChangeInfo` 구독 변경,
+      base plan 접미사 `:p1y` 제거 후 전달)
+- ✅ 상품 카드 caption: "자녀 2명까지 (첫째+둘째)" / "자녀 무제한"
+- ✅ settings: subtitle 에 플랜명 표시
+- ⏳ 검증 (v8 설치 후): 추가 자녀팩 계정으로 3번째 자녀 등록 시도 → 업그레이드
+      카드 → 구독 변경 결제 → Play 에서 기존 구독 대체 확인
+
+<!-- 추가 항목은 U13 … 으로 아래에 누적 -->
 
 ---
 

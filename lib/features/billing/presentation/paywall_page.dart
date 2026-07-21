@@ -43,10 +43,13 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
     });
   }
 
-  Future<void> _purchase(Package pkg) async {
+  /// [upgradeFrom] — 기존 구독 상품 ID (base plan 접미사 제외). 주어지면
+  /// Google Play 구독 변경(추가 자녀팩 → 가족팩 업그레이드) 플로우로 결제.
+  Future<void> _purchase(Package pkg, {String? upgradeFrom}) async {
     setState(() => _purchasing = true);
     final svc = ref.read(billingServiceProvider);
-    final info = await svc.purchasePackage(pkg);
+    final info =
+        await svc.purchasePackage(pkg, upgradeFromProductId: upgradeFrom);
     if (!mounted) return;
     setState(() => _purchasing = false);
     if (info != null && svc.hasMultiChildEntitlement(info)) {
@@ -108,13 +111,26 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
     }
   }
 
+  /// offering 에서 가족팩 패키지 찾기 (업그레이드 카드용).
+  Package? get _familyPackage {
+    final pkgs = _offering?.availablePackages ?? const [];
+    for (final p in pkgs) {
+      if (p.storeProduct.identifier.contains('family')) return p;
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     // 이미 entitlement 보유 → 구매 카드 대신 "이용 중" 상태 표시.
-    // dev(빌링 키 없음)에서는 provider 가 항상 true 라 Env 가드 필수 (뱃지와 동일).
-    final subscribed = Env.isBillingEnabled &&
-        ref.watch(hasMultiChildEntitlementProvider);
+    // dev(빌링 키 없음)에서는 entitlement 가 항상 true 라 Env 가드 필수 (뱃지와 동일).
+    final svc = ref.read(billingServiceProvider);
+    final info = ref.watch(customerInfoProvider).valueOrNull;
+    final activeProduct = svc.activeProductId(info);
+    final subscribed = Env.isBillingEnabled && activeProduct != null;
+    // 추가 자녀팩(2명) vs 가족팩(무제한) — Android base plan 접미사 감안 contains.
+    final isFamilyPlan = activeProduct?.contains('family') ?? false;
     return Scaffold(
       appBar: AppBar(
         title: const Text('가족 플랜'),
@@ -130,7 +146,17 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
         child: _loading
             ? const Center(child: BabyLoading())
             : subscribed
-                ? _SubscribedView(onManage: _openManagement)
+                ? _SubscribedView(
+                    isFamilyPlan: isFamilyPlan,
+                    // 업그레이드: 기존 상품 ID 의 base plan 접미사(:p1y) 제거
+                    upgradePackage: isFamilyPlan ? null : _familyPackage,
+                    purchasing: _purchasing,
+                    onUpgrade: (pkg) => _purchase(
+                      pkg,
+                      upgradeFrom: activeProduct.split(':').first,
+                    ),
+                    onManage: _openManagement,
+                  )
                 : ListView(
                 padding: const EdgeInsets.all(Spacing.md),
                 children: [
@@ -179,7 +205,7 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: const [
-                          _Benefit('💌', '자녀 무제한 추가'),
+                          _Benefit('💌', '자녀 추가 — 추가 자녀팩 2명 · 가족팩 무제한'),
                           SizedBox(height: 8),
                           _Benefit('🤝', '가족과 실시간 공유'),
                           SizedBox(height: 8),
@@ -236,6 +262,9 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
                             _PackageCard(
                               title: product.title,
                               description: product.description,
+                              caption: isFamily
+                                  ? '자녀 무제한'
+                                  : '자녀 2명까지 (첫째 + 둘째)',
                               price: product.priceString,
                               onPressed: _purchasing
                                   ? null
@@ -274,8 +303,21 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
 }
 
 /// 구독 중 상태 — 구매 카드 대신 이용 중 안내 + 구독 관리 진입.
+/// 추가 자녀팩(2명) 구독이면 가족팩 업그레이드 카드를 함께 표시.
 class _SubscribedView extends StatelessWidget {
-  const _SubscribedView({required this.onManage});
+  const _SubscribedView({
+    required this.isFamilyPlan,
+    required this.upgradePackage,
+    required this.purchasing,
+    required this.onUpgrade,
+    required this.onManage,
+  });
+
+  final bool isFamilyPlan;
+  /// 업그레이드 대상 가족팩 패키지. null 이면 업그레이드 카드 숨김.
+  final Package? upgradePackage;
+  final bool purchasing;
+  final ValueChanged<Package> onUpgrade;
   final VoidCallback onManage;
 
   @override
@@ -291,7 +333,7 @@ class _SubscribedView extends StatelessWidget {
               const Text('👑', style: TextStyle(fontSize: 56)),
               const SizedBox(height: Spacing.sm),
               Text(
-                '가족 플랜 이용 중',
+                isFamilyPlan ? '가족팩 이용 중' : '추가 자녀팩 이용 중',
                 style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w800,
                   color: const Color(0xFFA43F45),
@@ -299,7 +341,9 @@ class _SubscribedView extends StatelessWidget {
               ),
               const SizedBox(height: 6),
               Text(
-                '자녀 무제한 추가와 가족 공유가 활성화되어 있어요',
+                isFamilyPlan
+                    ? '자녀 무제한 추가와 가족 공유가 활성화되어 있어요'
+                    : '자녀를 2명까지 등록할 수 있어요',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
@@ -314,20 +358,45 @@ class _SubscribedView extends StatelessWidget {
             padding: const EdgeInsets.all(Spacing.md),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                _Benefit('💌', '자녀 무제한 추가'),
-                SizedBox(height: 8),
-                _Benefit('🤝', '가족과 실시간 공유'),
-                SizedBox(height: 8),
-                _Benefit('📊', '자녀별 통계 / 백분위 비교'),
-                SizedBox(height: 8),
-                _Benefit('☁️', '클라우드 자동 백업'),
-                SizedBox(height: 8),
-                _Benefit('🚫', '광고 없음'),
+              children: [
+                _Benefit('💌',
+                    isFamilyPlan ? '자녀 무제한 추가' : '자녀 2명까지 등록'),
+                const SizedBox(height: 8),
+                const _Benefit('🤝', '가족과 실시간 공유'),
+                const SizedBox(height: 8),
+                const _Benefit('📊', '자녀별 통계 / 백분위 비교'),
+                const SizedBox(height: 8),
+                const _Benefit('☁️', '클라우드 자동 백업'),
+                const SizedBox(height: 8),
+                const _Benefit('🚫', '광고 없음'),
               ],
             ),
           ),
         ),
+
+        // 추가 자녀팩 → 가족팩 업그레이드 유도 (Google Play 구독 변경 + 일할 정산)
+        if (!isFamilyPlan && upgradePackage != null) ...[
+          const SizedBox(height: Spacing.lg),
+          Padding(
+            padding: const EdgeInsets.only(left: 4, bottom: 4),
+            child: Text(
+              '👍 셋째부터는 가족팩으로 — 자녀 무제한',
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFFD06A5C),
+              ),
+            ),
+          ),
+          _PackageCard(
+            title: upgradePackage!.storeProduct.title,
+            description: upgradePackage!.storeProduct.description,
+            caption: '자녀 무제한 · 기존 구독은 자동 전환돼요',
+            price: upgradePackage!.storeProduct.priceString,
+            onPressed:
+                purchasing ? null : () => onUpgrade(upgradePackage!),
+          ),
+        ],
+
         const SizedBox(height: Spacing.lg),
         FilledButton.icon(
           onPressed: onManage,
@@ -373,9 +442,12 @@ class _PackageCard extends StatelessWidget {
     required this.description,
     required this.price,
     required this.onPressed,
+    this.caption,
   });
   final String title;
   final String description;
+  /// 자녀 수 한도 등 상품 핵심 조건 한 줄 (코랄 강조).
+  final String? caption;
   final String price;
   final VoidCallback? onPressed;
 
@@ -400,6 +472,14 @@ class _PackageCard extends StatelessWidget {
                         fontWeight: FontWeight.w800,
                       ),
                     ),
+                    if (caption != null)
+                      Text(
+                        caption!,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFFD06A5C),
+                        ),
+                      ),
                     if (description.isNotEmpty)
                       Text(
                         description,

@@ -76,10 +76,23 @@ class BillingService {
   }
 
   /// 패키지 구매 — 성공 시 CustomerInfo 반환, 취소/실패 시 null.
-  Future<CustomerInfo?> purchasePackage(Package pkg) async {
+  ///
+  /// [upgradeFromProductId] 를 주면 Google Play 구독 변경(업그레이드) 플로우 —
+  /// 기존 구독(추가 자녀팩)을 새 상품(가족팩)으로 교체 + 일할 정산.
+  Future<CustomerInfo?> purchasePackage(
+    Package pkg, {
+    String? upgradeFromProductId,
+  }) async {
     if (!_initialized) return null;
     try {
-      final result = await Purchases.purchase(PurchaseParams.package(pkg));
+      final params = upgradeFromProductId == null
+          ? PurchaseParams.package(pkg)
+          : PurchaseParams.package(
+              pkg,
+              googleProductChangeInfo:
+                  GoogleProductChangeInfo(upgradeFromProductId),
+            );
+      final result = await Purchases.purchase(params);
       return result.customerInfo;
     } on PlatformException catch (e) {
       final code = PurchasesErrorHelper.getErrorCode(e);
@@ -121,6 +134,28 @@ class BillingService {
     if (info == null) return false;
     final ent = info.entitlements.active[Env.billingEntitlement];
     return ent != null && ent.isActive;
+  }
+
+  /// entitlement 를 활성화한 상품 ID. 미구독이면 null.
+  /// Android 는 base plan 접미사가 붙을 수 있음 (예: `..._yearly:p1y`).
+  String? activeProductId(CustomerInfo? info) {
+    if (info == null) return null;
+    final ent = info.entitlements.active[Env.billingEntitlement];
+    if (ent == null || !ent.isActive) return null;
+    return ent.productIdentifier;
+  }
+
+  /// 현재 구독 기준 등록 가능한 최대 자녀 수. null = 무제한.
+  ///
+  /// - 빌링 비활성(dev, 키 없음) → 무제한 (개발 중 막힘 없음)
+  /// - 미구독 → 1 (첫째만 무료)
+  /// - 추가 자녀팩(`babynote_extra_child_yearly`) → 2 (첫째 + 둘째)
+  /// - 가족팩(`babynote_family_yearly`) → 무제한
+  int? maxChildren(CustomerInfo? info) {
+    if (!isEnabled) return null;
+    final product = activeProductId(info);
+    if (product == null) return 1;
+    return product.contains('family') ? null : 2;
   }
 }
 

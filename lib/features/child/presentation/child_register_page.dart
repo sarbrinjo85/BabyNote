@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 
 import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/widgets/date_input_dialog.dart';
@@ -101,19 +102,43 @@ class _ChildRegisterPageState extends ConsumerState<ChildRegisterPage> {
   @override
   void initState() {
     super.initState();
-    // 페이월 게이트 — 이미 자녀 1명 이상이고 멀티 자녀 entitlement 미보유면
-    // 등록 페이지를 닫고 /paywall로 보냄.
+    // 페이월 게이트 — 플랜별 자녀 한도(미구독 1 / 추가 자녀팩 2 / 가족팩 무제한)
+    // 초과면 /paywall 로 보냄. 잠금 해제 못 하면 등록 페이지를 닫음.
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
       final children = ref.read(myChildrenProvider).valueOrNull ?? const [];
-      final hasEntitlement = ref.read(hasMultiChildEntitlementProvider);
-      if (children.isNotEmpty && !hasEntitlement) {
-        if (!mounted) return;
-        final unlocked = await context.push<bool>('/paywall');
-        if (!mounted) return;
-        if (unlocked != true) {
-          context.pop();
-        }
+      final svc = ref.read(billingServiceProvider);
+      // customerInfo 로딩을 기다렸다 판정 — 콜드 스타트 직후 구독자가
+      // 잘못 paywall 로 보내지는 레이스 방지.
+      CustomerInfo? info;
+      try {
+        info = await ref.read(customerInfoProvider.future);
+      } catch (_) {}
+      if (!mounted) return;
+      final max = svc.maxChildren(info);
+      if (max == null || children.length < max) return; // 한도 내 — 통과
+
+      final unlocked = await context.push<bool>('/paywall');
+      if (!mounted) return;
+      if (unlocked != true) {
+        context.pop();
+        return;
+      }
+      // 구매/복원 후 한도 재확인 — 추가 자녀팩(2명)인데 이미 2명이면 여전히 불가.
+      CustomerInfo? after;
+      try {
+        after = await ref.read(customerInfoProvider.future);
+      } catch (_) {}
+      if (!mounted) return;
+      final newMax = svc.maxChildren(after);
+      if (newMax != null && children.length >= newMax) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            duration: Duration(seconds: 2),
+            content: Text('현재 플랜의 자녀 한도에 도달했어요. 가족팩으로 업그레이드해주세요.'),
+          ),
+        );
+        context.pop();
       }
     });
   }
