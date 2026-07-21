@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/config/env.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/baby_loading.dart';
 import '../data/billing_service.dart';
@@ -12,6 +14,7 @@ import '../data/billing_service.dart';
 /// ── 표시 조건 ────────────────────────────────────────────────────────
 /// - 자녀 등록 화면 진입 시 이미 1명 이상이고 entitlement 미보유면 자동 push
 /// - 설정 → 구독 / 결제 → 수동 진입
+/// - 이미 구독 중이면 구매 카드 대신 "이용 중" 상태 + 구독 관리 진입
 class PaywallPage extends ConsumerStatefulWidget {
   const PaywallPage({super.key});
 
@@ -82,9 +85,36 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
     if (ok && mounted) context.pop(true);
   }
 
+  /// Google Play 구독 관리 화면 열기.
+  /// RevenueCat CustomerInfo.managementURL 이 있으면 그걸 사용 (스토어별 정확),
+  /// 없으면 Play 구독 목록 딥링크로 fallback.
+  Future<void> _openManagement() async {
+    final svc = ref.read(billingServiceProvider);
+    final info = await svc.getCustomerInfo();
+    final url = info?.managementURL ??
+        'https://play.google.com/store/account/subscriptions'
+            '?package=com.kjfamily.babynote';
+    final ok = await launchUrl(
+      Uri.parse(url),
+      mode: LaunchMode.externalApplication,
+    );
+    if (!ok && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          duration: Duration(seconds: 1),
+          content: Text('구독 관리 화면을 열 수 없어요. Play 스토어에서 확인해주세요.'),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    // 이미 entitlement 보유 → 구매 카드 대신 "이용 중" 상태 표시.
+    // dev(빌링 키 없음)에서는 provider 가 항상 true 라 Env 가드 필수 (뱃지와 동일).
+    final subscribed = Env.isBillingEnabled &&
+        ref.watch(hasMultiChildEntitlementProvider);
     return Scaffold(
       appBar: AppBar(
         title: const Text('가족 플랜'),
@@ -99,7 +129,9 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
         top: false,
         child: _loading
             ? const Center(child: BabyLoading())
-            : ListView(
+            : subscribed
+                ? _SubscribedView(onManage: _openManagement)
+                : ListView(
                 padding: const EdgeInsets.all(Spacing.md),
                 children: [
                   const SizedBox(height: Spacing.md),
@@ -237,6 +269,81 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
                 ],
               ),
       ),
+    );
+  }
+}
+
+/// 구독 중 상태 — 구매 카드 대신 이용 중 안내 + 구독 관리 진입.
+class _SubscribedView extends StatelessWidget {
+  const _SubscribedView({required this.onManage});
+  final VoidCallback onManage;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return ListView(
+      padding: const EdgeInsets.all(Spacing.md),
+      children: [
+        const SizedBox(height: Spacing.md),
+        Center(
+          child: Column(
+            children: [
+              const Text('👑', style: TextStyle(fontSize: 56)),
+              const SizedBox(height: Spacing.sm),
+              Text(
+                '가족 플랜 이용 중',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: const Color(0xFFA43F45),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                '자녀 무제한 추가와 가족 공유가 활성화되어 있어요',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: Spacing.lg),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(Spacing.md),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const [
+                _Benefit('💌', '자녀 무제한 추가'),
+                SizedBox(height: 8),
+                _Benefit('🤝', '가족과 실시간 공유'),
+                SizedBox(height: 8),
+                _Benefit('📊', '자녀별 통계 / 백분위 비교'),
+                SizedBox(height: 8),
+                _Benefit('☁️', '클라우드 자동 백업'),
+                SizedBox(height: 8),
+                _Benefit('🚫', '광고 없음'),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: Spacing.lg),
+        FilledButton.icon(
+          onPressed: onManage,
+          icon: const Icon(Icons.manage_accounts_outlined),
+          label: const Text('구독 관리 (Google Play)'),
+        ),
+        const SizedBox(height: Spacing.sm),
+        Text(
+          '결제 수단 변경·해지는 Google Play 구독 관리에서 진행돼요. '
+          '해지해도 결제 기간이 끝날 때까지 이용할 수 있어요.',
+          textAlign: TextAlign.center,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
     );
   }
 }

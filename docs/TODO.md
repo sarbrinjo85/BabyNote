@@ -143,7 +143,11 @@ RevenueCat 이 익명 ID 사용 → 구독이 Supabase 회원이 아니라 익�
 - ✅ `home_page.dart`: ChildInfoCard 아래 👑 chip 노출
 - ✅ l10n `homeFamilyPlanBadge` ko/ja/en 추가 + gen-l10n
 - ✅ flutter analyze 통과
-- ▢ (후속) 탭 시 구독 관리 안내 + 설정 "가족 플랜" 진입 시 구독 중 상태 표시
+- ✅ (후속, 2026-05-27 / v1.0.0+8) 구독 중 상태 UX 일괄:
+      paywall 이 구독 중이면 구매 카드 대신 "가족 플랜 이용 중" + 혜택 +
+      "구독 관리 (Google Play)" 버튼 (`CustomerInfo.managementURL`,
+      fallback Play 구독 딥링크) / 설정 "가족 플랜" subtitle 에 👑 구독 중 표시 /
+      홈 👑 뱃지 탭 → paywall 진입
 
 ---
 

@@ -8,7 +8,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:babynote/l10n/app_localizations.dart';
+import '../../../core/config/env.dart';
 import '../../../core/theme/tokens.dart';
+import '../../billing/data/billing_service.dart';
 import '../../child/presentation/child_providers.dart';
 import '../../child/presentation/selected_child_provider.dart';
 import '../data/export_service.dart';
@@ -126,14 +128,25 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           padding: const EdgeInsets.all(Spacing.md),
           children: [
             // ── 가족 플랜 / 구독 ─────────────────────────────────
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.workspace_premium_outlined),
-              title: const Text('가족 플랜'),
-              subtitle: const Text('자녀 무제한 추가 + 가족 공유'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => context.push('/paywall'),
-            ),
+            // 구독 중이면 상태를 subtitle 로 노출 — paywall 이 "이용 중" 화면
+            // (구독 관리 진입)으로 동작. dev 오표시 방지 Env 가드는 뱃지와 동일.
+            Builder(builder: (context) {
+              final subscribed = Env.isBillingEnabled &&
+                  ref.watch(hasMultiChildEntitlementProvider);
+              return ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(
+                  Icons.workspace_premium_outlined,
+                  color: subscribed ? const Color(0xFFE0B25C) : null,
+                ),
+                title: const Text('가족 플랜'),
+                subtitle: Text(subscribed
+                    ? '👑 구독 중 · 구독 관리 보기'
+                    : '자녀 무제한 추가 + 가족 공유'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.push('/paywall'),
+              );
+            }),
             const Divider(),
             // ── 도움말 다시 보기 ─────────────────────────────────
             ListTile(

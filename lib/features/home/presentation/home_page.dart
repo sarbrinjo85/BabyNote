@@ -482,27 +482,32 @@ class _FamilyPlanBadge extends ConsumerWidget {
       alignment: Alignment.centerLeft,
       child: Padding(
         padding: const EdgeInsets.only(top: Spacing.xs),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: const Color(0xFFFFF1D6),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFFE0B25C)),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('👑', style: TextStyle(fontSize: 13)),
-              const SizedBox(width: 4),
-              Text(
-                l10n.homeFamilyPlanBadge,
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF8A6D1B),
+        // 탭 → paywall (구독 중이면 "이용 중" + 구독 관리 화면으로 동작)
+        child: InkWell(
+          onTap: () => context.push('/paywall'),
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFF1D6),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: const Color(0xFFE0B25C)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('👑', style: TextStyle(fontSize: 13)),
+                const SizedBox(width: 4),
+                Text(
+                  l10n.homeFamilyPlanBadge,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF8A6D1B),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
