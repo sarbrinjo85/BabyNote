@@ -289,7 +289,24 @@ paywall 상품 목록(`paywall_page.dart:160-178`, `availablePackages` 루프)�
 - ⏳ 검증 (v8 설치 후): 추가 자녀팩 계정으로 3번째 자녀 등록 시도 → 업그레이드
       카드 → 구독 변경 결제 → Play 에서 기존 구독 대체 확인
 
-<!-- 추가 항목은 U13 … 으로 아래에 누적 -->
+### U13. 앱 실행 시 "인증 스트림 에러" 전체화면 노출 (해결)
+✅ 완료 (2026-05-27, v1.0.0+9)
+
+증상: 앱 콜드 스타트 시 `AuthRetryableFetchException: Failed host lookup ...
+grant_type=refresh_token` 날것 예외가 전체화면으로 표시됨.
+
+근본 원인: 네트워크 스택 준비 전 supabase 가 저장 세션 토큰 갱신을 시도 →
+일시적 DNS 실패(errno=7). `AuthGate` 의 `error` 브랜치가 재시도 가능한
+네트워크 오류를 그대로 전체화면에 렌더 (주석엔 "거의 발생 안 함"이라 방치).
+
+- ✅ `auth_gate.dart`: error 브랜치에서 캐시 세션 있으면(`user != null`) 앱으로
+      그대로 진입 (supabase 백그라운드 토큰 갱신 재시도) / 세션 없으면 날것 예외
+      대신 `_ConnectionErrorView` (wifi_off 아이콘 + 안내 + 다시 시도 버튼)
+- ✅ 다시 시도 = `ref.invalidate(authStateChangesProvider)`
+- ✅ l10n `authConnErrorTitle`/`authConnErrorBody` ko/ja/en, `syncRetryNow` 재활용
+- ✅ flutter analyze 통과
+
+<!-- 추가 항목은 U14 … 으로 아래에 누적 -->
 
 ---
 

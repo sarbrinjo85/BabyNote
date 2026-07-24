@@ -496,5 +496,7 @@
   "@syncPendingDetail": { "placeholders": { "count": { "type": "int" } } },
   "syncPendingHint": "네트워크가 연결되면 자동으로 동기화돼요.",
   "syncRetryNow": "지금 다시 시도",
-  "syncRetryDoneToast": "동기화 시도했어요"
+  "syncRetryDoneToast": "동기화 시도했어요",
+  "authConnErrorTitle": "연결에 문제가 있어요",
+  "authConnErrorBody": "네트워크 상태를 확인하고 다시 시도해주세요."
 }

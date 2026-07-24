@@ -458,5 +458,7 @@
   "@syncPendingDetail": { "placeholders": { "count": { "type": "int" } } },
   "syncPendingHint": "They'll sync automatically when you're back online.",
   "syncRetryNow": "Try now",
-  "syncRetryDoneToast": "Sync attempted"
+  "syncRetryDoneToast": "Sync attempted",
+  "authConnErrorTitle": "Connection problem",
+  "authConnErrorBody": "Please check your network and try again."
 }

@@ -458,5 +458,7 @@
   "@syncPendingDetail": { "placeholders": { "count": { "type": "int" } } },
   "syncPendingHint": "ネットワーク復旧時に自動同期されます。",
   "syncRetryNow": "今すぐ再試行",
-  "syncRetryDoneToast": "同期を試みました"
+  "syncRetryDoneToast": "同期を試みました",
+  "authConnErrorTitle": "接続に問題があります",
+  "authConnErrorBody": "ネットワーク状態を確認して、もう一度お試しください。"
 }
