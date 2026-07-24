@@ -1355,4 +1355,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get syncRetryDoneToast => '同期を試みました';
+
+  @override
+  String get authConnErrorTitle => '接続に問題があります';
+
+  @override
+  String get authConnErrorBody => 'ネットワーク状態を確認して、もう一度お試しください。';
 }

@@ -1356,4 +1356,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get syncRetryDoneToast => '동기화 시도했어요';
+
+  @override
+  String get authConnErrorTitle => '연결에 문제가 있어요';
+
+  @override
+  String get authConnErrorBody => '네트워크 상태를 확인하고 다시 시도해주세요.';
 }

@@ -1373,4 +1373,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get syncRetryDoneToast => 'Sync attempted';
+
+  @override
+  String get authConnErrorTitle => 'Connection problem';
+
+  @override
+  String get authConnErrorBody => 'Please check your network and try again.';
 }

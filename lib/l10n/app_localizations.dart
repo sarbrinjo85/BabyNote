@@ -2625,6 +2625,18 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'동기화 시도했어요'**
   String get syncRetryDoneToast;
+
+  /// No description provided for @authConnErrorTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'연결에 문제가 있어요'**
+  String get authConnErrorTitle;
+
+  /// No description provided for @authConnErrorBody.
+  ///
+  /// In ko, this message translates to:
+  /// **'네트워크 상태를 확인하고 다시 시도해주세요.'**
+  String get authConnErrorBody;
 }
 
 class _AppLocalizationsDelegate
