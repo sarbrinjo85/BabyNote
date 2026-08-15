@@ -1033,6 +1033,29 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get notifDiaperLowTitle => 'Diapers running low';
+
+  @override
+  String notifDiaperLowBody(String label) {
+    return '$label diapers are almost out. Order ahead.';
+  }
+
+  @override
+  String diaperLowBanner(String days) {
+    return '~$days days of diapers left';
+  }
+
+  @override
+  String get reorderButton => 'Reorder';
+
+  @override
+  String get reorderFailed => 'Couldn\'t open the store';
+
+  @override
+  String get affiliateDisclosure =>
+      'As a Coupang Partners affiliate, we may earn a commission on qualifying purchases made through these links.';
+
+  @override
   String get notifVaccineUpcomingTitle => 'Upcoming vaccination';
 
   @override

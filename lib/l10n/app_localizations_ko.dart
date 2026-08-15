@@ -1023,6 +1023,29 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String get notifDiaperLowTitle => '기저귀 곧 소진';
+
+  @override
+  String notifDiaperLowBody(String label) {
+    return '$label 기저귀가 곧 떨어져요. 미리 주문하세요.';
+  }
+
+  @override
+  String diaperLowBanner(String days) {
+    return '기저귀 약 $days일 남음';
+  }
+
+  @override
+  String get reorderButton => '다시 주문';
+
+  @override
+  String get reorderFailed => '쇼핑몰을 열 수 없어요';
+
+  @override
+  String get affiliateDisclosure =>
+      '쿠팡 파트너스 활동의 일환으로, 링크를 통한 구매 시 일정액의 수수료를 제공받을 수 있어요.';
+
+  @override
   String get notifVaccineUpcomingTitle => '예방접종 임박';
 
   @override

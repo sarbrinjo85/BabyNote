@@ -1023,6 +1023,29 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String get notifDiaperLowTitle => 'おむつ残量わずか';
+
+  @override
+  String notifDiaperLowBody(String label) {
+    return '$label のおむつがもうすぐなくなります。早めにご注文ください。';
+  }
+
+  @override
+  String diaperLowBanner(String days) {
+    return 'おむつ残り約$days日';
+  }
+
+  @override
+  String get reorderButton => '再注文';
+
+  @override
+  String get reorderFailed => 'ストアを開けませんでした';
+
+  @override
+  String get affiliateDisclosure =>
+      '本アプリはクーパン・パートナーズの一環として、リンク経由の購入で一定の手数料を得る場合があります。';
+
+  @override
   String get notifVaccineUpcomingTitle => '予防接種が近づいています';
 
   @override

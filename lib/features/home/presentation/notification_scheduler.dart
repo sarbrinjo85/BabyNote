@@ -5,6 +5,7 @@ import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/notifications/notification_service.dart';
 import '../../child/domain/child.dart';
 import '../../growth/presentation/growth_providers.dart';
+import '../../inventory/presentation/diaper_inventory_providers.dart';
 import '../../inventory/presentation/formula_inventory_providers.dart';
 import '../../vaccination/domain/vaccination.dart';
 import '../../vaccination/domain/vaccine_schedule.dart';
@@ -33,6 +34,8 @@ class NotificationScheduler extends ConsumerWidget {
 
     // 분유 알림
     _scheduleFormulaNotifications(ref, l10n);
+    // 기저귀 알림
+    _scheduleDiaperNotifications(ref, l10n);
     // 접종 알림
     _scheduleVaccineNotifications(ref, l10n);
     // 성장 주간 알림
@@ -106,6 +109,45 @@ class NotificationScheduler extends ConsumerWidget {
             when: when,
             channelId: 'formula',
             channelName: 'Formula',
+          );
+        });
+      }
+    });
+  }
+
+  /// 활성 기저귀 팩의 소진 예상 -1일 시점에 알림 schedule (분유 패턴 미러).
+  /// 어필리에이트 재구매 유도의 핵심 트리거 — 떨어지기 전에 알려줌.
+  void _scheduleDiaperNotifications(WidgetRef ref, AppLocalizations l10n) {
+    final asyncActives = ref.watch(activeDiaperInventoriesProvider(child.id));
+    asyncActives.whenData((actives) {
+      for (final inv in actives) {
+        // 분유 notif ID 영역과 안 겹치게 'DIAP' salt XOR.
+        final notifId =
+            (child.id.hashCode ^ inv.id.hashCode ^ 0x44494150) & 0x7fffffff;
+        final asyncStats = ref.read(diaperInventoryStatsProvider(inv));
+        asyncStats.whenData((stats) {
+          if (stats.expectedDaysLeft >= 999) {
+            NotificationService.instance.cancel(notifId);
+            return;
+          }
+          final whenDays = stats.expectedDaysLeft - 1.0;
+          if (whenDays > 7) {
+            NotificationService.instance.cancel(notifId);
+            return;
+          }
+          final label = (inv.brand != null && inv.brand!.isNotEmpty)
+              ? inv.brand!
+              : inv.size;
+          final when = DateTime.now().add(
+            Duration(seconds: (whenDays * 86400).round()),
+          );
+          NotificationService.instance.scheduleAt(
+            id: notifId,
+            title: l10n.notifDiaperLowTitle,
+            body: l10n.notifDiaperLowBody(label),
+            when: when,
+            channelId: 'diaper',
+            channelName: 'Diaper',
           );
         });
       }

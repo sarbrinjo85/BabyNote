@@ -51,4 +51,13 @@ class Env {
       String.fromEnvironment('GOOGLE_SERVER_CLIENT_ID');
 
   static bool get isGoogleSignInEnabled => googleServerClientId.isNotEmpty;
+
+  /// 쿠팡 파트너스 subId — 재구매 링크의 정산/전환 추적용.
+  /// 파트너스 승인 후 dart-define 으로 주입. 비었으면 일반 쿠팡 검색 URL 로 폴백
+  /// (기능은 동작하되 수수료 정산은 안 됨 → 가입 전 UX 검증 가능).
+  static const affiliateCoupangSubId =
+      String.fromEnvironment('AFFILIATE_COUPANG_SUBID');
+
+  /// 파트너스 정산 링크가 실제 활성인지 → 수수료 고지 문구 노출 판단.
+  static bool get isAffiliateActive => affiliateCoupangSubId.isNotEmpty;
 }

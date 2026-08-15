@@ -6,6 +6,8 @@ import 'package:go_router/go_router.dart';
 import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/child_picker_action.dart';
+import '../../affiliate/data/affiliate_service.dart';
+import '../../affiliate/presentation/reorder_button.dart';
 import '../../child/presentation/child_providers.dart';
 import '../../child/presentation/selected_child_provider.dart';
 import '../domain/formula_inventory.dart';
@@ -86,6 +88,7 @@ class FormulaInventoryListPage extends ConsumerWidget {
                     icon: const Icon(Icons.add),
                     label: Text(l10n.formulaAdd),
                   ),
+                  const AffiliateDisclosure(),
                   const SizedBox(height: Spacing.lg),
                 ],
               );
@@ -196,6 +199,16 @@ class _InventoryTile extends StatelessWidget {
               ),
               // 사용 중 통: 잔량/소진 예상 표시 (P3-1c)
               if (i.isActive) _StatsRow(inventory: i),
+              // 소진 임박 재구매 유도 — 브랜드로 쿠팡 검색 이동 + 클릭 추적.
+              if (i.isActive)
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: ReorderButton(
+                    kind: ProductKind.formula,
+                    brand: i.brand,
+                    childId: childId,
+                  ),
+                ),
             ],
           ),
         ),

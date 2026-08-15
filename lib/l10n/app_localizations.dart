@@ -1984,6 +1984,42 @@ abstract class AppLocalizations {
   /// **'{product} 1일분 남았어요. 새 통 준비해주세요.'**
   String notifFormulaLowBody(String product);
 
+  /// No description provided for @notifDiaperLowTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'기저귀 곧 소진'**
+  String get notifDiaperLowTitle;
+
+  /// No description provided for @notifDiaperLowBody.
+  ///
+  /// In ko, this message translates to:
+  /// **'{label} 기저귀가 곧 떨어져요. 미리 주문하세요.'**
+  String notifDiaperLowBody(String label);
+
+  /// No description provided for @diaperLowBanner.
+  ///
+  /// In ko, this message translates to:
+  /// **'기저귀 약 {days}일 남음'**
+  String diaperLowBanner(String days);
+
+  /// No description provided for @reorderButton.
+  ///
+  /// In ko, this message translates to:
+  /// **'다시 주문'**
+  String get reorderButton;
+
+  /// No description provided for @reorderFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'쇼핑몰을 열 수 없어요'**
+  String get reorderFailed;
+
+  /// No description provided for @affiliateDisclosure.
+  ///
+  /// In ko, this message translates to:
+  /// **'쿠팡 파트너스 활동의 일환으로, 링크를 통한 구매 시 일정액의 수수료를 제공받을 수 있어요.'**
+  String get affiliateDisclosure;
+
   /// No description provided for @notifVaccineUpcomingTitle.
   ///
   /// In ko, this message translates to:

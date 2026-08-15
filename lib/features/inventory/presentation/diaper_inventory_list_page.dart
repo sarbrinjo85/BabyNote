@@ -6,6 +6,8 @@ import 'package:go_router/go_router.dart';
 import 'package:babynote/l10n/app_localizations.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/child_picker_action.dart';
+import '../../affiliate/data/affiliate_service.dart';
+import '../../affiliate/presentation/reorder_button.dart';
 import '../../child/presentation/child_providers.dart';
 import '../../child/presentation/selected_child_provider.dart';
 import '../domain/diaper_inventory.dart';
@@ -82,6 +84,7 @@ class DiaperInventoryListPage extends ConsumerWidget {
                     icon: const Icon(Icons.add),
                     label: Text(l10n.diaperInventoryAdd),
                   ),
+                  const AffiliateDisclosure(),
                   const SizedBox(height: Spacing.lg),
                 ],
               );
@@ -194,6 +197,16 @@ class _InventoryTile extends StatelessWidget {
                         : null,
               ),
               if (i.isActive) _StatsRow(inventory: i),
+              // 소진 임박 재구매 유도 — 브랜드로 쿠팡 검색 이동 + 클릭 추적.
+              if (i.isActive)
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: ReorderButton(
+                    kind: ProductKind.diaper,
+                    brand: i.brand,
+                    childId: childId,
+                  ),
+                ),
             ],
           ),
         ),

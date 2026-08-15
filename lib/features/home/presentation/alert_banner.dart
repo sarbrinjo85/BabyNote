@@ -38,6 +38,22 @@ class AlertBanner extends ConsumerWidget {
       }
     });
 
+    // 1.5) 기저귀 잔량 — 활성 팩의 소진 예상 < 3일
+    String? diaperLowMsg;
+    final asyncDiaperActives =
+        ref.watch(activeDiaperInventoriesProvider(child.id));
+    asyncDiaperActives.whenData((list) {
+      for (final inv in list) {
+        final asyncStats = ref.read(diaperInventoryStatsProvider(inv));
+        asyncStats.whenData((s) {
+          if (s.expectedDaysLeft < 3 && s.expectedDaysLeft >= 0) {
+            diaperLowMsg =
+                '🧷 ${l10n.diaperLowBanner(s.expectedDaysLeft.toStringAsFixed(1))}';
+          }
+        });
+      }
+    });
+
     // 2) 사이즈업 — 14일 이내
     String? sizeUpMsg;
     final asyncForecast =
@@ -80,13 +96,13 @@ class AlertBanner extends ConsumerWidget {
       }
     }
 
-    // 우선순위: vaccine overdue > formula < 3일 > sizeUp > vaccine 미래
-    final msg = vaccineMsg ?? formulaMsg ?? sizeUpMsg;
+    // 우선순위: vaccine overdue > formula < 3일 > 기저귀 < 3일 > sizeUp
+    final msg = vaccineMsg ?? formulaMsg ?? diaperLowMsg ?? sizeUpMsg;
     if (msg == null) return const SizedBox.shrink();
 
     return InkWell(
       onTap: () {
-        // 가장 관련성 높은 화면으로 이동
+        // 가장 관련성 높은 화면으로 이동 (재구매 버튼이 있는 재고 화면)
         if (vaccineMsg != null) {
           context.push('/vaccine');
         } else if (formulaMsg != null) {
