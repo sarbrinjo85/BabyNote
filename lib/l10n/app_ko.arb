@@ -377,7 +377,7 @@
   "@diaperLowBanner": { "placeholders": { "days": { "type": "String" } } },
   "reorderButton": "다시 주문",
   "reorderFailed": "쇼핑몰을 열 수 없어요",
-  "affiliateDisclosure": "쿠팡 파트너스 활동의 일환으로, 링크를 통한 구매 시 일정액의 수수료를 제공받을 수 있어요.",
+  "affiliateDisclosure": "이 앱은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.",
   "notifVaccineUpcomingTitle": "예방접종 임박",
   "notifVaccineUpcomingBody": "내일 {vaccine} 권장일이에요.",
   "@notifVaccineUpcomingBody": { "placeholders": { "vaccine": { "type": "String" } } },

@@ -28,18 +28,27 @@ class AffiliateService {
 
   static const _partner = 'coupang';
 
-  /// 브랜드 + 카테고리로 쿠팡 검색 URL 생성.
-  /// 예) brand="하기스", diaper → "하기스 기저귀" 검색.
+  /// 재구매 이동 URL.
+  ///
+  /// 카테고리별 **쿠팡 파트너스 추적 링크**(link.coupang.com) 를 우선 사용 —
+  /// 이 링크를 통한 클릭만 수수료가 정산됨. 카테고리 단위라 브랜드 특정은 안 되고
+  /// "기저귀/분유" 검색 결과로 이동(Phase 1). 브랜드별 딥링크는 Phase 2(Open API).
+  ///
+  /// 추적 링크 미설정 시엔 일반 검색 URL 로 폴백(동작만, 수수료 X).
   Uri buildReorderUrl({required ProductKind kind, String? brand}) {
+    final tracking = switch (kind) {
+      ProductKind.diaper => Env.affiliateCoupangDiaperUrl,
+      ProductKind.formula => Env.affiliateCoupangFormulaUrl,
+      ProductKind.other => '',
+    };
+    if (tracking.isNotEmpty) return Uri.parse(tracking);
+
+    // 폴백: 추적 안 되는 일반 검색 (수수료 X).
     final query = [
       if (brand != null && brand.trim().isNotEmpty) brand.trim(),
       _categoryKeyword(kind),
     ].where((s) => s.isNotEmpty).join(' ');
-
-    final params = <String, String>{'q': query, 'channel': 'user'};
-    final subId = Env.affiliateCoupangSubId;
-    if (subId.isNotEmpty) params['subId'] = subId; // 파트너스 정산 추적
-    return Uri.https('www.coupang.com', '/np/search', params);
+    return Uri.https('www.coupang.com', '/np/search', {'q': query});
   }
 
   /// 클릭 기록(best-effort) 후 외부 브라우저로 이동. 성공 시 true.

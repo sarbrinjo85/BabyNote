@@ -52,12 +52,21 @@ class Env {
 
   static bool get isGoogleSignInEnabled => googleServerClientId.isNotEmpty;
 
-  /// 쿠팡 파트너스 subId — 재구매 링크의 정산/전환 추적용.
-  /// 파트너스 승인 후 dart-define 으로 주입. 비었으면 일반 쿠팡 검색 URL 로 폴백
-  /// (기능은 동작하되 수수료 정산은 안 됨 → 가입 전 UX 검증 가능).
-  static const affiliateCoupangSubId =
-      String.fromEnvironment('AFFILIATE_COUPANG_SUBID');
+  /// 쿠팡 파트너스 카테고리별 추적 링크 (Partners ID AF2420215 임베드).
+  /// 이 link.coupang.com 딥링크를 통한 클릭만 수수료가 정산됨 — 일반 검색 URL은
+  /// 수수료 안 붙음. **공개 링크라 소스에 포함해도 무방** (앱에 노출되는 값).
+  /// 링크 교체 시 dart-define 으로 재정의 가능. 비면 검색 URL 폴백(수수료 X).
+  static const affiliateCoupangDiaperUrl = String.fromEnvironment(
+    'AFFILIATE_COUPANG_DIAPER_URL',
+    defaultValue: 'https://link.coupang.com/a/gfu3hKD5GK',
+  );
+  static const affiliateCoupangFormulaUrl = String.fromEnvironment(
+    'AFFILIATE_COUPANG_FORMULA_URL',
+    defaultValue: 'https://link.coupang.com/a/gfu5qRJuyi',
+  );
 
-  /// 파트너스 정산 링크가 실제 활성인지 → 수수료 고지 문구 노출 판단.
-  static bool get isAffiliateActive => affiliateCoupangSubId.isNotEmpty;
+  /// 파트너스 추적 링크가 하나라도 설정됐는지 → 수수료 고지 문구 노출 판단.
+  static bool get isAffiliateActive =>
+      affiliateCoupangDiaperUrl.isNotEmpty ||
+      affiliateCoupangFormulaUrl.isNotEmpty;
 }

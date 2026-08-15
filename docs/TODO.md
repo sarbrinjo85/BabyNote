@@ -312,9 +312,12 @@ grant_type=refresh_token` 날것 예외가 전체화면으로 표시됨.
 수익원 1순위(어필리에이트)의 클라이언트 Phase 1. 기존 기반(store 필드, 소진
 예측, `affiliate_clicks` 테이블) 위에 재구매 링크/알림 레이어 구현.
 
-- ✅ `lib/features/affiliate/data/affiliate_service.dart` — 브랜드+카테고리로 쿠팡
-      검색 URL 생성(`Env.affiliateCoupangSubId` 있으면 subId 부착, 없으면 검색
-      URL 폴백), `affiliate_clicks` insert(best-effort) + launchUrl 외부 열기
+- ✅ `lib/features/affiliate/data/affiliate_service.dart` — **카테고리별 쿠팡
+      파트너스 추적 링크**(link.coupang.com, Partners ID AF2420215) 사용. 이
+      딥링크 클릭만 수수료 정산됨(일반 검색 URL은 수수료 X → 폴백용). 링크는
+      `Env.affiliateCoupangDiaperUrl`/`FormulaUrl` 하드코딩(공개 링크). +
+      `affiliate_clicks` insert(best-effort) + launchUrl 외부 열기
+      · 기저귀 `a/gfu3hKD5GK` / 분유 `a/gfu5qRJuyi`
 - ✅ `reorder_button.dart` — `ReorderButton`(활성 재고 타일에 "다시 주문") +
       `AffiliateDisclosure`(파트너스 활성 시 수수료 고지). **둘 다 한국어 로케일
       에서만 노출** (쿠팡=한국 파트너; Phase 2에서 Amazon JP/US)
@@ -323,9 +326,9 @@ grant_type=refresh_token` 날것 예외가 전체화면으로 표시됨.
       패턴 미러) + `AlertBanner` 기저귀 잔량 경고(<3일)
 - ✅ l10n ko/en/ja (reorderButton/reorderFailed/affiliateDisclosure/
       notifDiaperLow*/diaperLowBanner) + analyze 통과
-- ⏳ **선행(사용자)**: 쿠팡 파트너스 사업자 가입 → subId 발급 →
-      GitHub Secret `AFFILIATE_COUPANG_SUBID` 주입(빌드 워크플로 dart-define 추가 필요)
-- ⏳ 기기 검증: 재구매 버튼 → 쿠팡 이동 + affiliate_clicks 기록 확인
+- ✅ 쿠팡 파트너스 가입 완료 (Partners ID AF2420215) + 카테고리 추적 링크 2개 생성
+- ⏳ 기기 검증: 재구매 버튼 → 쿠팡 파트너스 링크 이동 + affiliate_clicks 기록 확인
+- ⏳ 마이페이지에 앱 내 링크 스크린샷 등록 → 쿠팡 최종 승인 (앱 게시됨 → 앱 URL 등록 가능)
 - ▢ 후속: 구입처(store) 자유텍스트 → 쿠팡/네이버/오프라인 칩 (컨트롤러 리팩터)
 - ▢ Phase 2: 알림 탭→라우팅, 쿠팡 Open API 딥링크, 전환(converted) 추적,
       다권역 파트너(Amazon JP/US), Cloudflare Workers 리다이렉트(Y9 백엔드)
