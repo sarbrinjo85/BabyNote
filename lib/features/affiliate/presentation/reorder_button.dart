@@ -9,7 +9,10 @@ import '../data/affiliate_service.dart';
 ///
 /// Phase 1은 쿠팡(한국)만 지원 → **한국어 로케일에서만 노출**. 그 외 로케일은
 /// 파트너 미지원이라 숨김 (Phase 2에서 Amazon JP/US 등 추가).
-class ReorderButton extends ConsumerWidget {
+///
+/// 브랜드별 딥링크 생성(Edge Function)에 네트워크 왕복이 있어 탭 후 잠깐 로딩
+/// 표시. 함수 미배포 시엔 정적 링크로 즉시 폴백.
+class ReorderButton extends ConsumerStatefulWidget {
   const ReorderButton({
     super.key,
     required this.kind,
@@ -22,35 +25,54 @@ class ReorderButton extends ConsumerWidget {
   final String? childId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ReorderButton> createState() => _ReorderButtonState();
+}
+
+class _ReorderButtonState extends ConsumerState<ReorderButton> {
+  bool _busy = false;
+
+  @override
+  Widget build(BuildContext context) {
     // 쿠팡 = 한국 파트너. 한국어 사용자에게만 노출.
     if (Localizations.localeOf(context).languageCode != 'ko') {
       return const SizedBox.shrink();
     }
     final l10n = AppLocalizations.of(context);
     return OutlinedButton.icon(
-      onPressed: () async {
-        final messenger = ScaffoldMessenger.of(context);
-        final svc = ref.read(affiliateServiceProvider);
-        final ok = await svc.openReorder(
-          kind: kind,
-          brand: brand,
-          childId: childId,
-        );
-        if (!ok) {
-          messenger.showSnackBar(SnackBar(
-            duration: const Duration(seconds: 1),
-            content: Text(l10n.reorderFailed),
-          ));
-        }
-      },
-      icon: const Icon(Icons.shopping_cart_outlined, size: 18),
+      onPressed: _busy ? null : _onReorder,
+      icon: _busy
+          ? const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const Icon(Icons.shopping_cart_outlined, size: 18),
       label: Text(l10n.reorderButton),
       style: OutlinedButton.styleFrom(
         visualDensity: VisualDensity.compact,
         foregroundColor: const Color(0xFFA43F45),
       ),
     );
+  }
+
+  Future<void> _onReorder() async {
+    setState(() => _busy = true);
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final svc = ref.read(affiliateServiceProvider);
+    final ok = await svc.openReorder(
+      kind: widget.kind,
+      brand: widget.brand,
+      childId: widget.childId,
+    );
+    if (!mounted) return;
+    setState(() => _busy = false);
+    if (!ok) {
+      messenger.showSnackBar(SnackBar(
+        duration: const Duration(seconds: 1),
+        content: Text(l10n.reorderFailed),
+      ));
+    }
   }
 }
 

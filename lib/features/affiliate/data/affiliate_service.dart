@@ -42,13 +42,34 @@ class AffiliateService {
       ProductKind.other => '',
     };
     if (tracking.isNotEmpty) return Uri.parse(tracking);
-
     // 폴백: 추적 안 되는 일반 검색 (수수료 X).
-    final query = [
-      if (brand != null && brand.trim().isNotEmpty) brand.trim(),
-      _categoryKeyword(kind),
-    ].where((s) => s.isNotEmpty).join(' ');
-    return Uri.https('www.coupang.com', '/np/search', {'q': query});
+    return _coupangSearchUrl(kind: kind, brand: brand);
+  }
+
+  /// 재구매 URL 해석 (Phase 2).
+  ///
+  /// 브랜드가 있으면 **브랜드별 딥링크**를 `coupang-deeplink` Edge Function 으로
+  /// 생성 시도 → "하기스 기저귀" 처럼 브랜드 특정 추적 링크. 함수 미배포/실패 시엔
+  /// 정적 카테고리 추적 링크([buildReorderUrl], Phase 1)로 폴백.
+  Future<Uri> resolveReorderUrl({
+    required ProductKind kind,
+    String? brand,
+  }) async {
+    if (brand != null && brand.trim().isNotEmpty && kind != ProductKind.other) {
+      final target = _coupangSearchUrl(kind: kind, brand: brand);
+      try {
+        final res = await _client.functions.invoke(
+          'coupang-deeplink',
+          body: {'url': target.toString(), 'subId': _kindDbValue(kind)},
+        );
+        final data = res.data;
+        final shorten = (data is Map) ? data['shortenUrl'] as String? : null;
+        if (shorten != null && shorten.isNotEmpty) return Uri.parse(shorten);
+      } catch (e) {
+        if (kDebugMode) debugPrint('coupang deeplink 실패, 정적 링크 폴백: $e');
+      }
+    }
+    return buildReorderUrl(kind: kind, brand: brand);
   }
 
   /// 클릭 기록(best-effort) 후 외부 브라우저로 이동. 성공 시 true.
@@ -57,7 +78,7 @@ class AffiliateService {
     String? brand,
     String? childId,
   }) async {
-    final url = buildReorderUrl(kind: kind, brand: brand);
+    final url = await resolveReorderUrl(kind: kind, brand: brand);
     // 로깅 실패가 이동을 막지 않도록 fire-and-forget.
     unawaited(_logClick(kind: kind, url: url.toString(), childId: childId));
     try {
@@ -66,6 +87,15 @@ class AffiliateService {
       if (kDebugMode) debugPrint('reorder launch 실패: $e');
       return false;
     }
+  }
+
+  /// 브랜드+카테고리 쿠팡 검색 URL (딥링크 변환 대상).
+  Uri _coupangSearchUrl({required ProductKind kind, String? brand}) {
+    final query = [
+      if (brand != null && brand.trim().isNotEmpty) brand.trim(),
+      _categoryKeyword(kind),
+    ].where((s) => s.isNotEmpty).join(' ');
+    return Uri.https('www.coupang.com', '/np/search', {'q': query});
   }
 
   /// affiliate_clicks 에 클릭 1건 기록. RLS: 본인(user_id=auth.uid) 또는 익명(null).

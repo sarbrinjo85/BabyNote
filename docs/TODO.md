@@ -329,9 +329,15 @@ grant_type=refresh_token` 날것 예외가 전체화면으로 표시됨.
 - ✅ 쿠팡 파트너스 가입 완료 (Partners ID AF2420215) + 카테고리 추적 링크 2개 생성
 - ⏳ 기기 검증: 재구매 버튼 → 쿠팡 파트너스 링크 이동 + affiliate_clicks 기록 확인
 - ⏳ 마이페이지에 앱 내 링크 스크린샷 등록 → 쿠팡 최종 승인 (앱 게시됨 → 앱 URL 등록 가능)
+- 🟡 Phase 2 코드 준비 완료 (배포 대기): 쿠팡 Open API **브랜드별 딥링크**.
+      `supabase/functions/coupang-deeplink/` Edge Function(HMAC 서명, Secret Key
+      서버 보관) + `AffiliateService.resolveReorderUrl`(딥링크 시도→정적 링크 폴백)
+      + ReorderButton 로딩 상태. **선행(사용자)**: 쿠팡 마이페이지 Open API 키
+      발급 → `supabase secrets set COUPANG_ACCESS_KEY/SECRET_KEY` → `supabase
+      functions deploy coupang-deeplink`. 미배포여도 앱은 정적 링크로 폴백.
 - ▢ 후속: 구입처(store) 자유텍스트 → 쿠팡/네이버/오프라인 칩 (컨트롤러 리팩터)
-- ▢ Phase 2: 알림 탭→라우팅, 쿠팡 Open API 딥링크, 전환(converted) 추적,
-      다권역 파트너(Amazon JP/US), Cloudflare Workers 리다이렉트(Y9 백엔드)
+- ▢ Phase 2+: 알림 탭→라우팅, 전환(converted) webhook 추적, 다권역 파트너
+      (Amazon JP/US)
 
 <!-- 추가 항목은 U15 … 으로 아래에 누적 -->
 
